@@ -1,2 +1,0 @@
-const DATASET = [{th:'สวัสดี',en:'hello',rt:'sa-wat-dee',category:'Core'}];
-console.log('fallback');
