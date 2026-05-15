@@ -1,0 +1,19 @@
+{
+  "name": "thaiquest-engine",
+  "version": "0.1.0",
+  "description": "ThaiQuest core engine: SRS, game logic, vocabulary data",
+  "main": "dist/engine/index.js",
+  "types": "dist/engine/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest --passWithNoTests",
+    "test:watch": "jest --watch",
+    "lint": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.14",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.4.9",
+    "typescript": "^5.9.3"
+  }
+}
