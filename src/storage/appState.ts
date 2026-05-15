@@ -1,12 +1,10 @@
 import { UserProfile, CardSRSState } from '../types';
 import { SessionSummary } from '../engine/sessionManager';
+import { QuestProgress } from '../engine/questEngine';
 
 // ─── Persisted app state ──────────────────────────────────────────────────────
-// One JSON document holds everything for a single player.
-// Games using a server backend would split this across tables;
-// for the core engine we keep it flat and portable.
 
-export const APP_STATE_VERSION = 1;
+export const APP_STATE_VERSION = 2;
 
 export interface SessionRecord {
   id: string;
@@ -19,6 +17,8 @@ export interface AppState {
   profile: UserProfile;
   /** cardId → SRS state for every card the player has ever seen */
   srsStates: Record<string, CardSRSState>;
+  /** questId → live objective progress for active quests */
+  questProgress: Record<string, QuestProgress>;
   /** Chronological log of completed sessions (most recent last) */
   sessionHistory: SessionRecord[];
   lastSaved: string;         // ISO timestamp
@@ -31,6 +31,7 @@ export function createAppState(profile: UserProfile): AppState {
     version: APP_STATE_VERSION,
     profile,
     srsStates: {},
+    questProgress: {},
     sessionHistory: [],
     lastSaved: new Date().toISOString(),
   };
@@ -51,6 +52,13 @@ export function applySRSUpdates(
     next[s.cardId] = s;
   }
   return { ...state, srsStates: next };
+}
+
+export function applyQuestProgressUpdates(
+  state: AppState,
+  updates: Record<string, QuestProgress>,
+): AppState {
+  return { ...state, questProgress: { ...state.questProgress, ...updates } };
 }
 
 export function appendSessionRecord(
@@ -83,6 +91,11 @@ export function validateAppState(raw: unknown): AppState {
     throw new Error('AppState: sessionHistory must be an array');
   }
 
-  // Future: run per-version migrations here when APP_STATE_VERSION bumps
+  // v1 → v2: add questProgress field if missing
+  if (!obj['questProgress'] || typeof obj['questProgress'] !== 'object') {
+    obj['questProgress'] = {};
+    obj['version'] = APP_STATE_VERSION;
+  }
+
   return obj as unknown as AppState;
 }

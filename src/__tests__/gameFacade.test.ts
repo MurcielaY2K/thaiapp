@@ -213,6 +213,104 @@ describe('GameFacade.resetProgress', () => {
   });
 });
 
+// ─── Quest integration ────────────────────────────────────────────────────────
+
+describe('GameFacade quest integration', () => {
+  it('auto-accepts available quests on init', async () => {
+    const facade = makeFacade();
+    await facade.init();
+    // kt_01_first_steps has no prerequisites — should be active immediately
+    expect(facade.profile.activeQuestIds).toContain('kt_01_first_steps');
+    expect(facade.getQuestProgress('kt_01_first_steps')).not.toBeNull();
+  });
+
+  it('getQuestBoard returns entries for all region quests', async () => {
+    const facade = makeFacade();
+    await facade.init();
+    const board = facade.getQuestBoard('krung_thon');
+    expect(board.length).toBeGreaterThan(5);
+    const statuses = board.map(e => e.status);
+    expect(statuses).toContain('active');
+    expect(statuses).toContain('locked');
+  });
+
+  it('getQuestBoard marks completed quests correctly', async () => {
+    const facade = makeFacade();
+    await facade.init();
+    // Complete the session so kt_01 (learn 10 words) progresses
+    const session = facade.startSession();
+    for (let i = 0; i < session.cards.length; i++) facade.answerCard(3, 2000);
+    await facade.endSession();
+
+    const board = facade.getQuestBoard('krung_thon');
+    const kt01 = board.find(e => e.quest.id === 'kt_01_first_steps')!;
+    // 10 new words were learned in this session → should be complete
+    expect(kt01.status).toBe('completed');
+  });
+
+  it('acceptQuest throws for unknown quest', async () => {
+    const facade = makeFacade();
+    await facade.init();
+    expect(() => facade.acceptQuest('does_not_exist')).toThrow();
+  });
+
+  it('acceptQuest throws for unavailable (locked) quest', async () => {
+    const facade = makeFacade();
+    await facade.init();
+    // kt_10 requires completing quests 1–9 first
+    expect(() => facade.acceptQuest('kt_10_harbor_master')).toThrow();
+  });
+
+  it('endSession returns completedQuestIds', async () => {
+    const facade = makeFacade();
+    await facade.init();
+    // kt_07_flawless: perfect_session, count 1
+    // Manually accept it by completing prerequisites would be complex,
+    // so test via the session completing kt_01 (learn 10 words)
+    const session = facade.startSession();
+    for (let i = 0; i < session.cards.length; i++) facade.answerCard(3, 2000);
+    const result = await facade.endSession();
+    expect(result?.completedQuestIds).toBeDefined();
+    expect(Array.isArray(result?.completedQuestIds)).toBe(true);
+  });
+
+  it('endSession persists quest progress to storage', async () => {
+    const storage = new MemoryStorage();
+    const facade = new GameFacade(storage, { today: TODAY });
+    await facade.init();
+    const session = facade.startSession();
+    for (let i = 0; i < session.cards.length; i++) facade.answerCard(3, 2000);
+    await facade.endSession();
+    const saved = storage.peek();
+    expect(Object.keys(saved!.questProgress).length).toBeGreaterThan(0);
+  });
+
+  it('quest progress survives a storage round-trip', async () => {
+    const storage = new MemoryStorage();
+
+    const g1 = new GameFacade(storage, { today: TODAY });
+    await g1.init('Niran');
+    const session = g1.startSession();
+    for (let i = 0; i < session.cards.length; i++) g1.answerCard(3, 2000);
+    await g1.endSession();
+
+    const g2 = new GameFacade(storage, { today: TODAY });
+    await g2.init();
+    // kt_01 should be completed (10 words learned)
+    const board = g2.getQuestBoard('krung_thon');
+    const kt01 = board.find(e => e.quest.id === 'kt_01_first_steps')!;
+    expect(kt01.status).toBe('completed');
+  });
+
+  it('speakingScore passed to answerCard feeds quest evaluation', async () => {
+    const facade = makeFacade();
+    await facade.init();
+    facade.startSession();
+    // Answer with a speaking score — just verify it doesn't throw
+    expect(() => facade.answerCard(4, 2000, 85)).not.toThrow();
+  });
+});
+
 // ─── Persistence round-trip ───────────────────────────────────────────────────
 
 describe('persistence round-trip', () => {
