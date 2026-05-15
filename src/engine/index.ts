@@ -8,3 +8,6 @@ export * from './pronunciationEngine';
 export * from '../types';
 export * from '../types/pronunciation';
 export * from '../data/vocabulary';
+export * from '../storage';
+export { GameFacade } from '../GameFacade';
+export type { DashboardStats, GameFacadeOptions } from '../GameFacade';
