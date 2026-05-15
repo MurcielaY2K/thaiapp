@@ -46,7 +46,15 @@ export type SemanticCategory =
   | 'weather'
   | 'verbs_core'
   | 'adjectives_core'
-  | 'grammar';
+  | 'grammar'
+  // Region 3+ categories
+  | 'temple'
+  | 'lanna'
+  | 'verbs_advanced'
+  | 'adjectives_adv'
+  | 'professions'
+  | 'time_adv'
+  | 'body';
 
 // ─── Core vocabulary card ────────────────────────────────────────────────────
 
@@ -75,7 +83,7 @@ export interface VocabCard {
   englishAlternatives?: string[];  // other valid meanings
 
   // Audio
-  audioFile: string;               // relative path, e.g. "audio/gin.mp3"
+  audioFile?: string;              // relative path, e.g. "audio/gin.mp3"
 
   // Example
   exampleSentence: ExampleSentence;

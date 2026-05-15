@@ -281,11 +281,465 @@ export const DAILY_QUEST_POOL: Quest[] = [
   },
 ];
 
+// ─── paa_isaan (The Spirit Forest) — 10 story quests ─────────────────────────
+// Arc: enter the forest at dusk → earn the spirits' trust → face the Forest Spirit.
+
+const PAA_ISAAN_QUESTS: Quest[] = [
+  {
+    id: 'pi_01_forest_entry',
+    type: 'story',
+    region: 'paa_isaan',
+    title: 'Into the Spirit Forest',
+    description: 'The treeline swallows the last light. Unseen eyes watch you from every shadow.',
+    flavorText: '"ป่า speaks before any creature does. Learn to listen."',
+    objectives: [
+      {
+        type: 'learn_words',
+        count: 8,
+        cardCategory: 'nature',
+        description: 'Learn 8 nature words',
+      },
+    ],
+    rewards: { xp: 200, gold: 35 },
+  },
+  {
+    id: 'pi_02_village_customs',
+    type: 'story',
+    region: 'paa_isaan',
+    title: 'The Hidden Village',
+    description: 'Smoke rises through the canopy. A village that appears on no map offers a cautious welcome.',
+    flavorText: '"We do not greet with words here. We greet with knowledge."',
+    objectives: [
+      {
+        type: 'learn_words',
+        count: 6,
+        cardCategory: 'culture',
+        description: 'Learn 6 cultural words',
+      },
+    ],
+    rewards: { xp: 220, gold: 40 },
+    prerequisiteQuestIds: ['pi_01_forest_entry'],
+  },
+  {
+    id: 'pi_03_feast_table',
+    type: 'story',
+    region: 'paa_isaan',
+    title: 'The Spirit Feast',
+    description: 'The villagers set a feast for the forest spirits. You are invited — if you can name what you are eating.',
+    flavorText: '"ส้มตำ ข้าวเหนียว ลาบ — every dish is a prayer."',
+    objectives: [
+      {
+        type: 'learn_words',
+        count: 4,
+        cardCategory: 'food',
+        description: 'Learn 4 Isaan food words',
+      },
+    ],
+    rewards: { xp: 200, gold: 35 },
+    prerequisiteQuestIds: ['pi_02_village_customs'],
+  },
+  {
+    id: 'pi_04_forest_paths',
+    type: 'story',
+    region: 'paa_isaan',
+    title: 'Paths Without Signs',
+    description: 'The forest elder sends you to gather herbs. No trail markers. Only the language of direction.',
+    flavorText: '"เหนือ ใต้ ออก ตก — the compass has no needle here, only words."',
+    objectives: [
+      {
+        type: 'learn_words',
+        count: 4,
+        cardCategory: 'direction',
+        description: 'Learn 4 direction words',
+      },
+    ],
+    rewards: { xp: 200, gold: 35 },
+    prerequisiteQuestIds: ['pi_03_feast_table'],
+  },
+  {
+    id: 'pi_05_spirit_vigil',
+    type: 'story',
+    region: 'paa_isaan',
+    title: 'The Night Vigil',
+    description: 'To gain the spirits\' trust you must sit awake all night and review what you have learned. They are watching.',
+    flavorText: '"Spirits do not respect those who forget. Review and remember."',
+    objectives: [
+      {
+        type: 'review_cards',
+        count: 30,
+        description: 'Review 30 cards across any sessions',
+      },
+    ],
+    rewards: { xp: 280, gold: 55, gems: 1 },
+    prerequisiteQuestIds: ['pi_04_forest_paths'],
+  },
+  {
+    id: 'pi_06_shrine_keeper',
+    type: 'story',
+    region: 'paa_isaan',
+    title: 'The Shrine Keeper',
+    description: 'An ancient woman tends a spirit shrine at the forest heart. She tests your understanding of sacred things.',
+    flavorText: '"ผี เฝ้า บ้าน — spirits guard homes. Do they guard yours?"',
+    objectives: [
+      {
+        type: 'learn_words',
+        count: 3,
+        cardCategory: 'religion',
+        description: 'Learn 3 sacred words',
+      },
+    ],
+    rewards: { xp: 250, gold: 50 },
+    prerequisiteQuestIds: ['pi_05_spirit_vigil'],
+  },
+  {
+    id: 'pi_07_voice_of_forest',
+    type: 'story',
+    region: 'paa_isaan',
+    title: 'Voice of the Forest',
+    description: 'The spirits communicate through sound. To be heard, you must speak Thai correctly — tones and all.',
+    flavorText: '"Wrong tone, wrong meaning. Here, that angers the wrong spirit."',
+    objectives: [
+      {
+        type: 'speaking_score',
+        count: 3,
+        minimumScore: 65,
+        description: 'Score 65+ on 3 speaking cards',
+      },
+    ],
+    rewards: { xp: 350, gold: 65, gems: 2 },
+    prerequisiteQuestIds: ['pi_06_shrine_keeper'],
+  },
+  {
+    id: 'pi_08_elder_grammar',
+    type: 'story',
+    region: 'paa_isaan',
+    title: 'The Elder\'s Challenge',
+    description: 'The village elder will not speak with you until you can connect ideas — not just name things.',
+    flavorText: '"แต่ ถ้า เพราะ ก็ — without these, you speak like a child, not a traveler."',
+    objectives: [
+      {
+        type: 'learn_words',
+        count: 4,
+        cardCategory: 'grammar',
+        description: 'Learn 4 grammar connector words',
+      },
+    ],
+    rewards: { xp: 300, gold: 55 },
+    prerequisiteQuestIds: ['pi_07_voice_of_forest'],
+  },
+  {
+    id: 'pi_09_forest_scholar',
+    type: 'story',
+    region: 'paa_isaan',
+    title: 'Becoming a Forest Scholar',
+    description: 'The elder declares you ready for the final trial — but only if your vocabulary proves it.',
+    flavorText: '"The forest has a thousand words. You must know at least thirty-five."',
+    objectives: [
+      {
+        type: 'learn_words',
+        count: 35,
+        description: 'Learn 35 total words in the Spirit Forest',
+      },
+    ],
+    rewards: { xp: 550, gold: 100, gems: 3 },
+    prerequisiteQuestIds: ['pi_08_elder_grammar'],
+  },
+  {
+    id: 'pi_10_forest_spirit',
+    type: 'boss',
+    region: 'paa_isaan',
+    title: 'The Forest Spirit\'s Trial',
+    description: 'A towering presence of light and shadow steps from behind the oldest tree. It speaks to you — in Thai.',
+    flavorText: '"มนุษย์ — you have learned much. Now prove you have earned the right to pass."',
+    objectives: [
+      {
+        type: 'perfect_session',
+        count: 1,
+        description: 'Complete a perfect review session',
+      },
+      {
+        type: 'speaking_score',
+        count: 3,
+        minimumScore: 75,
+        description: 'Score 75+ on 3 speaking cards',
+      },
+    ],
+    rewards: { xp: 900, gold: 160, gems: 5, cardUnlockIds: ['doi_nuea_unlock'] },
+    prerequisiteQuestIds: ['pi_09_forest_scholar'],
+  },
+];
+
+const PAA_ISAAN_SIDE_QUESTS: Quest[] = [
+  {
+    id: 'pi_side_creatures',
+    type: 'side',
+    region: 'paa_isaan',
+    title: 'Creatures of the Forest',
+    description: 'Strange animals watch from the undergrowth. A young tracker offers to teach you their names.',
+    flavorText: '"ช้าง นาค กบ — every creature has power here."',
+    objectives: [
+      {
+        type: 'learn_words',
+        count: 3,
+        cardCategory: 'animal',
+        description: 'Learn 3 animal words',
+      },
+    ],
+    rewards: { xp: 130, gold: 25 },
+  },
+  {
+    id: 'pi_side_darkness',
+    type: 'side',
+    region: 'paa_isaan',
+    title: 'Light and Shadow',
+    description: 'The forest plays tricks with light. An old painter wants you to name what you see.',
+    flavorText: '"มืด สว่าง ลึกลับ — darkness, light, mystery. The forest is all three."',
+    objectives: [
+      {
+        type: 'learn_words',
+        count: 5,
+        cardCategory: 'adjectives_core',
+        description: 'Learn 5 descriptive words',
+      },
+    ],
+    rewards: { xp: 140, gold: 25 },
+  },
+];
+
+// ─── doi_nuea (The Northern Peaks) — 10 story quests ─────────────────────────
+// Arc: climb the misty mountains → earn the Temple Guardian's blessing.
+
+const DOI_NUEA_QUESTS: Quest[] = [
+  {
+    id: 'dn_01_mountain_path',
+    type: 'story',
+    region: 'doi_nuea',
+    title: 'The Mountain Path',
+    description: 'The road north winds up through cloud forest. Every step brings colder air and older stones.',
+    flavorText: '"ยอดดอย ไม่เคยรอคอย — the peaks wait for no one."',
+    objectives: [
+      {
+        type: 'learn_words',
+        count: 8,
+        cardCategory: 'nature',
+        description: 'Learn 8 mountain nature words',
+      },
+    ],
+    rewards: { xp: 280, gold: 50 },
+  },
+  {
+    id: 'dn_02_lanna_welcome',
+    type: 'story',
+    region: 'doi_nuea',
+    title: 'Welcome to Lanna',
+    description: 'The walled city of the north has its own language, its own history, its own pride.',
+    flavorText: '"ล้านนา — a million rice fields, a thousand years of kings."',
+    objectives: [
+      {
+        type: 'learn_words',
+        count: 5,
+        cardCategory: 'lanna',
+        description: 'Learn 5 Lanna cultural words',
+      },
+    ],
+    rewards: { xp: 300, gold: 55 },
+    prerequisiteQuestIds: ['dn_01_mountain_path'],
+  },
+  {
+    id: 'dn_03_temple_dawn',
+    type: 'story',
+    region: 'doi_nuea',
+    title: 'Dawn at the Temple',
+    description: 'Monks file out at first light, alms bowls in hand. You are invited to walk with them — if you know the words.',
+    flavorText: '"ตักบาตร ทุกวัน — give to monks every day, and the day gives back."',
+    objectives: [
+      {
+        type: 'learn_words',
+        count: 6,
+        cardCategory: 'temple',
+        description: 'Learn 6 temple and Buddhist words',
+      },
+    ],
+    rewards: { xp: 320, gold: 60 },
+    prerequisiteQuestIds: ['dn_02_lanna_welcome'],
+  },
+  {
+    id: 'dn_04_craftwork',
+    type: 'story',
+    region: 'doi_nuea',
+    title: 'The Craft Quarter',
+    description: 'Weavers, silversmiths, and umbrella makers crowd the workshop streets. Each will only trade with someone who understands their work.',
+    flavorText: '"Craft is language. Learn its words."',
+    objectives: [
+      {
+        type: 'learn_words',
+        count: 4,
+        cardCategory: 'professions',
+        description: 'Learn 4 craftwork profession words',
+      },
+    ],
+    rewards: { xp: 300, gold: 55 },
+    prerequisiteQuestIds: ['dn_03_temple_dawn'],
+  },
+  {
+    id: 'dn_05_meditation_hall',
+    type: 'story',
+    region: 'doi_nuea',
+    title: 'The Meditation Hall',
+    description: 'A senior monk teaches meditation to foreigners — once a year, to one who proves worthy.',
+    flavorText: '"สมาธิ is not silence. It is the loudest thing you will ever hear."',
+    objectives: [
+      {
+        type: 'review_cards',
+        count: 40,
+        description: 'Review 40 cards across any sessions',
+      },
+    ],
+    rewards: { xp: 380, gold: 70, gems: 2 },
+    prerequisiteQuestIds: ['dn_04_craftwork'],
+  },
+  {
+    id: 'dn_06_healer_hut',
+    type: 'story',
+    region: 'doi_nuea',
+    title: 'The Mountain Healer',
+    description: 'An herbalist in the hills has medicines that cannot be found in any city. She only helps those who speak carefully.',
+    flavorText: '"เยียวยา — to heal. The word itself must be said with intention."',
+    objectives: [
+      {
+        type: 'learn_words',
+        count: 4,
+        cardCategory: 'body',
+        description: 'Learn 4 body and health words',
+      },
+    ],
+    rewards: { xp: 340, gold: 65 },
+    prerequisiteQuestIds: ['dn_05_meditation_hall'],
+  },
+  {
+    id: 'dn_07_teacher_test',
+    type: 'story',
+    region: 'doi_nuea',
+    title: 'The Teacher\'s Test',
+    description: 'The schoolmaster of the mountain village refuses to let you pass until you can explain things, not just say them.',
+    flavorText: '"สอน อธิบาย เข้าใจ — teaching, explaining, understanding. These are one thing."',
+    objectives: [
+      {
+        type: 'learn_words',
+        count: 6,
+        cardCategory: 'verbs_advanced',
+        description: 'Learn 6 advanced action verbs',
+      },
+    ],
+    rewards: { xp: 360, gold: 65, gems: 1 },
+    prerequisiteQuestIds: ['dn_06_healer_hut'],
+  },
+  {
+    id: 'dn_08_peak_voice',
+    type: 'story',
+    region: 'doi_nuea',
+    title: 'Voice at the Summit',
+    description: 'The peak amplifies every sound. A wrong tone echoes for miles. A right one reaches the temple below.',
+    flavorText: '"At this height, tones do not forgive mistakes."',
+    objectives: [
+      {
+        type: 'speaking_score',
+        count: 4,
+        minimumScore: 72,
+        description: 'Score 72+ on 4 speaking cards',
+      },
+    ],
+    rewards: { xp: 420, gold: 80, gems: 2 },
+    prerequisiteQuestIds: ['dn_07_teacher_test'],
+  },
+  {
+    id: 'dn_09_northern_mastery',
+    type: 'story',
+    region: 'doi_nuea',
+    title: 'Northern Mastery',
+    description: 'The temple abbot will grant you an audience when your knowledge of the north is complete.',
+    flavorText: '"ห้าสิบคำ — fifty words. The north is demanding."',
+    objectives: [
+      {
+        type: 'learn_words',
+        count: 50,
+        description: 'Learn 50 total words in the Northern Peaks',
+      },
+    ],
+    rewards: { xp: 650, gold: 120, gems: 4 },
+    prerequisiteQuestIds: ['dn_08_peak_voice'],
+  },
+  {
+    id: 'dn_10_temple_guardian',
+    type: 'boss',
+    region: 'doi_nuea',
+    title: 'The Temple Guardian\'s Trial',
+    description: 'Carved in gold at the temple gate, the Guardian stirs. Ancient and patient, it has turned away ten thousand before you.',
+    flavorText: '"You have climbed far. Now prove the climb changed you."',
+    objectives: [
+      {
+        type: 'perfect_session',
+        count: 1,
+        description: 'Complete a perfect review session',
+      },
+      {
+        type: 'speaking_score',
+        count: 4,
+        minimumScore: 82,
+        description: 'Score 82+ on 4 speaking cards',
+      },
+    ],
+    rewards: { xp: 1100, gold: 200, gems: 6, cardUnlockIds: ['talee_tong_unlock'] },
+    prerequisiteQuestIds: ['dn_09_northern_mastery'],
+  },
+];
+
+const DOI_NUEA_SIDE_QUESTS: Quest[] = [
+  {
+    id: 'dn_side_ancient_time',
+    type: 'side',
+    region: 'doi_nuea',
+    title: 'Chronicles of the North',
+    description: 'The temple library holds scrolls written before living memory. A scholar needs a translator.',
+    flavorText: '"โบราณกาล — ancient times. Every stone here has a story."',
+    objectives: [
+      {
+        type: 'learn_words',
+        count: 4,
+        cardCategory: 'time_adv',
+        description: 'Learn 4 advanced time words',
+      },
+    ],
+    rewards: { xp: 180, gold: 35 },
+  },
+  {
+    id: 'dn_side_cold_words',
+    type: 'side',
+    region: 'doi_nuea',
+    title: 'Words for Cold Places',
+    description: 'A cartographer mapping the high passes needs precise descriptions. She pays in maps — and knowledge.',
+    flavorText: '"หนาว ชัน กว้าง สูง — the mountain demands exact words."',
+    objectives: [
+      {
+        type: 'learn_words',
+        count: 5,
+        cardCategory: 'adjectives_adv',
+        description: 'Learn 5 intermediate descriptive words',
+      },
+    ],
+    rewards: { xp: 190, gold: 35 },
+  },
+];
+
 // ─── All quests ───────────────────────────────────────────────────────────────
 
 export const ALL_QUESTS: Quest[] = [
   ...KRUNG_THON_QUESTS,
   ...KRUNG_THON_SIDE_QUESTS,
+  ...PAA_ISAAN_QUESTS,
+  ...PAA_ISAAN_SIDE_QUESTS,
+  ...DOI_NUEA_QUESTS,
+  ...DOI_NUEA_SIDE_QUESTS,
   ...DAILY_QUEST_POOL,
 ];
 

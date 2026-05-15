@@ -20,7 +20,7 @@ describe('VOCABULARY data integrity', () => {
       expect(card.romanization).toBeTruthy();
       expect(card.ipa).toBeTruthy();
       expect(card.englishMeaning).toBeTruthy();
-      expect(card.audioFile).toBeTruthy();
+      if (card.audioFile !== undefined) expect(card.audioFile).toBeTruthy();
       expect(card.exampleSentence).toBeDefined();
       expect(card.exampleSentence.thai).toBeTruthy();
       expect(card.difficultyRating).toBeGreaterThanOrEqual(1);
