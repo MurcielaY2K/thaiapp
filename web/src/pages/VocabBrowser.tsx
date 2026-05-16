@@ -21,6 +21,7 @@ export function VocabBrowser() {
   const [filterStatus, setFilterStatus] = useState<'all' | 'new' | 'seen' | 'favorites'>('all');
   const [expanded, setExpanded] = useState<string | null>(null);
   const [favorites, setFavorites] = useState<Set<string>>(() => getFavorites());
+  const [hideRoman, setHideRoman] = useState(false);
 
   const handleToggleFavorite = useCallback((id: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -67,7 +68,14 @@ export function VocabBrowser() {
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       {/* Search */}
       <div style={{ padding: '14px 16px 10px', background: 'var(--surface)', borderBottom: '1px solid var(--border)' }}>
-        <div style={{ fontSize: 20, fontWeight: 800, marginBottom: 10 }}>Vocabulary</div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+          <div style={{ fontSize: 20, fontWeight: 800 }}>Vocabulary</div>
+          <button
+            onClick={() => setHideRoman(h => !h)}
+            title={hideRoman ? 'Show romanization' : 'Hide romanization (reading challenge)'}
+            style={{ background: hideRoman ? 'var(--warning)' : 'var(--surface-hi)', border: `1px solid ${hideRoman ? 'var(--warning)' : 'var(--border)'}`, borderRadius: 8, padding: '5px 10px', fontSize: 11, fontWeight: 700, color: hideRoman ? '#fff' : 'var(--text-muted)', transition: 'all 0.2s' }}
+          >{hideRoman ? '🙈 Roman hidden' : '🔤 Hide roman'}</button>
+        </div>
         <div style={{ position: 'relative' }}>
           <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', fontSize: 16, color: 'var(--text-muted)' }}>🔍</span>
           <input
@@ -124,6 +132,7 @@ export function VocabBrowser() {
             seen={srsMap.has(card.id)}
             isFav={favorites.has(card.id)}
             onFavorite={handleToggleFavorite}
+            hideRoman={hideRoman}
             isOpen={expanded === card.id}
             toggle={() => setExpanded(p => p === card.id ? null : card.id)}
           />
@@ -155,9 +164,10 @@ function FilterChip({ label, active, onClick, color }: { label: string; active: 
   );
 }
 
-function CardRow({ card, isOpen, toggle, seen, isFav, onFavorite }: {
+function CardRow({ card, isOpen, toggle, seen, isFav, onFavorite, hideRoman }: {
   card: VocabCard; isOpen: boolean; toggle: () => void; seen: boolean;
   isFav: boolean; onFavorite: (id: string, e: React.MouseEvent) => void;
+  hideRoman: boolean;
 }) {
   const regionColor = REGION_COLOR[card.region] ?? 'var(--primary)';
   const toneColor = TONE_COLORS[card.tone];
@@ -175,7 +185,7 @@ function CardRow({ card, isOpen, toggle, seen, isFav, onFavorite }: {
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
             <span style={{ fontSize: 22, fontWeight: 700, color: 'var(--text)' }}>{card.thai}</span>
-            <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{card.romanization}</span>
+            {!hideRoman && <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{card.romanization}</span>}
           </div>
           <div style={{ fontSize: 13, color: 'var(--text-sec)', marginTop: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{card.englishMeaning}</div>
         </div>
