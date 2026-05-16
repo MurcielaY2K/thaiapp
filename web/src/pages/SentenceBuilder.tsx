@@ -2,7 +2,7 @@ import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { VOCABULARY } from '@engine/data/vocabulary';
 import { VocabCard } from '@engine/types';
 import { useGame } from '../context/GameContext';
-import { sfx } from '../utils/audio';
+import { sfx, speakThai } from '../utils/audio';
 
 interface BuildQuestion {
   card: VocabCard;
@@ -136,14 +136,27 @@ export function SentenceBuilder({ onExit }: { onExit: () => void }) {
       {/* Prompt */}
       <div style={{ padding: '0 24px 16px', textAlign: 'center' }}>
         <div style={{ fontSize: 13, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 10 }}>Arrange into a sentence</div>
-        <div style={{ background: 'var(--surface)', borderRadius: 14, padding: 16, marginBottom: 8, border: '1px solid var(--border)' }}>
+        <div style={{ background: 'var(--surface)', borderRadius: 14, padding: 16, marginBottom: 8, border: '1px solid var(--border)', position: 'relative' }}>
           <div style={{ fontSize: 22, fontWeight: 700, marginBottom: 4 }}>{q.card.thai}</div>
           <div style={{ fontSize: 13, color: 'var(--text-muted)', fontStyle: 'italic' }}>"{q.card.exampleSentence!.englishNatural}"</div>
+          <button
+            style={{ position: 'absolute', top: 10, right: 10, background: 'var(--surface-hi)', border: '1px solid var(--border)', borderRadius: 999, width: 30, height: 30, fontSize: 13, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            onClick={() => speakThai(q.card.exampleSentence!.thai)}
+            title="Listen to the full sentence"
+          >🔊</button>
         </div>
       </div>
 
       {/* Drop zone */}
       <div style={{ padding: '0 20px 16px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+          <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>Your sentence</span>
+          {placed.length > 0 && phase === 'question' && (
+            <button style={{ fontSize: 11, color: 'var(--text-muted)', background: 'transparent', border: '1px solid var(--border)', borderRadius: 8, padding: '2px 10px' }}
+              onClick={() => { setRemaining(q.tiles); setPlaced([]); }}
+            >Clear ✕</button>
+          )}
+        </div>
         <div style={{
           minHeight: 60, background: 'var(--surface-hi)', borderRadius: 14, padding: '10px 14px',
           border: `2px dashed ${phase === 'feedback' ? (feedbackCorrect ? 'var(--success)' : 'var(--error)') : 'var(--border)'}`,
@@ -164,10 +177,14 @@ export function SentenceBuilder({ onExit }: { onExit: () => void }) {
         {phase === 'feedback' && (
           <div style={{ marginTop: 10, padding: '10px 14px', borderRadius: 10, background: feedbackCorrect ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)', border: `1px solid ${feedbackCorrect ? 'var(--success)' : 'var(--error)'}` }}>
             {feedbackCorrect
-              ? <div style={{ color: 'var(--success)', fontWeight: 700 }}>Correct! ✓</div>
+              ? <div>
+                  <div style={{ color: 'var(--success)', fontWeight: 700, marginBottom: 4 }}>Correct! ✓</div>
+                  <div style={{ fontSize: 12, color: 'var(--text-muted)', fontStyle: 'italic' }}>{q.card.exampleSentence!.thai}</div>
+                </div>
               : <div>
                   <div style={{ color: 'var(--error)', fontWeight: 700, marginBottom: 4 }}>Not quite!</div>
                   <div style={{ fontSize: 13, color: 'var(--text-sec)' }}>Correct: <span style={{ fontWeight: 600 }}>{q.correctWords.join(' ')}</span></div>
+                  <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4, fontStyle: 'italic' }}>{q.card.exampleSentence!.thai}</div>
                 </div>
             }
           </div>
