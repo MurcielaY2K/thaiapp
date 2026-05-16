@@ -34,6 +34,15 @@ export function App() {
   const [tab, setTab] = useState<Tab>('home');
   const [complete, setComplete] = useState<CompleteState | null>(null);
 
+  // PWA install prompt
+  const [installPrompt, setInstallPrompt] = useState<Event | null>(null);
+  const [showInstall, setShowInstall] = useState(false);
+  useEffect(() => {
+    const handler = (e: Event) => { e.preventDefault(); setInstallPrompt(e); setShowInstall(true); };
+    window.addEventListener('beforeinstallprompt', handler);
+    return () => window.removeEventListener('beforeinstallprompt', handler);
+  }, []);
+
   // Show achievement toast
   const [toastAchievement, setToastAchievement] = useState<{ icon: string; title: string } | null>(null);
   useEffect(() => {
@@ -72,6 +81,22 @@ export function App() {
 
   return (
     <>
+      {/* PWA install banner */}
+      {showInstall && (
+        <div style={{ position: 'fixed', bottom: 80, left: 12, right: 12, zIndex: 999, background: 'var(--surface)', border: '1px solid var(--primary)', borderRadius: 14, padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 12, boxShadow: '0 4px 24px rgba(0,0,0,0.4)', animation: 'slideUp 0.3s ease forwards' }}>
+          <span style={{ fontSize: 24 }}>📱</span>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontWeight: 700, fontSize: 13 }}>Install ThaiQuest</div>
+            <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>Add to home screen for the full experience</div>
+          </div>
+          <button style={{ background: 'var(--primary)', color: '#fff', borderRadius: 8, padding: '6px 14px', fontWeight: 700, fontSize: 13, flexShrink: 0 }} onClick={() => {
+            (installPrompt as any)?.prompt?.();
+            setShowInstall(false);
+          }}>Install</button>
+          <button style={{ background: 'transparent', color: 'var(--text-muted)', fontSize: 18, padding: 4, flexShrink: 0 }} onClick={() => setShowInstall(false)}>✕</button>
+        </div>
+      )}
+
       {/* Achievement toast */}
       {toastAchievement && (
         <div style={{ position: 'fixed', top: 20, left: '50%', transform: 'translateX(-50%)', zIndex: 1000, background: 'var(--surface)', border: '1px solid var(--gold)', borderRadius: 14, padding: '12px 20px', display: 'flex', alignItems: 'center', gap: 10, boxShadow: '0 4px 24px rgba(0,0,0,0.4)', animation: 'slideUp 0.3s ease forwards', maxWidth: 320 }}>

@@ -155,6 +155,18 @@ export function Home({ onStudy, onQuiz }: { onStudy: () => void; onQuiz: () => v
         </div>
       )}
 
+      {/* Struggling words call to action */}
+      {stats.strugglingCards > 0 && (
+        <button style={{ ...s.studyBtn, background: 'rgba(249,115,22,0.12)', border: '1px solid var(--warning)', color: 'var(--warning)' }} onClick={onStudy}>
+          <span style={{ fontSize: 22 }}>⚠️</span>
+          <div style={{ flex: 1, textAlign: 'left' }}>
+            <div style={{ fontWeight: 700 }}>{stats.strugglingCards} Struggling Word{stats.strugglingCards !== 1 ? 's' : ''}</div>
+            <div style={{ fontSize: 12, opacity: 0.8, marginTop: 2 }}>Study session will prioritize these cards</div>
+          </div>
+          <span style={{ fontSize: 18 }}>→</span>
+        </button>
+      )}
+
       {/* Active quests */}
       {profile.activeQuestIds.length > 0 && (
         <div>
