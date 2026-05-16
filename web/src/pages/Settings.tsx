@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useGame } from '../context/GameContext';
 import { VOCABULARY_STATS } from '@engine/data/vocabulary';
 import { speakThai } from '../utils/audio';
+import { DailyGoal } from '@engine/engine/sessionManager';
 
 function getTheme(): 'dark' | 'light' {
   return (localStorage.getItem('thaiquest:theme') as 'dark' | 'light') ?? 'dark';
@@ -12,7 +13,7 @@ function setTheme(t: 'dark' | 'light') {
 }
 
 export function Settings({ onBack }: { onBack: () => void }) {
-  const { resetProgress } = useGame();
+  const { resetProgress, dailyGoal, setDailyGoal } = useGame();
   const [confirmReset, setConfirmReset] = useState(false);
   const [importStatus, setImportStatus] = useState<'idle' | 'ok' | 'err'>('idle');
   const [theme, setThemeState] = useState<'dark' | 'light'>(getTheme);
@@ -77,6 +78,39 @@ export function Settings({ onBack }: { onBack: () => void }) {
             >
               Switch to {theme === 'dark' ? 'Light' : 'Dark'}
             </button>
+          </div>
+        </div>
+
+        {/* Study preferences */}
+        <div style={s.section}>
+          <div style={s.sectionTitle}>Study Preferences</div>
+          <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 14, lineHeight: 1.5 }}>
+            Daily goal controls how many new words are introduced per study session.
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {([
+              { id: 'casual',  label: 'Casual', desc: '5 new words · ~5 min sessions', icon: '🌿' },
+              { id: 'regular', label: 'Regular', desc: '10 new words · ~10 min sessions', icon: '📚' },
+              { id: 'serious', label: 'Serious', desc: '20 new words · ~20 min sessions', icon: '🏆' },
+            ] as { id: DailyGoal; label: string; desc: string; icon: string }[]).map(({ id, label, desc, icon }) => (
+              <button
+                key={id}
+                onClick={() => setDailyGoal(id)}
+                style={{
+                  background: dailyGoal === id ? 'var(--primary)' : 'var(--surface-hi)',
+                  border: `1px solid ${dailyGoal === id ? 'var(--primary)' : 'var(--border)'}`,
+                  borderRadius: 12, padding: '12px 16px',
+                  display: 'flex', alignItems: 'center', gap: 14, textAlign: 'left', transition: 'all 0.2s',
+                }}
+              >
+                <span style={{ fontSize: 22 }}>{icon}</span>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontWeight: 700, fontSize: 14, color: dailyGoal === id ? '#fff' : 'var(--text)' }}>{label}</div>
+                  <div style={{ fontSize: 12, color: dailyGoal === id ? 'rgba(255,255,255,0.75)' : 'var(--text-muted)', marginTop: 2 }}>{desc}</div>
+                </div>
+                {dailyGoal === id && <span style={{ color: '#fff', fontSize: 18 }}>✓</span>}
+              </button>
+            ))}
           </div>
         </div>
 

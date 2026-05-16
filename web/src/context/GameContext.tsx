@@ -2,9 +2,15 @@ import React, { createContext, useCallback, useContext, useEffect, useRef, useSt
 import { GameFacade, DashboardStats } from '@engine/GameFacade';
 import { UserProfile, VocabCard } from '@engine/types';
 import { VOCABULARY } from '@engine/data/vocabulary';
+import { DailyGoal } from '@engine/engine/sessionManager';
 import { LocalStorageAdapter } from '../storage/localStorageAdapter';
 import { Achievement, checkAchievements, getEarnedIds, ACHIEVEMENTS } from '../utils/achievements';
 import { DailyChallenge, getDailyChallenge } from '../utils/dailyChallenge';
+
+const DAILY_GOAL_KEY = 'thaiquest:daily_goal';
+function getSavedDailyGoal(): DailyGoal {
+  return (localStorage.getItem(DAILY_GOAL_KEY) as DailyGoal) ?? 'regular';
+}
 
 interface GameContextValue {
   facade: GameFacade | null;
@@ -22,6 +28,8 @@ interface GameContextValue {
   levelUp: number | null;
   dailyChallenge: DailyChallenge | null;
   wordOfDay: VocabCard | null;
+  dailyGoal: DailyGoal;
+  setDailyGoal: (goal: DailyGoal) => void;
   dismissNewAchievements: () => void;
   dismissLevelUp: () => void;
   refreshAchievements: () => void;
@@ -42,6 +50,16 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   const prevLevelRef = useRef<number>(1);
   const [dailyChallenge, setDailyChallenge] = useState<DailyChallenge | null>(null);
   const [wordOfDay, setWordOfDay] = useState<VocabCard | null>(null);
+  const [dailyGoal, setDailyGoalState] = useState<DailyGoal>(getSavedDailyGoal);
+
+  const setDailyGoal = useCallback((goal: DailyGoal) => {
+    localStorage.setItem(DAILY_GOAL_KEY, goal);
+    setDailyGoalState(goal);
+    // Update the facade options so the next session picks it up
+    if (facadeRef.current) {
+      (facadeRef.current as unknown as { options: { dailyGoal: DailyGoal } }).options.dailyGoal = goal;
+    }
+  }, []);
 
   const refreshAchievements = useCallback(() => {
     const f = facadeRef.current;
@@ -97,7 +115,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
     const boot = async () => {
       const storage = new LocalStorageAdapter();
-      const facade = new GameFacade(storage);
+      const facade = new GameFacade(storage, { dailyGoal: getSavedDailyGoal() });
       facadeRef.current = facade;
       const saved = await storage.load();
       if (saved) {
@@ -161,6 +179,8 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       levelUp,
       dailyChallenge,
       wordOfDay,
+      dailyGoal,
+      setDailyGoal,
       dismissNewAchievements,
       dismissLevelUp,
       refreshAchievements,
