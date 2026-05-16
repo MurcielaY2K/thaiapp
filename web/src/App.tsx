@@ -25,6 +25,7 @@ type Tab = 'home' | 'learn' | 'map' | 'browse' | 'profile';
 type View = 'onboarding' | 'main' | 'study' | 'quiz' | 'quiz_fav' | 'quiz_hard' | 'tone' | 'sentence' | 'alphabet' | 'phrasebook' | 'match' | 'session_complete' | 'settings' | 'shop';
 
 interface CompleteState { summary: SessionSummary; xp: number; questIds: string[] }
+interface StudyState { region?: string }
 
 const TABS: { id: Tab; icon: string; label: string }[] = [
   { id: 'home',    icon: '🏠', label: 'Home' },
@@ -39,6 +40,7 @@ export function App() {
   const [view, setView] = useState<View>('main');
   const [tab, setTab] = useState<Tab>('home');
   const [complete, setComplete] = useState<CompleteState | null>(null);
+  const [studyState, setStudyState] = useState<StudyState>({});
 
   // PWA install prompt
   const [installPrompt, setInstallPrompt] = useState<Event | null>(null);
@@ -82,8 +84,9 @@ export function App() {
   if (view === 'shop')     return <Shop     onBack={() => setView('main')} />;
   if (view === 'study') return (
     <Study
+      regionFilter={studyState.region}
       onComplete={(summary, xp, questIds) => { setComplete({ summary, xp, questIds }); setView('session_complete'); }}
-      onExit={() => { setView('main'); setTab('home'); }}
+      onExit={() => { setStudyState({}); setView('main'); setTab('home'); }}
     />
   );
   if (view === 'quiz')     return <Quiz         onExit={() => { setView('main'); setTab('learn'); }} />;
@@ -147,7 +150,7 @@ export function App() {
       <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
         {tab === 'home'    && <Home onStudy={() => setView('study')} onQuiz={() => setView('quiz')} onFavQuiz={() => setView('quiz_fav')} onHardQuiz={() => setView('quiz_hard')} />}
         {tab === 'learn'   && <LearnTab onStudy={() => setView('study')} onQuiz={() => setView('quiz')} onTone={() => setView('tone')} onSentence={() => setView('sentence')} onAlphabet={() => setView('alphabet')} onPhrasebook={() => setView('phrasebook')} onMatch={() => setView('match')} />}
-        {tab === 'map'     && <MapTab />}
+        {tab === 'map'     && <MapTab onStudyRegion={r => { setStudyState({ region: r }); setView('study'); }} />}
         {tab === 'browse'  && <VocabBrowser />}
         {tab === 'profile' && <Profile onSettings={() => setView('settings')} onShop={() => setView('shop')} />}
       </div>
@@ -176,7 +179,7 @@ function DueBadge() {
   );
 }
 
-function MapTab() {
+function MapTab({ onStudyRegion }: { onStudyRegion: (region: string) => void }) {
   const [sub, setSub] = useState<'map' | 'quests'>('map');
   return (
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
@@ -198,7 +201,7 @@ function MapTab() {
         ))}
       </div>
       <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-        {sub === 'map'    && <WorldMap />}
+        {sub === 'map'    && <WorldMap onStudyRegion={onStudyRegion} />}
         {sub === 'quests' && <Quests />}
       </div>
     </div>

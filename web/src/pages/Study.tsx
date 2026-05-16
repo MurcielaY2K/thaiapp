@@ -31,19 +31,24 @@ const CATEGORY_ICONS: Record<string, string> = {
 export function Study({
   onComplete,
   onExit,
+  regionFilter,
 }: {
   onComplete: (summary: SessionSummary, xp: number, questIds: string[]) => void;
   onExit: () => void;
+  regionFilter?: string;
 }) {
   const { profile } = useGame();
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [started, setStarted] = useState(false);
+  const [started, setStarted] = useState(!!regionFilter);
 
   const availableCategories = useMemo(() => {
     const unlocked = profile?.unlockedRegions ?? ['krung_thon'];
-    const cats = new Set(VOCABULARY.filter(c => unlocked.includes(c.region)).map(c => c.category));
+    const pool = regionFilter
+      ? VOCABULARY.filter(c => c.region === regionFilter)
+      : VOCABULARY.filter(c => unlocked.includes(c.region));
+    const cats = new Set(pool.map(c => c.category));
     return Array.from(cats).sort();
-  }, [profile]);
+  }, [profile, regionFilter]);
 
   if (!started) {
     return (
@@ -62,6 +67,7 @@ export function Study({
   return (
     <StudySession
       categoryFilter={selectedCategories.length > 0 ? selectedCategories : undefined}
+      regionFilter={regionFilter}
       onComplete={onComplete}
       onExit={onExit}
     />
@@ -164,10 +170,12 @@ function StudySetup({
 
 function StudySession({
   categoryFilter,
+  regionFilter,
   onComplete,
   onExit,
 }: {
   categoryFilter?: string[];
+  regionFilter?: string;
   onComplete: (summary: SessionSummary, xp: number, questIds: string[]) => void;
   onExit: () => void;
 }) {
@@ -177,12 +185,16 @@ function StudySession({
   const [exiting, setExiting] = useState(false);
   const [sessionCorrect, setSessionCorrect] = useState(0);
   const [sessionTotal, setSessionTotal] = useState(0);
+  const [combo, setCombo] = useState(0);
   const startTime = useRef(Date.now());
 
   useEffect(() => {
     if (!facade) return;
     try {
-      const filter = categoryFilter && categoryFilter.length > 0 ? { categories: categoryFilter } : undefined;
+      const filter: { categories?: string[]; region?: string } | undefined =
+        (categoryFilter && categoryFilter.length > 0) || regionFilter
+          ? { categories: categoryFilter?.length ? categoryFilter : undefined, region: regionFilter }
+          : undefined;
       setSession(facade.startSession(filter));
       startTime.current = Date.now();
     } catch { onExit(); }
@@ -214,7 +226,8 @@ function StudySession({
     const currentCard = session.cards[session.currentIndex];
     if (!currentCard) return;
 
-    if (q >= 3) { sfx.correct(); setSessionCorrect(c => c + 1); } else sfx.wrong();
+    if (q >= 3) { sfx.correct(); setSessionCorrect(c => c + 1); setCombo(c => c + 1); }
+    else { sfx.wrong(); setCombo(0); }
     setSessionTotal(t => t + 1);
 
     const timeTaken = Date.now() - startTime.current;
@@ -269,7 +282,12 @@ function StudySession({
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', minWidth: 52 }}>
           <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{session.currentIndex + 1}/{session.cards.length}</span>
-          {sessionTotal > 0 && (
+          {combo >= 3 && (
+            <span style={{ fontSize: 10, color: 'var(--gold)', fontWeight: 800, letterSpacing: 0.5 }}>
+              🔥{combo} combo!
+            </span>
+          )}
+          {combo < 3 && sessionTotal > 0 && (
             <span style={{ fontSize: 10, color: sessionCorrect / sessionTotal >= 0.8 ? 'var(--success)' : sessionCorrect / sessionTotal >= 0.6 ? 'var(--gold)' : 'var(--error)', fontWeight: 700 }}>
               {Math.round((sessionCorrect / sessionTotal) * 100)}% acc
             </span>

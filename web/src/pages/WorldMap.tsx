@@ -38,7 +38,7 @@ const REGION_DIFFICULTY: Record<GameRegion, { label: string; stars: number }> = 
   daen_winyaan: { label: 'Expert',       stars: 4 },
 };
 
-export function WorldMap() {
+export function WorldMap({ onStudyRegion }: { onStudyRegion?: (region: string) => void }) {
   const { profile, facade } = useGame();
   if (!profile) return null;
 
@@ -139,6 +139,14 @@ export function WorldMap() {
                     <div className="progress-fill" style={{ width: `${questPct}%`, background: color }} />
                   </div>
                 </>
+              )}
+              {isUnlocked && onStudyRegion && (
+                <button
+                  style={{ marginTop: 12, width: '100%', background: `${color}22`, border: `1px solid ${color}`, borderRadius: 10, padding: '8px 16px', fontSize: 12, fontWeight: 700, color, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
+                  onClick={() => onStudyRegion(region)}
+                >
+                  📖 Study {cfg.nameEnglish} Words
+                </button>
               )}
             </div>
           </div>

@@ -311,17 +311,26 @@ const GRAMMAR_TIPS = [
 ];
 
 function GrammarTip() {
+  const [showExample, setShowExample] = React.useState(false);
   const dayIndex = Math.floor(Date.now() / 86400000);
   const tip = GRAMMAR_TIPS[dayIndex % GRAMMAR_TIPS.length];
   return (
-    <div style={{ background: 'var(--surface)', borderRadius: 14, padding: 16, border: '1px solid var(--border)' }}>
-      <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--info)', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 8 }}>Grammar Tip of the Day</div>
-      <div style={{ fontWeight: 600, fontSize: 14, color: 'var(--text)', marginBottom: 6 }}>{tip.tip}</div>
-      <div style={{ background: 'var(--surface-hi)', borderRadius: 8, padding: '8px 12px', display: 'flex', alignItems: 'center', gap: 10 }}>
-        <span style={{ fontSize: 20, fontWeight: 700, color: 'var(--primary)' }}>{tip.example}</span>
-        <span style={{ fontSize: 13, color: 'var(--text-muted)', fontStyle: 'italic' }}>"{tip.meaning}"</span>
+    <button
+      style={{ background: 'var(--surface)', borderRadius: 14, padding: 16, border: '1px solid var(--border)', textAlign: 'left', width: '100%' }}
+      onClick={() => setShowExample(s => !s)}
+    >
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+        <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--info)', textTransform: 'uppercase', letterSpacing: 0.5 }}>Grammar Tip of the Day</div>
+        <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{showExample ? '▲ hide' : '▼ example'}</span>
       </div>
-    </div>
+      <div style={{ fontWeight: 600, fontSize: 14, color: 'var(--text)', marginBottom: showExample ? 8 : 0 }}>{tip.tip}</div>
+      {showExample && (
+        <div style={{ background: 'var(--surface-hi)', borderRadius: 8, padding: '8px 12px', display: 'flex', alignItems: 'center', gap: 10 }}>
+          <span style={{ fontSize: 20, fontWeight: 700, color: 'var(--primary)' }}>{tip.example}</span>
+          <span style={{ fontSize: 13, color: 'var(--text-muted)', fontStyle: 'italic' }}>"{tip.meaning}"</span>
+        </div>
+      )}
+    </button>
   );
 }
 
