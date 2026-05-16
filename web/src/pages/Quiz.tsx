@@ -319,6 +319,7 @@ function ScoreScreen({ score, total, questions, results, onRetry, onExit }: {
   score: number; total: number; questions: QuizQuestion[]; results: boolean[];
   onRetry: () => void; onExit: () => void;
 }) {
+  const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
   const pct = Math.round((score / total) * 100);
   const emoji = pct === 100 ? '🏆' : pct >= 80 ? '⭐' : pct >= 60 ? '👍' : '💪';
   const label = pct === 100 ? 'Perfect!' : pct >= 80 ? 'Great job!' : pct >= 60 ? 'Not bad!' : 'Keep practicing!';
@@ -333,14 +334,35 @@ function ScoreScreen({ score, total, questions, results, onRetry, onExit }: {
         </div>
         {results.some(r => !r) && (
           <div style={{ width: '100%' }}>
-            <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 10 }}>Review Missed Words</div>
+            <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 10 }}>Review Missed Words · tap for details</div>
             {questions.map((q, i) => results[i] ? null : (
-              <div key={i} style={{ background: 'var(--surface)', border: '1px solid var(--error)', borderRadius: 12, padding: 14, marginBottom: 8 }}>
+              <div key={i} style={{ background: 'var(--surface)', border: '1px solid var(--error)', borderRadius: 12, padding: 14, marginBottom: 8, cursor: 'pointer' }}
+                onClick={() => setExpandedIdx(p => p === i ? null : i)}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                  <div><div style={{ fontSize: 22, fontWeight: 700 }}>{q.card.thai}</div><div style={{ fontSize: 13, color: 'var(--text-muted)' }}>{q.card.romanization}</div></div>
-                  <div style={{ textAlign: 'right' }}><div style={{ fontSize: 14, fontWeight: 600, color: 'var(--success)' }}>{q.card.englishMeaning}</div></div>
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <div style={{ fontSize: 22, fontWeight: 700 }}>{q.card.thai}</div>
+                      <button onClick={e => { e.stopPropagation(); speakThai(q.card.thai); }} style={{ background: 'transparent', fontSize: 14 }}>🔊</button>
+                    </div>
+                    <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>{q.card.romanization}</div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--success)' }}>{q.card.englishMeaning}</div>
+                    <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 2 }}>{expandedIdx === i ? '▲' : '▼'}</div>
+                  </div>
                 </div>
-                {q.card.culturalNote && <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 8, fontStyle: 'italic', borderTop: '1px solid var(--border)', paddingTop: 8 }}>💡 {q.card.culturalNote}</div>}
+                {expandedIdx === i && (
+                  <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {q.card.exampleSentence && (
+                      <div style={{ background: 'var(--surface-hi)', borderRadius: 8, padding: 10 }}>
+                        <div style={{ fontSize: 13, fontWeight: 500 }}>{q.card.exampleSentence.thai}</div>
+                        <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>{q.card.exampleSentence.romanization}</div>
+                        <div style={{ fontSize: 11, color: 'var(--text-sec)', fontStyle: 'italic', marginTop: 2 }}>"{q.card.exampleSentence.englishNatural}"</div>
+                      </div>
+                    )}
+                    {q.card.culturalNote && <div style={{ fontSize: 11, color: 'var(--text-muted)', fontStyle: 'italic' }}>💡 {q.card.culturalNote}</div>}
+                  </div>
+                )}
               </div>
             ))}
           </div>
