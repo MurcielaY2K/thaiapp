@@ -286,51 +286,49 @@ function StudySession({
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', minWidth: 52 }}>
           <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{session.currentIndex + 1}/{session.cards.length}</span>
-          {combo >= 3 && (
-            <span style={{ fontSize: 10, color: 'var(--gold)', fontWeight: 800, letterSpacing: 0.5 }}>🔥{combo} combo!</span>
-          )}
+          {combo >= 3 && <span style={{ fontSize: 10, color: 'var(--gold)', fontWeight: 800 }}>🔥{combo} combo!</span>}
           {combo < 3 && sessionTotal > 0 && (
-            <span style={{ fontSize: 10, color: sessionCorrect / sessionTotal >= 0.8 ? 'var(--success)' : sessionCorrect / sessionTotal >= 0.6 ? 'var(--gold)' : 'var(--error)', fontWeight: 700 }}>
-              {Math.round((sessionCorrect / sessionTotal) * 100)}% acc
+            <span style={{ fontSize: 10, fontWeight: 700, color: sessionCorrect / sessionTotal >= 0.8 ? 'var(--success)' : sessionCorrect / sessionTotal >= 0.6 ? 'var(--gold)' : 'var(--error)' }}>
+              {Math.round((sessionCorrect / sessionTotal) * 100)}%
             </span>
           )}
         </div>
       </div>
 
-      {/* Scrollable card area */}
-      <div className="scroll" style={{ flex: 1, padding: '12px 20px 8px' }}>
-        <div
-          style={{ background: 'var(--surface)', borderRadius: 20, border: '1px solid var(--border)', borderTop: `4px solid ${regionColor}`, padding: 24, cursor: flipped ? 'default' : 'pointer' }}
-          onClick={flipped ? undefined : () => { sfx.flip(); setFlipped(true); if (getAutoPlay()) speakThai(card.thai); }}
-        >
-          {/* Category + NEW badge + tone */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-            <span style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 1 }}>
-              {card.category.replace(/_/g, ' ')}
-              {currentCard.isNew && <span style={{ color: 'var(--success)', fontWeight: 700, marginLeft: 6 }}>NEW</span>}
-            </span>
-            <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>{card.tone} tone</span>
-          </div>
+      {/* Everything in ONE scrollable area — nothing hidden behind viewport edges */}
+      <div className="scroll" style={{ flex: 1, padding: '16px 20px 32px' }}>
 
-          {/* Thai word — always visible */}
-          <div style={{ textAlign: 'center', marginBottom: 4 }}>
-            <div style={{ fontSize: 58, fontWeight: 700, lineHeight: 1.2 }}>{card.thai}</div>
-            <div style={{ fontSize: 19, color: 'var(--text-sec)', marginTop: 8 }}>{card.romanization}</div>
-          </div>
+        {/* Card header */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10, fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 0.8 }}>
+          <span>{card.category.replace(/_/g, ' ')}{currentCard.isNew && <span style={{ color: 'var(--success)', fontWeight: 700, marginLeft: 6 }}>NEW</span>}</span>
+          <span>{card.tone} tone</span>
+        </div>
 
-          {/* Listen button */}
-          <div style={{ display: 'flex', justifyContent: 'center', marginTop: 12, marginBottom: flipped ? 20 : 8 }}>
-            <button
-              style={{ background: 'var(--surface-hi)', border: '1px solid var(--border)', borderRadius: 999, padding: '6px 16px', fontSize: 13, color: 'var(--text-sec)', display: 'flex', alignItems: 'center', gap: 6 }}
-              onClick={e => { e.stopPropagation(); speakThai(card.thai); }}
-            >🔊 Listen</button>
-          </div>
+        {/* Thai word */}
+        <div style={{ background: 'var(--surface)', borderRadius: 20, border: '1px solid var(--border)', borderTop: `4px solid ${regionColor}`, padding: '28px 24px', textAlign: 'center', marginBottom: 16 }}>
+          <div style={{ fontSize: 62, fontWeight: 700, lineHeight: 1.15, letterSpacing: -1 }}>{card.thai}</div>
+          <div style={{ fontSize: 20, color: 'var(--text-sec)', marginTop: 10 }}>{card.romanization}</div>
+          <button
+            style={{ marginTop: 14, background: 'var(--surface-hi)', border: '1px solid var(--border)', borderRadius: 999, padding: '7px 18px', fontSize: 14, color: 'var(--text-sec)' }}
+            onClick={() => speakThai(card.thai)}
+          >🔊 Listen</button>
+        </div>
 
-          {/* Revealed content */}
-          {flipped && (
-            <div style={{ borderTop: `1px solid var(--border)`, paddingTop: 20 }}>
+        {!flipped ? (
+          /* ── UNREVEALED ── */
+          <button
+            style={{ width: '100%', background: 'var(--primary)', color: '#fff', borderRadius: 16, padding: '20px 0', fontWeight: 800, fontSize: 20, letterSpacing: 0.3 }}
+            onClick={() => { sfx.flip(); setFlipped(true); if (getAutoPlay()) speakThai(card.thai); }}
+          >
+            Show Answer
+          </button>
+        ) : (
+          /* ── REVEALED ── */
+          <>
+            {/* Answer card */}
+            <div style={{ background: 'var(--surface)', borderRadius: 20, border: '1px solid var(--border)', borderTop: `4px solid ${regionColor}`, padding: '20px 22px', marginBottom: 16 }}>
               <div style={{ textAlign: 'center', marginBottom: 12 }}>
-                <div style={{ fontSize: 26, fontWeight: 800, color: 'var(--gold)' }}>{card.englishMeaning}</div>
+                <div style={{ fontSize: 28, fontWeight: 800, color: 'var(--gold)' }}>{card.englishMeaning}</div>
                 {card.englishAlternatives?.length ? (
                   <div style={{ fontSize: 12, color: 'var(--text-muted)', fontStyle: 'italic', marginTop: 4 }}>
                     also: {card.englishAlternatives.join(', ')}
@@ -339,8 +337,8 @@ function StudySession({
               </div>
 
               {card.exampleSentence && (
-                <div style={{ background: 'var(--surface-hi)', borderRadius: 12, padding: '12px 14px', marginBottom: 10 }}>
-                  <div style={{ fontSize: 14, fontWeight: 600 }}>{card.exampleSentence.thai}</div>
+                <div style={{ background: 'var(--surface-hi)', borderRadius: 10, padding: '12px 14px', marginBottom: 10 }}>
+                  <div style={{ fontSize: 15, fontWeight: 600 }}>{card.exampleSentence.thai}</div>
                   <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 3 }}>{card.exampleSentence.romanization}</div>
                   <div style={{ fontSize: 12, color: 'var(--text-sec)', fontStyle: 'italic', marginTop: 5 }}>"{card.exampleSentence.englishNatural}"</div>
                 </div>
@@ -353,53 +351,34 @@ function StudySession({
                 </div>
               )}
             </div>
-          )}
 
-          {/* Tap hint when unrevealed */}
-          {!flipped && (
-            <div style={{ textAlign: 'center', fontSize: 13, color: 'var(--text-muted)', fontStyle: 'italic', paddingBottom: 4 }}>
-              Tap card to reveal →
+            {/* Primary: two big buttons */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 10 }}>
+              <button
+                style={{ background: 'rgba(239,68,68,0.12)', border: '2px solid var(--error)', borderRadius: 16, padding: '18px 0', fontWeight: 800, fontSize: 18, color: 'var(--error)' }}
+                onClick={() => answer(0)}
+              >✗ Nope</button>
+              <button
+                style={{ background: 'rgba(16,185,129,0.12)', border: '2px solid var(--success)', borderRadius: 16, padding: '18px 0', fontWeight: 800, fontSize: 18, color: 'var(--success)' }}
+                onClick={() => answer(3)}
+              >✓ Got it</button>
             </div>
-          )}
-        </div>
-      </div>
 
-      {/* Bottom action bar — always visible, never covered */}
-      <div style={{ padding: '10px 20px', paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 10px)', background: 'var(--bg)', borderTop: '1px solid var(--border)', flexShrink: 0 }}>
-        {flipped ? (
-          <>
-            <div style={{ fontSize: 11, color: 'var(--text-muted)', textAlign: 'center', marginBottom: 8 }}>
-              How well did you know it?
-            </div>
+            {/* Secondary: detailed SRS ratings + next */}
             <div style={{ display: 'flex', gap: 8 }}>
-              {QUALITY.map(({ q, label, color, key }) => (
+              {QUALITY.map(({ q, label, color }) => (
                 <button
                   key={q}
-                  style={{ flex: 1, background: 'var(--surface)', border: `2px solid ${color}`, borderRadius: 12, padding: '12px 4px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}
+                  style={{ flex: 1, background: 'var(--surface)', border: `1px solid ${color}`, borderRadius: 10, padding: '10px 2px', fontSize: 12, fontWeight: 700, color }}
                   onClick={() => answer(q)}
-                >
-                  <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>[{key}]</span>
-                  <span style={{ fontSize: 14, fontWeight: 700, color }}>{label}</span>
-                </button>
+                >{label}</button>
               ))}
+              <button
+                style={{ flex: 1.4, background: 'var(--surface-hi)', border: '1px solid var(--border)', borderRadius: 10, padding: '10px 2px', fontSize: 12, fontWeight: 700, color: 'var(--text-sec)' }}
+                onClick={() => answer(3)}
+              >Next →</button>
             </div>
           </>
-        ) : (
-          <div style={{ display: 'flex', gap: 10 }}>
-            <button
-              style={{ flex: 1, background: 'var(--primary)', color: '#fff', borderRadius: 12, padding: '14px 0', fontWeight: 700, fontSize: 16 }}
-              onClick={() => { sfx.flip(); setFlipped(true); if (getAutoPlay()) speakThai(card.thai); }}
-            >
-              Reveal
-            </button>
-            <button
-              style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '14px 16px', fontSize: 13, color: 'var(--text-muted)' }}
-              onClick={() => answer(2)}
-              title="Skip (mark as Hard)"
-            >
-              Skip
-            </button>
-          </div>
         )}
       </div>
     </div>
