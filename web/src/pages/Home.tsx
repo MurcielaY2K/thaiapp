@@ -3,6 +3,8 @@ import { useGame } from '../context/GameContext';
 import { REGIONS, TONE_COLORS } from '@engine/types';
 import { VOCABULARY } from '@engine/data/vocabulary';
 import { getLevelConfig } from '@engine/engine/gameEngine';
+import { speakThai } from '../utils/audio';
+import { getFavorites } from '../utils/favorites';
 
 const XP_PER_LEVEL = 500;
 const REGION_COLOR: Record<string, string> = {
@@ -16,6 +18,7 @@ export function Home({ onStudy, onQuiz }: { onStudy: () => void; onQuiz: () => v
 
   if (!profile || !stats) return null;
 
+  const favoriteCount = getFavorites().size;
   const levelXP = profile.totalXP % XP_PER_LEVEL;
   const levelCfg = getLevelConfig(profile.currentLevel);
   const region = profile.unlockedRegions[profile.unlockedRegions.length - 1] ?? 'krung_thon';
@@ -127,6 +130,17 @@ export function Home({ onStudy, onQuiz }: { onStudy: () => void; onQuiz: () => v
         <span style={{ fontSize: 18 }}>→</span>
       </button>
 
+      {favoriteCount > 0 && (
+        <button style={{ ...s.quizBtn, border: '1px solid var(--error)', color: 'var(--error)', background: 'rgba(239,68,68,0.05)' }} onClick={onQuiz}>
+          <span style={{ fontSize: 22 }}>♥</span>
+          <div style={{ flex: 1, textAlign: 'left' }}>
+            <div style={{ fontWeight: 700 }}>Quiz Saved Words</div>
+            <div style={{ fontSize: 12, opacity: 0.8, marginTop: 2 }}>{favoriteCount} saved · Practice your bookmarks</div>
+          </div>
+          <span style={{ fontSize: 18 }}>→</span>
+        </button>
+      )}
+
       {/* Daily challenge */}
       {dailyChallenge && (
         <div style={{ ...s.card, borderLeft: `4px solid ${dailyChallenge.completed ? 'var(--success)' : 'var(--gold)'}` }}>
@@ -150,18 +164,28 @@ export function Home({ onStudy, onQuiz }: { onStudy: () => void; onQuiz: () => v
       {/* Word of the day */}
       {wordOfDay && (
         <div style={{ ...s.card, background: 'var(--surface-hi)', border: '1px solid var(--primary)' }}>
-          <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 10 }}>Word of the Day</div>
+          <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 10 }}>🌟 Word of the Day</div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 32, fontWeight: 700 }}>{wordOfDay.thai}</div>
-              <div style={{ fontSize: 14, color: 'var(--text-muted)' }}>{wordOfDay.romanization}</div>
+            <button
+              style={{ flex: 1, textAlign: 'left', background: 'transparent', padding: 0 }}
+              onClick={() => speakThai(wordOfDay.thai)}
+            >
+              <div style={{ fontSize: 38, fontWeight: 700 }}>{wordOfDay.thai}</div>
+              <div style={{ fontSize: 14, color: 'var(--text-muted)' }}>{wordOfDay.romanization} <span style={{ fontSize: 12, color: 'var(--primary)' }}>🔊</span></div>
               <div style={{ fontSize: 15, color: 'var(--text-sec)', marginTop: 4 }}>{wordOfDay.englishMeaning}</div>
-            </div>
-            <div style={{ textAlign: 'right' }}>
+            </button>
+            <div style={{ textAlign: 'right', flexShrink: 0 }}>
               <div style={{ fontSize: 12, fontWeight: 700, color: TONE_COLORS[wordOfDay.tone], background: `${TONE_COLORS[wordOfDay.tone]}22`, borderRadius: 8, padding: '4px 10px' }}>{wordOfDay.tone}</div>
               <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 6 }}>{wordOfDay.category.replace(/_/g, ' ')}</div>
             </div>
           </div>
+          {wordOfDay.exampleSentence && (
+            <div style={{ background: 'var(--surface)', borderRadius: 8, padding: '10px 12px', marginTop: 10, borderLeft: '3px solid var(--primary)' }}>
+              <div style={{ fontSize: 13, fontWeight: 500 }}>{wordOfDay.exampleSentence.thai}</div>
+              <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>{wordOfDay.exampleSentence.romanization}</div>
+              <div style={{ fontSize: 12, color: 'var(--text-sec)', fontStyle: 'italic', marginTop: 3 }}>"{wordOfDay.exampleSentence.englishNatural}"</div>
+            </div>
+          )}
           {wordOfDay.culturalNote && (
             <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 10, paddingTop: 10, borderTop: '1px solid var(--border)', fontStyle: 'italic', lineHeight: 1.5 }}>
               💡 {wordOfDay.culturalNote}

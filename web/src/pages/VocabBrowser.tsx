@@ -1,8 +1,9 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { VOCABULARY } from '@engine/data/vocabulary';
 import { VocabCard, TONE_COLORS, GameRegion, SemanticCategory, ThaiTone, REGIONS } from '@engine/types';
 import { useGame } from '../context/GameContext';
 import { speakThai } from '../utils/audio';
+import { getFavorites, toggleFavorite } from '../utils/favorites';
 
 const REGION_COLOR: Record<string, string> = {
   krung_thon: 'var(--r-kt)', paa_isaan: 'var(--r-pi)', doi_nuea: 'var(--r-dn)',
@@ -17,8 +18,19 @@ export function VocabBrowser() {
   const [filterRegion, setFilterRegion] = useState<GameRegion | 'all'>('all');
   const [filterTone, setFilterTone] = useState<ThaiTone | 'all'>('all');
   const [filterCat, setFilterCat] = useState<string>('all');
-  const [filterStatus, setFilterStatus] = useState<'all' | 'new' | 'seen'>('all');
+  const [filterStatus, setFilterStatus] = useState<'all' | 'new' | 'seen' | 'favorites'>('all');
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [favorites, setFavorites] = useState<Set<string>>(() => getFavorites());
+
+  const handleToggleFavorite = useCallback((id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const nowFav = toggleFavorite(id);
+    setFavorites(prev => {
+      const next = new Set(prev);
+      if (nowFav) next.add(id); else next.delete(id);
+      return next;
+    });
+  }, []);
 
   const unlocked = profile?.unlockedRegions ?? ['krung_thon'];
   const pool = VOCABULARY.filter(c => unlocked.includes(c.region));
@@ -37,6 +49,8 @@ export function VocabBrowser() {
       if (filterCat !== 'all' && c.category !== filterCat) return false;
       if (filterStatus === 'new' && srsMap.has(c.id)) return false;
       if (filterStatus === 'seen' && !srsMap.has(c.id)) return false;
+      if (filterStatus === 'favorites' && !favorites.has(c.id)) return false;
+
       if (!q) return true;
       return (
         c.thai.includes(q) ||
@@ -45,7 +59,7 @@ export function VocabBrowser() {
         c.englishAlternatives?.some(a => a.toLowerCase().includes(q))
       );
     });
-  }, [pool, search, filterRegion, filterTone, filterCat, filterStatus, srsMap]);
+  }, [pool, search, filterRegion, filterTone, filterCat, filterStatus, srsMap, favorites]);
 
   const unlockedRegions = unlocked as GameRegion[];
 
@@ -92,11 +106,12 @@ export function VocabBrowser() {
           </select>
         </div>
 
-        <div style={{ display: 'flex', gap: 6, marginTop: 8, alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: 6, marginTop: 8, alignItems: 'center', overflowX: 'auto', scrollbarWidth: 'none' }}>
           <FilterChip label="All" active={filterStatus === 'all'} onClick={() => setFilterStatus('all')} color="var(--text-sec)" />
           <FilterChip label="🆕 Unseen" active={filterStatus === 'new'} onClick={() => setFilterStatus(filterStatus === 'new' ? 'all' : 'new')} color="var(--success)" />
           <FilterChip label="📖 Studied" active={filterStatus === 'seen'} onClick={() => setFilterStatus(filterStatus === 'seen' ? 'all' : 'seen')} color="var(--info)" />
-          <span style={{ fontSize: 11, color: 'var(--text-muted)', marginLeft: 'auto' }}>{filtered.length} word{filtered.length !== 1 ? 's' : ''}</span>
+          <FilterChip label={`♥ Saved${favorites.size > 0 ? ` (${favorites.size})` : ''}`} active={filterStatus === 'favorites'} onClick={() => setFilterStatus(filterStatus === 'favorites' ? 'all' : 'favorites')} color="var(--error)" />
+          <span style={{ fontSize: 11, color: 'var(--text-muted)', marginLeft: 'auto', flexShrink: 0 }}>{filtered.length} word{filtered.length !== 1 ? 's' : ''}</span>
         </div>
       </div>
 
@@ -107,6 +122,8 @@ export function VocabBrowser() {
             key={card.id}
             card={card}
             seen={srsMap.has(card.id)}
+            isFav={favorites.has(card.id)}
+            onFavorite={handleToggleFavorite}
             isOpen={expanded === card.id}
             toggle={() => setExpanded(p => p === card.id ? null : card.id)}
           />
@@ -138,7 +155,10 @@ function FilterChip({ label, active, onClick, color }: { label: string; active: 
   );
 }
 
-function CardRow({ card, isOpen, toggle, seen }: { card: VocabCard; isOpen: boolean; toggle: () => void; seen: boolean }) {
+function CardRow({ card, isOpen, toggle, seen, isFav, onFavorite }: {
+  card: VocabCard; isOpen: boolean; toggle: () => void; seen: boolean;
+  isFav: boolean; onFavorite: (id: string, e: React.MouseEvent) => void;
+}) {
   const regionColor = REGION_COLOR[card.region] ?? 'var(--primary)';
   const toneColor = TONE_COLORS[card.tone];
 
@@ -162,6 +182,11 @@ function CardRow({ card, isOpen, toggle, seen }: { card: VocabCard; isOpen: bool
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4, flexShrink: 0 }}>
           <span style={{ fontSize: 11, fontWeight: 700, color: toneColor, background: `${toneColor}22`, borderRadius: 6, padding: '2px 6px' }}>{card.tone}</span>
           <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+            <button
+              style={{ background: 'transparent', border: 'none', fontSize: 15, color: isFav ? 'var(--error)' : 'var(--border)', padding: '2px 4px', lineHeight: 1, transition: 'color 0.15s' }}
+              onClick={e => onFavorite(card.id, e)}
+              title={isFav ? 'Remove from saved' : 'Save word'}
+            >{isFav ? '♥' : '♡'}</button>
             <button
               style={{ background: 'transparent', border: 'none', fontSize: 13, color: 'var(--text-muted)', padding: '2px 4px', lineHeight: 1 }}
               onClick={e => { e.stopPropagation(); speakThai(card.thai); }}
