@@ -189,19 +189,22 @@ export function Home({ onStudy, onQuiz }: { onStudy: () => void; onQuiz: () => v
       {profile.activeQuestIds.length > 0 && (
         <div>
           <div style={s.sectionTitle}>Active Quests</div>
-          {profile.activeQuestIds.slice(0, 2).map(qid => (
+          {profile.activeQuestIds.slice(0, 3).map(qid => (
             <div key={qid} style={{ ...s.card, borderLeft: `3px solid ${regionColor}`, flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 8 }}>
               <span style={{ fontSize: 16 }}>⚔️</span>
               <span style={{ flex: 1, fontSize: 13, color: 'var(--text-sec)' }}>
-                {qid.replace(/_/g, ' ').replace(/^[a-z]+\s\d+\s/, '')}
+                {qid.replace(/_/g, ' ').replace(/^[a-z]{2}_\d+_/, '').replace(/_/g, ' ')}
               </span>
             </div>
           ))}
+          {profile.activeQuestIds.length > 3 && (
+            <div style={{ fontSize: 11, color: 'var(--text-muted)', textAlign: 'center', marginTop: 4 }}>+{profile.activeQuestIds.length - 3} more quests</div>
+          )}
         </div>
       )}
 
       {/* Footer stats */}
-      <div style={{ display: 'flex', justifyContent: 'center', gap: 20, paddingBottom: 8 }}>
+      <div style={{ display: 'flex', justifyContent: 'center', gap: 20, paddingBottom: 4 }}>
         <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>📚 {stats.totalCards} cards</span>
         <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>📝 {profile.totalWordsLearned} learned</span>
         {stats.strugglingCards > 0 && (

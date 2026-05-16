@@ -115,7 +115,7 @@ export function Study({
               style={{ ...s.card, borderTop: `4px solid ${regionColor}`, cursor: 'pointer', minHeight: 300, justifyContent: 'center', alignItems: 'center' }}
               onClick={() => { sfx.flip(); setFlipped(true); }}
             >
-              <div style={s.catLabel}>{card.category.replace(/_/g, ' ')}</div>
+              <div style={s.catLabel}>{card.category.replace(/_/g, ' ')}{currentCard.isNew && <span style={{ color: 'var(--success)', fontWeight: 700, marginLeft: 6 }}>NEW</span>}</div>
               <div style={s.toneLabel}>{card.tone} tone</div>
               <div style={s.thaiText}>{card.thai}</div>
               <div style={s.roman}>{card.romanization}</div>
