@@ -2,7 +2,7 @@ import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { VOCABULARY } from '@engine/data/vocabulary';
 import { VocabCard } from '@engine/types';
 import { useGame } from '../context/GameContext';
-import { sfx } from '../utils/audio';
+import { sfx, speakThai, getAutoPlay } from '../utils/audio';
 
 interface MatchCard {
   id: string;
@@ -113,7 +113,13 @@ export function MatchGame({ onExit }: { onExit: () => void }) {
           const c2 = prev.find(c => c.id === cardId);
           if (!c1 || !c2) return prev;
           const isMatch = c1.pairId === c2.pairId;
-          if (isMatch) sfx.correct(); else sfx.wrong();
+          if (isMatch) {
+            sfx.correct();
+            if (getAutoPlay()) {
+              const thaiCard = [c1, c2].find(c => c.faceType === 'thai');
+              if (thaiCard) speakThai(thaiCard.face);
+            }
+          } else sfx.wrong();
           return prev.map(c => {
             if (c.id === first || c.id === cardId) {
               return isMatch ? { ...c, isMatched: true } : { ...c, isFlipped: false };
