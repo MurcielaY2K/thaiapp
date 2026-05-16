@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { VOCABULARY } from '@engine/data/vocabulary';
 import { VocabCard, TONE_COLORS, GameRegion, SemanticCategory, ThaiTone, REGIONS } from '@engine/types';
 import { useGame } from '../context/GameContext';
+import { speakThai } from '../utils/audio';
 
 const REGION_COLOR: Record<string, string> = {
   krung_thon: 'var(--r-kt)', paa_isaan: 'var(--r-pi)', doi_nuea: 'var(--r-dn)',
@@ -160,7 +161,13 @@ function CardRow({ card, isOpen, toggle, seen }: { card: VocabCard; isOpen: bool
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4, flexShrink: 0 }}>
           <span style={{ fontSize: 11, fontWeight: 700, color: toneColor, background: `${toneColor}22`, borderRadius: 6, padding: '2px 6px' }}>{card.tone}</span>
-          <span style={{ fontSize: 10, color: isOpen ? 'var(--primary)' : 'var(--text-muted)' }}>{isOpen ? '▲' : '▼'}</span>
+          <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+            <button
+              style={{ background: 'transparent', border: 'none', fontSize: 13, color: 'var(--text-muted)', padding: '2px 4px', lineHeight: 1 }}
+              onClick={e => { e.stopPropagation(); speakThai(card.thai); }}
+            >🔊</button>
+            <span style={{ fontSize: 10, color: isOpen ? 'var(--primary)' : 'var(--text-muted)' }}>{isOpen ? '▲' : '▼'}</span>
+          </div>
         </div>
       </button>
 

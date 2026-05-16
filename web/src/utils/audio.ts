@@ -30,3 +30,42 @@ export const sfx = {
     [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => beep(f, 0.15), i * 90));
   },
 };
+
+let ttsVoice: SpeechSynthesisVoice | null | undefined = undefined;
+
+function getTTSVoice(): SpeechSynthesisVoice | null {
+  if (ttsVoice !== undefined) return ttsVoice;
+  if (!window.speechSynthesis) { ttsVoice = null; return null; }
+  const voices = window.speechSynthesis.getVoices();
+  ttsVoice = voices.find(v => v.lang.startsWith('th')) ?? voices.find(v => v.lang.startsWith('th-TH')) ?? null;
+  return ttsVoice;
+}
+
+// Speak Thai text using Web Speech API. Falls back gracefully if TTS unavailable or Thai voice missing.
+export function speakThai(text: string): boolean {
+  try {
+    if (!window.speechSynthesis) return false;
+    window.speechSynthesis.cancel();
+    const voice = getTTSVoice();
+    if (!voice) {
+      // Try anyway with lang hint even without a matched voice
+      const utt = new SpeechSynthesisUtterance(text);
+      utt.lang = 'th-TH';
+      utt.rate = 0.85;
+      window.speechSynthesis.speak(utt);
+      return true;
+    }
+    const utt = new SpeechSynthesisUtterance(text);
+    utt.voice = voice;
+    utt.lang = 'th-TH';
+    utt.rate = 0.85;
+    window.speechSynthesis.speak(utt);
+    return true;
+  } catch { return false; }
+}
+
+// Returns true if TTS is likely available (voice list loaded)
+export function hasThaiTTS(): boolean {
+  if (!window.speechSynthesis) return false;
+  return window.speechSynthesis.getVoices().some(v => v.lang.startsWith('th'));
+}

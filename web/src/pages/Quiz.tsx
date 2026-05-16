@@ -2,7 +2,7 @@ import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { VOCABULARY } from '@engine/data/vocabulary';
 import { VocabCard } from '@engine/types';
 import { useGame } from '../context/GameContext';
-import { sfx } from '../utils/audio';
+import { sfx, speakThai } from '../utils/audio';
 import { updateChallengeProgress } from '../utils/dailyChallenge';
 
 type QuizMode = 'thai_to_english' | 'english_to_thai' | 'romanization' | 'type_english' | 'type_romanization';
@@ -99,7 +99,7 @@ export function Quiz({ onExit }: { onExit: () => void }) {
   }, [pool]);
 
   const advance = useCallback((correct: boolean) => {
-    if (correct) sfx.correct(); else sfx.wrong();
+    if (correct) sfx.correct(); else { sfx.wrong(); speakThai(questions[current].card.thai); }
     const newResults = [...results, correct];
     setResults(newResults);
     setPhase('feedback');

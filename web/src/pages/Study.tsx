@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useGame } from '../context/GameContext';
 import { Session, ReviewQuality } from '@engine/types';
 import { SessionSummary } from '@engine/engine/sessionManager';
-import { sfx } from '../utils/audio';
+import { sfx, speakThai } from '../utils/audio';
 import { updateChallengeProgress } from '../utils/dailyChallenge';
 
 type Quality = 0 | 2 | 3 | 4;
@@ -119,6 +119,11 @@ export function Study({
               <div style={s.toneLabel}>{card.tone} tone</div>
               <div style={s.thaiText}>{card.thai}</div>
               <div style={s.roman}>{card.romanization}</div>
+              <button
+                style={{ position: 'absolute', bottom: 14, right: 14, background: 'var(--surface-hi)', border: '1px solid var(--border)', borderRadius: 999, width: 36, height: 36, fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-sec)' }}
+                onClick={e => { e.stopPropagation(); speakThai(card.thai); }}
+                title="Listen to pronunciation"
+              >🔊</button>
               <div style={s.tapHint}>Tap to reveal →</div>
             </div>
 
@@ -127,7 +132,13 @@ export function Study({
               className="flip-back"
               style={{ ...s.card, borderTop: `4px solid ${regionColor}`, minHeight: 300, justifyContent: 'center', alignItems: 'center', textAlign: 'center' }}
             >
-              <div style={{ fontSize: 28, fontWeight: 700, marginBottom: 6 }}>{card.thai}</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
+                <div style={{ fontSize: 28, fontWeight: 700 }}>{card.thai}</div>
+                <button
+                  style={{ background: 'var(--surface-hi)', border: '1px solid var(--border)', borderRadius: 999, width: 32, height: 32, fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-sec)', flexShrink: 0 }}
+                  onClick={e => { e.stopPropagation(); speakThai(card.thai); }}
+                >🔊</button>
+              </div>
               <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--gold)', marginBottom: 4 }}>{card.englishMeaning}</div>
               {card.englishAlternatives?.length ? (
                 <div style={{ fontSize: 12, color: 'var(--text-muted)', fontStyle: 'italic', marginBottom: 10 }}>
