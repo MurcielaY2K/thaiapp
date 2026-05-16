@@ -4021,7 +4021,7 @@ export const VOCABULARY: VocabCard[] = [
   // ── VERBS (useful actions) ────────────────────────────────────────────────
 
   {
-    id: 'pi_vrb_001',
+    id: 'pi_vrb_008',
     type: 'vocabulary',
     category: 'verbs_core',
     region: 'paa_isaan',
@@ -4042,7 +4042,7 @@ export const VOCABULARY: VocabCard[] = [
   },
 
   {
-    id: 'pi_vrb_002',
+    id: 'pi_vrb_009',
     type: 'vocabulary',
     category: 'verbs_core',
     region: 'paa_isaan',
@@ -4063,7 +4063,7 @@ export const VOCABULARY: VocabCard[] = [
   },
 
   {
-    id: 'pi_vrb_003',
+    id: 'pi_vrb_010',
     type: 'vocabulary',
     category: 'verbs_core',
     region: 'paa_isaan',
@@ -6507,28 +6507,7 @@ export const TALEE_TONG_CARDS: VocabCard[] = [
   // ── NATURE (sea/weather) ──────────────────────────────────────────────────
 
   {
-    id: 'tt_nat_001',
-    type: 'vocabulary',
-    category: 'nature',
-    region: 'talee_tong',
-    thai: 'คลื่น',
-    romanization: 'khluen',
-    ipa: '/kʰlɯːn/',
-    tone: 'mid',
-    englishMeaning: 'wave (ocean)',
-    exampleSentence: {
-      thai: 'คลื่นทะเลสูงมากในช่วงมรสุม',
-      romanization: 'khluen tha-le suung maak nai chuang mo-ra-sum',
-      englishLiteral: 'wave sea high very in period monsoon',
-      englishNatural: 'The ocean waves are very high during the monsoon.',
-    },
-    culturalNote: 'คลื่น (waves) is also used metaphorically in Thai — คลื่นเสียง means sound wave, and คลื่นวิทยุ is a radio wave. The southern islands are famous for their calm คลื่นนิ่ง (still waters).',
-    difficultyRating: 2,
-    tags: ['nature', 'sea', 'south'],
-  },
-
-  {
-    id: 'tt_nat_002',
+    id: 'tt_nat_009',
     type: 'vocabulary',
     category: 'nature',
     region: 'talee_tong',
@@ -6549,7 +6528,7 @@ export const TALEE_TONG_CARDS: VocabCard[] = [
   },
 
   {
-    id: 'tt_nat_003',
+    id: 'tt_nat_010',
     type: 'vocabulary',
     category: 'nature',
     region: 'talee_tong',
@@ -6572,7 +6551,7 @@ export const TALEE_TONG_CARDS: VocabCard[] = [
   // ── MARINE LIFE ───────────────────────────────────────────────────────────
 
   {
-    id: 'tt_ani_001',
+    id: 'tt_ani_009',
     type: 'vocabulary',
     category: 'animal',
     region: 'talee_tong',
@@ -6593,7 +6572,7 @@ export const TALEE_TONG_CARDS: VocabCard[] = [
   },
 
   {
-    id: 'tt_ani_002',
+    id: 'tt_ani_010',
     type: 'vocabulary',
     category: 'animal',
     region: 'talee_tong',
@@ -8919,7 +8898,7 @@ export const WANG_LOI_FAA_CARDS: VocabCard[] = [
   // ── CELESTIAL / SKY THEMED ────────────────────────────────────────────────
 
   {
-    id: 'wl_sky_001',
+    id: 'wl_sky_005',
     type: 'vocabulary',
     category: 'nature',
     region: 'wang_loi_faa',
@@ -8940,7 +8919,7 @@ export const WANG_LOI_FAA_CARDS: VocabCard[] = [
   },
 
   {
-    id: 'wl_sky_002',
+    id: 'wl_sky_006',
     type: 'vocabulary',
     category: 'emotion',
     region: 'wang_loi_faa',
@@ -8961,7 +8940,7 @@ export const WANG_LOI_FAA_CARDS: VocabCard[] = [
   },
 
   {
-    id: 'wl_sky_003',
+    id: 'wl_sky_007',
     type: 'vocabulary',
     category: 'adjectives_adv',
     region: 'wang_loi_faa',
