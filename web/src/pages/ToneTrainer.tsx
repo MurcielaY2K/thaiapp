@@ -14,6 +14,13 @@ const TONES: { tone: ThaiTone; label: string; hint: string; contour: string; svg
 
 const QUIZ_SIZE = 10;
 
+type ToneDifficulty = 'easy' | 'normal' | 'hard';
+const DIFFICULTIES: { id: ToneDifficulty; label: string; icon: string; desc: string; color: string }[] = [
+  { id: 'easy',   label: 'Easy',   icon: '🌱', desc: 'Shows romanization + meaning', color: 'var(--success)' },
+  { id: 'normal', label: 'Normal', icon: '⚡', desc: 'Shows meaning, hides romanization', color: 'var(--info)' },
+  { id: 'hard',   label: 'Hard',   icon: '🏆', desc: 'Thai word only — pure listening', color: 'var(--gold)' },
+];
+
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
   for (let i = a.length - 1; i > 0; i--) {
@@ -26,6 +33,7 @@ function shuffle<T>(arr: T[]): T[] {
 export function ToneTrainer({ onExit }: { onExit: () => void }) {
   const { profile } = useGame();
   const [phase, setPhase] = useState<'intro' | 'question' | 'feedback' | 'complete'>('intro');
+  const [difficulty, setDifficulty] = useState<ToneDifficulty>('easy');
   const [cards, setCards] = useState<VocabCard[]>([]);
   const [current, setCurrent] = useState(0);
   const [results, setResults] = useState<boolean[]>([]);
@@ -48,7 +56,8 @@ export function ToneTrainer({ onExit }: { onExit: () => void }) {
     }
   }, [phase, current, cards]);
 
-  const start = useCallback(() => {
+  const start = useCallback((diff: ToneDifficulty) => {
+    setDifficulty(diff);
     setCards(shuffle(pool).slice(0, QUIZ_SIZE));
     setCurrent(0);
     setResults([]);
@@ -75,7 +84,7 @@ export function ToneTrainer({ onExit }: { onExit: () => void }) {
   if (phase === 'intro') return <IntroScreen onStart={start} onExit={onExit} />;
   if (phase === 'complete') {
     const score = results.filter(Boolean).length;
-    return <ToneScoreScreen score={score} total={cards.length} cards={cards} results={results} onRetry={start} onExit={onExit} />;
+    return <ToneScoreScreen score={score} total={cards.length} cards={cards} results={results} onRetry={() => start(difficulty)} onExit={onExit} />;
   }
 
   const card = cards[current];
@@ -87,10 +96,13 @@ export function ToneTrainer({ onExit }: { onExit: () => void }) {
         <button style={s.exitBtn} onClick={onExit}>✕</button>
         <div style={{ flex: 1 }}>
           <div className="progress-track" style={{ height: 6 }}>
-            <div className="progress-fill" style={{ width: `${(current / cards.length) * 100}%`, background: 'var(--info)' }} />
+            <div className="progress-fill" style={{ width: `${(current / cards.length) * 100}%`, background: DIFFICULTIES.find(d => d.id === difficulty)?.color ?? 'var(--info)' }} />
           </div>
         </div>
-        <span style={s.counter}>{current + 1}/{cards.length}</span>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 1 }}>
+          <span style={s.counter}>{current + 1}/{cards.length}</span>
+          <span style={{ fontSize: 9, color: DIFFICULTIES.find(d => d.id === difficulty)?.color ?? 'var(--info)', fontWeight: 700, textTransform: 'uppercase' }}>{difficulty}</span>
+        </div>
       </div>
 
       {/* Score dots */}
@@ -109,9 +121,11 @@ export function ToneTrainer({ onExit }: { onExit: () => void }) {
           style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 999, padding: '6px 16px', fontSize: 13, color: 'var(--text-sec)', display: 'flex', alignItems: 'center', gap: 6 }}
           onClick={() => speakThai(card.thai)}
         >
-          🔊 <span>{card.romanization}</span>
+          {difficulty === 'easy' ? <>🔊 <span>{card.romanization}</span></> : <span>🔊 Replay</span>}
         </button>
-        <div style={{ fontSize: 15, color: 'var(--text-muted)', fontStyle: 'italic' }}>{card.englishMeaning}</div>
+        {difficulty !== 'hard' && (
+          <div style={{ fontSize: 15, color: 'var(--text-muted)', fontStyle: 'italic' }}>{card.englishMeaning}</div>
+        )}
 
         {/* Feedback overlay */}
         {phase === 'feedback' && (
@@ -169,7 +183,9 @@ export function ToneTrainer({ onExit }: { onExit: () => void }) {
   );
 }
 
-function IntroScreen({ onStart, onExit }: { onStart: () => void; onExit: () => void }) {
+function IntroScreen({ onStart, onExit }: { onStart: (d: ToneDifficulty) => void; onExit: () => void }) {
+  const [selectedDiff, setSelectedDiff] = useState<ToneDifficulty>('easy');
+  const diffCfg = DIFFICULTIES.find(d => d.id === selectedDiff)!;
   return (
     <div style={s.root}>
       <div style={s.topBar}>
@@ -177,7 +193,7 @@ function IntroScreen({ onStart, onExit }: { onStart: () => void; onExit: () => v
         <span style={{ flex: 1, fontWeight: 700, fontSize: 17, textAlign: 'center' }}>Tone Trainer</span>
         <div style={{ width: 32 }} />
       </div>
-      <div style={{ flex: 1, padding: '20px 24px 40px', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 20 }}>
+      <div className="scroll" style={{ flex: 1, padding: '20px 24px 40px', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 18 }}>
         <div style={{ textAlign: 'center' }}>
           <div style={{ fontSize: 52, marginBottom: 10 }}>🎵</div>
           <div style={{ fontSize: 22, fontWeight: 800 }}>Thai Tones</div>
@@ -199,7 +215,31 @@ function IntroScreen({ onStart, onExit }: { onStart: () => void; onExit: () => v
             </div>
           ))}
         </div>
-        <button style={{ background: 'var(--info)', color: '#fff', borderRadius: 14, padding: 18, fontWeight: 700, fontSize: 16 }} onClick={onStart}>
+
+        <div>
+          <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 10 }}>Difficulty</div>
+          <div style={{ display: 'flex', gap: 8 }}>
+            {DIFFICULTIES.map(d => (
+              <button
+                key={d.id}
+                onClick={() => setSelectedDiff(d.id)}
+                style={{
+                  flex: 1, borderRadius: 12, padding: '10px 6px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
+                  background: selectedDiff === d.id ? d.color : 'var(--surface)',
+                  border: `2px solid ${selectedDiff === d.id ? d.color : 'var(--border)'}`,
+                  color: selectedDiff === d.id ? '#fff' : 'var(--text)',
+                  transition: 'all 0.2s',
+                }}
+              >
+                <span style={{ fontSize: 20 }}>{d.icon}</span>
+                <span style={{ fontSize: 12, fontWeight: 700 }}>{d.label}</span>
+              </button>
+            ))}
+          </div>
+          <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 8, textAlign: 'center' }}>{diffCfg.desc}</div>
+        </div>
+
+        <button style={{ background: diffCfg.color, color: '#fff', borderRadius: 14, padding: 18, fontWeight: 700, fontSize: 16 }} onClick={() => onStart(selectedDiff)}>
           Start Training · 10 questions
         </button>
       </div>

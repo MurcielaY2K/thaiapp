@@ -39,6 +39,8 @@ export function Profile({ onSettings }: { onSettings: () => void }) {
   const { profile, stats, heatmap, earnedAchievementIds, refreshStats, facade } = useGame();
   const [sessionHistory] = useState(() => facade?.getSessionHistory().slice(-14).reverse() ?? []);
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
+  const [editingName, setEditingName] = useState(false);
+  const [nameInput, setNameInput] = useState('');
   useEffect(() => { refreshStats(); }, []);
 
   if (!profile || !stats) return null;
@@ -46,6 +48,14 @@ export function Profile({ onSettings }: { onSettings: () => void }) {
   const levelXP = profile.totalXP % XP_PER_LEVEL;
   const levelCfg = getLevelConfig(profile.currentLevel);
   const currentAvatar = AVATARS.find(a => a.id === profile.avatarId) ?? AVATARS[0];
+
+  const handleSaveName = async () => {
+    const trimmed = nameInput.trim();
+    if (!trimmed || !facade) { setEditingName(false); return; }
+    await facade.saveProfile({ ...profile, name: trimmed });
+    refreshStats();
+    setEditingName(false);
+  };
 
   return (
     <div className="scroll" style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 20 }}>
@@ -64,7 +74,29 @@ export function Profile({ onSettings }: { onSettings: () => void }) {
             ⚙️ Settings
           </button>
         </div>
-        <div style={{ fontSize: 24, fontWeight: 800 }}>{profile.name}</div>
+        {editingName ? (
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center', width: '100%', justifyContent: 'center' }}>
+            <input
+              autoFocus
+              style={{ background: 'var(--surface-hi)', border: '2px solid var(--primary)', borderRadius: 10, padding: '6px 12px', color: 'var(--text)', fontSize: 20, fontWeight: 700, textAlign: 'center', outline: 'none', maxWidth: 200 }}
+              value={nameInput}
+              onChange={e => setNameInput(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') handleSaveName(); if (e.key === 'Escape') setEditingName(false); }}
+              maxLength={30}
+            />
+            <button style={{ background: 'var(--success)', color: '#fff', borderRadius: 8, padding: '6px 12px', fontWeight: 700, fontSize: 13 }} onClick={handleSaveName}>Save</button>
+            <button style={{ background: 'var(--surface-hi)', borderRadius: 8, padding: '6px 10px', color: 'var(--text-muted)', fontSize: 13 }} onClick={() => setEditingName(false)}>✕</button>
+          </div>
+        ) : (
+          <button
+            style={{ fontSize: 24, fontWeight: 800, background: 'transparent', color: 'var(--text)', display: 'flex', alignItems: 'center', gap: 8 }}
+            onClick={() => { setNameInput(profile.name); setEditingName(true); }}
+            title="Tap to edit name"
+          >
+            {profile.name}
+            <span style={{ fontSize: 13, color: 'var(--text-muted)', fontWeight: 400 }}>✎</span>
+          </button>
+        )}
         <div style={{ fontSize: 22, color: 'var(--primary)', fontWeight: 700, letterSpacing: 0.5 }}>{levelCfg.titleThai}</div>
         <div style={{ fontSize: 13, color: 'var(--text-muted)', fontWeight: 600 }}>Level {profile.currentLevel} · {levelCfg.titleEnglish} · {levelCfg.titleRomanized}</div>
         <div style={{ width: '100%', marginTop: 14, display: 'flex', flexDirection: 'column', gap: 6 }}>
