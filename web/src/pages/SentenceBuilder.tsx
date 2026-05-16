@@ -45,7 +45,7 @@ export function SentenceBuilder({ onExit }: { onExit: () => void }) {
     return filtered.length >= QUIZ_SIZE ? filtered : VOCABULARY.filter(c => c.exampleSentence);
   })();
 
-  useEffect(() => {
+  const initQuestions = useCallback(() => {
     const qs: BuildQuestion[] = [];
     for (const card of shuffle(pool)) {
       const q = buildQuestion(card);
@@ -53,11 +53,16 @@ export function SentenceBuilder({ onExit }: { onExit: () => void }) {
       if (qs.length >= QUIZ_SIZE) break;
     }
     setQuestions(qs);
+    setCurrent(0);
+    setResults([]);
+    setPhase('question');
     if (qs.length > 0) {
       setRemaining([...qs[0].tiles]);
       setPlaced([]);
     }
-  }, []);
+  }, [pool]);
+
+  useEffect(() => { initQuestions(); }, []);
 
   useEffect(() => () => { if (timerRef.current) clearTimeout(timerRef.current); }, []);
 
@@ -109,7 +114,7 @@ export function SentenceBuilder({ onExit }: { onExit: () => void }) {
 
   if (phase === 'complete') {
     const score = results.filter(Boolean).length;
-    return <BuildScoreScreen score={score} total={questions.length} onRetry={onExit} onExit={onExit} />;
+    return <BuildScoreScreen score={score} total={questions.length} onRetry={initQuestions} onExit={onExit} />;
   }
 
   const q = questions[current];

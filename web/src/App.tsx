@@ -14,13 +14,14 @@ import { Profile } from './pages/Profile';
 import { VocabBrowser } from './pages/VocabBrowser';
 import { WorldMap } from './pages/WorldMap';
 import { Settings } from './pages/Settings';
+import { MatchGame } from './pages/MatchGame';
 import { TONE_COLORS } from '@engine/types';
 import { SessionSummary } from '@engine/engine/sessionManager';
 import { getLevelConfig } from '@engine/engine/gameEngine';
 import { sfx } from './utils/audio';
 
 type Tab = 'home' | 'learn' | 'map' | 'browse' | 'profile';
-type View = 'onboarding' | 'main' | 'study' | 'quiz' | 'quiz_fav' | 'quiz_hard' | 'tone' | 'sentence' | 'alphabet' | 'phrasebook' | 'session_complete' | 'settings';
+type View = 'onboarding' | 'main' | 'study' | 'quiz' | 'quiz_fav' | 'quiz_hard' | 'tone' | 'sentence' | 'alphabet' | 'phrasebook' | 'match' | 'session_complete' | 'settings';
 
 interface CompleteState { summary: SessionSummary; xp: number; questIds: string[] }
 
@@ -90,6 +91,7 @@ export function App() {
   if (view === 'sentence') return <SentenceBuilder onExit={() => { setView('main'); setTab('learn'); }} />;
   if (view === 'alphabet')    return <AlphabetDrill  onExit={() => { setView('main'); setTab('learn'); }} />;
   if (view === 'phrasebook')  return <Phrasebook     onExit={() => { setView('main'); setTab('learn'); }} />;
+  if (view === 'match')       return <MatchGame      onExit={() => { setView('main'); setTab('learn'); }} />;
   if (view === 'session_complete' && complete) return (
     <SessionComplete
       summary={complete.summary} xpGained={complete.xp} completedQuestIds={complete.questIds}
@@ -142,7 +144,7 @@ export function App() {
 
       <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
         {tab === 'home'    && <Home onStudy={() => setView('study')} onQuiz={() => setView('quiz')} onFavQuiz={() => setView('quiz_fav')} onHardQuiz={() => setView('quiz_hard')} />}
-        {tab === 'learn'   && <LearnTab onStudy={() => setView('study')} onQuiz={() => setView('quiz')} onTone={() => setView('tone')} onSentence={() => setView('sentence')} onAlphabet={() => setView('alphabet')} onPhrasebook={() => setView('phrasebook')} />}
+        {tab === 'learn'   && <LearnTab onStudy={() => setView('study')} onQuiz={() => setView('quiz')} onTone={() => setView('tone')} onSentence={() => setView('sentence')} onAlphabet={() => setView('alphabet')} onPhrasebook={() => setView('phrasebook')} onMatch={() => setView('match')} />}
         {tab === 'map'     && <MapTab />}
         {tab === 'browse'  && <VocabBrowser />}
         {tab === 'profile' && <Profile onSettings={() => setView('settings')} />}
@@ -201,7 +203,7 @@ function MapTab() {
   );
 }
 
-function LearnTab({ onStudy, onQuiz, onTone, onSentence, onAlphabet, onPhrasebook }: { onStudy: () => void; onQuiz: () => void; onTone: () => void; onSentence: () => void; onAlphabet: () => void; onPhrasebook: () => void }) {
+function LearnTab({ onStudy, onQuiz, onTone, onSentence, onAlphabet, onPhrasebook, onMatch }: { onStudy: () => void; onQuiz: () => void; onTone: () => void; onSentence: () => void; onAlphabet: () => void; onPhrasebook: () => void; onMatch: () => void }) {
   const activities = [
     {
       icon: '📖', title: 'Flashcard Study', desc: 'SRS-based review — the best way to build long-term memory', color: 'var(--primary)', badge: '',
@@ -210,6 +212,10 @@ function LearnTab({ onStudy, onQuiz, onTone, onSentence, onAlphabet, onPhraseboo
     {
       icon: '🧠', title: 'Multiple Choice Quiz', desc: 'Thai→English, English→Thai, Listening, and more', color: 'var(--info)', badge: '6 modes',
       onClick: onQuiz,
+    },
+    {
+      icon: '🃏', title: 'Memory Match', desc: 'Flip cards to match Thai words to English meanings', color: 'var(--r-pi)', badge: '3 difficulties',
+      onClick: onMatch,
     },
     {
       icon: '🎵', title: 'Tone Trainer', desc: 'Identify the 5 Thai tones — mid, low, falling, high, rising', color: '#6BBF6E', badge: '',
