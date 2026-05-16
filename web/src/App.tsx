@@ -86,7 +86,7 @@ export function App() {
       <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
         {tab === 'home'    && <Home onStudy={() => setView('study')} onQuiz={() => setView('quiz')} />}
         {tab === 'learn'   && <LearnTab onStudy={() => setView('study')} onQuiz={() => setView('quiz')} onTone={() => setView('tone')} onSentence={() => setView('sentence')} />}
-        {tab === 'map'     && <WorldMap />}
+        {tab === 'map'     && <MapTab />}
         {tab === 'browse'  && <VocabBrowser />}
         {tab === 'profile' && <Profile onSettings={() => setView('settings')} />}
       </div>
@@ -100,6 +100,35 @@ export function App() {
         ))}
       </nav>
     </>
+  );
+}
+
+function MapTab() {
+  const [sub, setSub] = useState<'map' | 'quests'>('map');
+  return (
+    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      <div style={{ display: 'flex', gap: 0, padding: '12px 20px 0', background: 'var(--bg)', flexShrink: 0 }}>
+        {(['map', 'quests'] as const).map(s => (
+          <button
+            key={s}
+            onClick={() => setSub(s)}
+            style={{
+              flex: 1, padding: '9px 0', fontSize: 13, fontWeight: 700,
+              color: sub === s ? 'var(--primary)' : 'var(--text-muted)',
+              background: 'transparent',
+              borderBottom: `2px solid ${sub === s ? 'var(--primary)' : 'transparent'}`,
+              borderRadius: 0, transition: 'all 0.2s',
+            }}
+          >
+            {s === 'map' ? '🗺️ World Map' : '⚔️ Quests'}
+          </button>
+        ))}
+      </div>
+      <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+        {sub === 'map'    && <WorldMap />}
+        {sub === 'quests' && <Quests />}
+      </div>
+    </div>
   );
 }
 
