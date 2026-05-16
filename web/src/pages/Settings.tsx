@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useGame } from '../context/GameContext';
+import { VOCABULARY_STATS } from '@engine/data/vocabulary';
 
 export function Settings({ onBack }: { onBack: () => void }) {
   const { resetProgress } = useGame();
@@ -22,10 +23,34 @@ export function Settings({ onBack }: { onBack: () => void }) {
       <div className="scroll" style={{ flex: 1, padding: 20, display: 'flex', flexDirection: 'column', gap: 20 }}>
         {/* App info */}
         <div style={s.section}>
-          <div style={s.sectionTitle}>About</div>
-          <InfoRow label="App" value="ThaiQuest" />
-          <InfoRow label="Engine" value="SRS · SM-2 algorithm" />
-          <InfoRow label="Vocabulary" value="Regions 1–3 available" />
+          <div style={s.sectionTitle}>About ThaiQuest</div>
+          <InfoRow label="Version" value="1.0 · 7 regions" />
+          <InfoRow label="Algorithm" value="SRS · SM-2 spaced repetition" />
+          <InfoRow label="Total vocabulary" value={`${VOCABULARY_STATS.total} words`} />
+          <InfoRow label="With cultural notes" value={`${VOCABULARY_STATS.withCulturalNotes} cards`} />
+        </div>
+
+        {/* Thai Grammar Quick Reference */}
+        <div style={s.section}>
+          <div style={s.sectionTitle}>Thai Grammar Quick Reference</div>
+          {[
+            { pattern: 'ผม / ฉัน + verb', english: 'I + verb (first person)', note: 'ผม (phom) = male, ฉัน (chan) = female/neutral' },
+            { pattern: 'SVO word order', english: 'Subject → Verb → Object', note: 'Thai follows the same basic order as English' },
+            { pattern: 'verb + ไม่', english: 'Negation: "do not"', note: 'ไม่ (mai) before verb negates it: ไม่กิน = don\'t eat' },
+            { pattern: 'verb + ไหม / ใช่ไหม', english: 'Yes/no question', note: 'Add ไหม (mai) at end of statement to make a question' },
+            { pattern: 'มาก / เล็กน้อย', english: 'Very / a little', note: 'Post-verbal modifiers: กินมาก = eat a lot' },
+            { pattern: 'กำลัง + verb', english: 'Currently doing (progressive)', note: 'กำลังกิน = currently eating / is eating' },
+            { pattern: 'จะ + verb', english: 'Will / going to (future)', note: 'จะไป = will go / going to go' },
+            { pattern: 'เคย + verb', english: 'Have ever done (experiential)', note: 'เคยไป = have been to / ever went' },
+          ].map(({ pattern, english, note }) => (
+            <div key={pattern} style={{ paddingBottom: 14, marginBottom: 14, borderBottom: '1px solid var(--border)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 8, marginBottom: 3 }}>
+                <span style={{ fontFamily: 'monospace', fontSize: 13, color: 'var(--primary)', fontWeight: 700 }}>{pattern}</span>
+                <span style={{ fontSize: 12, color: 'var(--text-sec)', flexShrink: 0 }}>{english}</span>
+              </div>
+              <div style={{ fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.5 }}>{note}</div>
+            </div>
+          ))}
         </div>
 
         {/* How to use */}
@@ -63,6 +88,29 @@ export function Settings({ onBack }: { onBack: () => void }) {
                 <div style={{ fontWeight: 600, fontSize: 14, color }}>{tone}</div>
                 <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{desc}</div>
               </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Essential phrases */}
+        <div style={s.section}>
+          <div style={s.sectionTitle}>Essential Phrases</div>
+          {[
+            { thai: 'สวัสดี', roman: 'sa-wat-dii', eng: 'Hello / Goodbye' },
+            { thai: 'ขอบคุณ', roman: 'khob-khun', eng: 'Thank you' },
+            { thai: 'ไม่เป็นไร', roman: 'mai pen rai', eng: 'No problem / Never mind' },
+            { thai: 'ไม่เข้าใจ', roman: 'mai khao-jai', eng: 'I don\'t understand' },
+            { thai: 'พูดช้าๆ ได้ไหม', roman: 'phut chaa chaa dai mai', eng: 'Can you speak slowly?' },
+            { thai: 'เท่าไหร่', roman: 'thao-rai', eng: 'How much?' },
+            { thai: 'อยู่ที่ไหน', roman: 'yuu thi-nai', eng: 'Where is it?' },
+            { thai: 'ชื่ออะไร', roman: 'chue a-rai', eng: 'What is your name?' },
+          ].map(({ thai, roman, eng }) => (
+            <div key={thai} style={{ display: 'flex', alignItems: 'center', gap: 14, paddingBottom: 12, marginBottom: 12, borderBottom: '1px solid var(--border)' }}>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 18, fontWeight: 700 }}>{thai}</div>
+                <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{roman}</div>
+              </div>
+              <div style={{ fontSize: 13, color: 'var(--text-sec)', textAlign: 'right' }}>{eng}</div>
             </div>
           ))}
         </div>
