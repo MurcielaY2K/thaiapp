@@ -120,18 +120,24 @@ export function Study({
               className="flip-back"
               style={{ ...s.card, borderTop: `4px solid ${regionColor}`, minHeight: 300, justifyContent: 'center', alignItems: 'center', textAlign: 'center' }}
             >
-              <div style={{ fontSize: 26, fontWeight: 700, marginBottom: 6 }}>{card.thai}</div>
+              <div style={{ fontSize: 28, fontWeight: 700, marginBottom: 6 }}>{card.thai}</div>
               <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--gold)', marginBottom: 4 }}>{card.englishMeaning}</div>
               {card.englishAlternatives?.length ? (
-                <div style={{ fontSize: 12, color: 'var(--text-muted)', fontStyle: 'italic', marginBottom: 12 }}>
+                <div style={{ fontSize: 12, color: 'var(--text-muted)', fontStyle: 'italic', marginBottom: 10 }}>
                   also: {card.englishAlternatives.join(', ')}
                 </div>
               ) : null}
               {card.exampleSentence && (
                 <div style={s.example}>
-                  <div style={{ fontSize: 14, color: 'var(--text)' }}>{card.exampleSentence.thai}</div>
+                  <div style={{ fontSize: 14, color: 'var(--text)', fontWeight: 500 }}>{card.exampleSentence.thai}</div>
                   <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>{card.exampleSentence.romanization}</div>
-                  <div style={{ fontSize: 12, color: 'var(--text-sec)', fontStyle: 'italic', marginTop: 4 }}>{card.exampleSentence.englishNatural}</div>
+                  <div style={{ fontSize: 12, color: 'var(--text-sec)', fontStyle: 'italic', marginTop: 4 }}>"{card.exampleSentence.englishNatural}"</div>
+                </div>
+              )}
+              {card.culturalNote && (
+                <div style={{ background: 'var(--surface-hi)', borderRadius: 10, padding: '10px 14px', width: '100%', marginTop: 8, display: 'flex', gap: 8, alignItems: 'flex-start', textAlign: 'left' }}>
+                  <span style={{ fontSize: 14 }}>💡</span>
+                  <span style={{ fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.5 }}>{card.culturalNote}</span>
                 </div>
               )}
             </div>

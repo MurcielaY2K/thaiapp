@@ -8,7 +8,7 @@ const REGION_COLOR: Record<string, string> = {
   talee_tong: 'var(--r-tt)', mueang_hin: 'var(--r-mh)', wang_loi_faa: 'var(--r-wl)', daen_winyaan: 'var(--r-dw)',
 };
 
-export function Home({ onStudy }: { onStudy: () => void }) {
+export function Home({ onStudy, onQuiz }: { onStudy: () => void; onQuiz: () => void }) {
   const { profile, stats, refreshStats } = useGame();
   useEffect(() => { refreshStats(); }, []);
 
@@ -20,13 +20,19 @@ export function Home({ onStudy }: { onStudy: () => void }) {
   const regionColor = REGION_COLOR[region] ?? 'var(--primary)';
   const canStudy = stats.dueToday > 0 || stats.newAvailable > 0;
 
+  const streakMsg = profile.currentStreak === 0
+    ? 'Start your streak today!'
+    : profile.currentStreak === 1
+    ? '1 day streak — keep going!'
+    : `${profile.currentStreak} day streak — amazing!`;
+
   return (
-    <div className="scroll" style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 16 }}>
+    <div className="scroll" style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 14 }}>
       {/* Header */}
       <div style={s.header}>
         <div>
           <div style={s.greeting}>สวัสดี, {profile.name}!</div>
-          <div style={s.sub}>Keep the streak alive</div>
+          <div style={s.sub}>{streakMsg}</div>
         </div>
         <div style={s.streak}>
           <span style={{ fontSize: 20 }}>🔥</span>
@@ -36,29 +42,37 @@ export function Home({ onStudy }: { onStudy: () => void }) {
 
       {/* Level bar */}
       <div style={s.card}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-          <span style={{ fontWeight: 700 }}>Level {profile.currentLevel}</span>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ fontSize: 16 }}>⚡</span>
+            <span style={{ fontWeight: 700 }}>Level {profile.currentLevel}</span>
+          </div>
           <span style={{ color: 'var(--text-sec)', fontSize: 13 }}>{levelXP} / {XP_PER_LEVEL} XP</span>
         </div>
-        <div className="progress-track" style={{ height: 8 }}>
-          <div className="progress-fill" style={{ width: `${(levelXP / XP_PER_LEVEL) * 100}%`, background: 'var(--gold)' }} />
+        <div className="progress-track" style={{ height: 10 }}>
+          <div className="progress-fill" style={{ width: `${(levelXP / XP_PER_LEVEL) * 100}%`, background: 'linear-gradient(90deg, var(--primary), var(--gold))' }} />
         </div>
-        <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4, textAlign: 'right' }}>
-          {profile.totalXP.toLocaleString()} total XP
+        <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 6, display: 'flex', justifyContent: 'space-between' }}>
+          <span>{profile.totalXP.toLocaleString()} total XP</span>
+          <span>{XP_PER_LEVEL - levelXP} XP to level {profile.currentLevel + 1}</span>
         </div>
       </div>
 
       {/* Region banner */}
-      <div style={{ ...s.card, borderLeft: `4px solid ${regionColor}` }}>
-        <div style={{ fontWeight: 700, fontSize: 17 }}>{regionCfg.nameThai}</div>
-        <div style={{ fontSize: 13, color: regionColor, fontWeight: 600 }}>{regionCfg.nameEnglish}</div>
+      <div style={{ ...s.card, borderLeft: `4px solid ${regionColor}`, flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontWeight: 700, fontSize: 17 }}>{regionCfg.nameThai}</div>
+          <div style={{ fontSize: 13, color: regionColor, fontWeight: 600 }}>{regionCfg.nameEnglish}</div>
+          <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>{regionCfg.description}</div>
+        </div>
+        <div style={{ fontSize: 32 }}>🗺️</div>
       </div>
 
       {/* Stats row */}
       <div style={{ display: 'flex', gap: 10 }}>
         {[
-          { label: 'Due Today', value: stats.dueToday, icon: '📋', color: stats.dueToday > 0 ? 'var(--warning)' : 'var(--text-muted)' },
-          { label: 'New Words', value: stats.newAvailable, icon: '✨', color: 'var(--success)' },
+          { label: 'Due Today', value: stats.dueToday, icon: '📋', color: stats.dueToday > 0 ? 'var(--warning)' : 'var(--success)' },
+          { label: 'New Words', value: stats.newAvailable, icon: '✨', color: 'var(--info)' },
           { label: 'Mastered', value: stats.masteredCards, icon: '⭐', color: 'var(--gold)' },
         ].map(({ label, value, icon, color }) => (
           <div key={label} style={{ ...s.card, flex: 1, borderTop: `3px solid ${color}`, textAlign: 'center', padding: '12px 8px' }}>
@@ -69,6 +83,31 @@ export function Home({ onStudy }: { onStudy: () => void }) {
         ))}
       </div>
 
+      {/* Primary actions */}
+      <button
+        style={{ ...s.studyBtn, background: canStudy ? 'var(--primary)' : 'var(--surface-hi)', color: canStudy ? '#fff' : 'var(--text-muted)' }}
+        onClick={onStudy}
+        disabled={!canStudy}
+      >
+        <span style={{ fontSize: 22 }}>{canStudy ? '📖' : '🎉'}</span>
+        <div style={{ flex: 1, textAlign: 'left' }}>
+          <div style={{ fontWeight: 700 }}>{canStudy ? 'Study Now' : 'All caught up!'}</div>
+          <div style={{ fontSize: 12, opacity: 0.8, marginTop: 2 }}>
+            {canStudy ? `~${stats.estimatedMinutes} min · Flashcard review` : 'Come back tomorrow'}
+          </div>
+        </div>
+        {canStudy && <span style={{ fontSize: 18 }}>→</span>}
+      </button>
+
+      <button style={s.quizBtn} onClick={onQuiz}>
+        <span style={{ fontSize: 22 }}>🧠</span>
+        <div style={{ flex: 1, textAlign: 'left' }}>
+          <div style={{ fontWeight: 700 }}>Quick Quiz</div>
+          <div style={{ fontSize: 12, opacity: 0.8, marginTop: 2 }}>10 questions · Test your memory</div>
+        </div>
+        <span style={{ fontSize: 18 }}>→</span>
+      </button>
+
       {/* Active quests */}
       {profile.activeQuestIds.length > 0 && (
         <div>
@@ -76,7 +115,7 @@ export function Home({ onStudy }: { onStudy: () => void }) {
           {profile.activeQuestIds.slice(0, 2).map(qid => (
             <div key={qid} style={{ ...s.card, borderLeft: `3px solid ${regionColor}`, flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 8 }}>
               <span style={{ fontSize: 16 }}>⚔️</span>
-              <span style={{ flex: 1, fontSize: 13, textTransform: 'capitalize' }}>
+              <span style={{ flex: 1, fontSize: 13, color: 'var(--text-sec)' }}>
                 {qid.replace(/_/g, ' ').replace(/^[a-z]+\s\d+\s/, '')}
               </span>
             </div>
@@ -84,17 +123,10 @@ export function Home({ onStudy }: { onStudy: () => void }) {
         </div>
       )}
 
-      {/* Study button */}
-      <button
-        style={{ ...s.studyBtn, background: canStudy ? 'var(--primary)' : 'var(--surface-hi)', color: canStudy ? '#fff' : 'var(--text-muted)' }}
-        onClick={onStudy}
-        disabled={!canStudy}
-      >
-        {canStudy ? `Study Now  ·  ~${stats.estimatedMinutes} min` : 'All caught up! 🎉 Come back tomorrow'}
-      </button>
-
+      {/* Footer stats */}
       <div style={{ display: 'flex', justifyContent: 'center', gap: 20, paddingBottom: 8 }}>
         <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>📚 {stats.totalCards} cards</span>
+        <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>📝 {profile.totalWordsLearned} learned</span>
         {stats.strugglingCards > 0 && (
           <span style={{ fontSize: 12, color: 'var(--warning)' }}>⚠️ {stats.strugglingCards} struggling</span>
         )}
@@ -110,5 +142,6 @@ const s: Record<string, React.CSSProperties> = {
   streak: { background: 'var(--surface)', border: '1px solid var(--gold)', borderRadius: 999, padding: '6px 14px', display: 'flex', alignItems: 'center', gap: 6 },
   card: { background: 'var(--surface)', borderRadius: 14, padding: 16, border: '1px solid var(--border)', display: 'flex', flexDirection: 'column' },
   sectionTitle: { fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 8 },
-  studyBtn: { borderRadius: 14, padding: 18, fontWeight: 700, fontSize: 15, textAlign: 'center', width: '100%' },
+  studyBtn: { borderRadius: 14, padding: '16px 20px', fontWeight: 700, fontSize: 15, width: '100%', display: 'flex', alignItems: 'center', gap: 14 },
+  quizBtn: { borderRadius: 14, padding: '16px 20px', fontWeight: 700, fontSize: 15, width: '100%', display: 'flex', alignItems: 'center', gap: 14, background: 'var(--surface-hi)', border: '1px solid var(--primary)', color: 'var(--primary)' },
 };
