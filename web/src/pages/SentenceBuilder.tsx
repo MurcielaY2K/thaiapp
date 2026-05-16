@@ -2,6 +2,7 @@ import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { VOCABULARY } from '@engine/data/vocabulary';
 import { VocabCard } from '@engine/types';
 import { useGame } from '../context/GameContext';
+import { sfx } from '../utils/audio';
 
 interface BuildQuestion {
   card: VocabCard;
@@ -71,6 +72,7 @@ export function SentenceBuilder({ onExit }: { onExit: () => void }) {
     // Auto-check when all tiles placed
     if (newPlaced.length === questions[current].correctWords.length) {
       const correct = newPlaced.join(' ') === questions[current].correctWords.join(' ');
+      if (correct) sfx.correct(); else sfx.wrong();
       setFeedbackCorrect(correct);
       setResults(r => [...r, correct]);
       setPhase('feedback');

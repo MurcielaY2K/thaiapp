@@ -21,6 +21,8 @@ export function Home({ onStudy, onQuiz }: { onStudy: () => void; onQuiz: () => v
   const regionColor = REGION_COLOR[region] ?? 'var(--primary)';
   const canStudy = stats.dueToday > 0 || stats.newAvailable > 0;
 
+  const hour = new Date().getHours();
+  const thaiGreeting = hour < 6 ? 'สวัสดีตอนดึก' : hour < 12 ? 'สวัสดีตอนเช้า' : hour < 17 ? 'สวัสดีตอนบ่าย' : 'สวัสดีตอนเย็น';
   const streakMsg = profile.currentStreak === 0
     ? 'Start your streak today!'
     : profile.currentStreak === 1
@@ -32,7 +34,8 @@ export function Home({ onStudy, onQuiz }: { onStudy: () => void; onQuiz: () => v
       {/* Header */}
       <div style={s.header}>
         <div>
-          <div style={s.greeting}>สวัสดี, {profile.name}!</div>
+          <div style={s.greeting}>{thaiGreeting}!</div>
+          <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 2 }}>{profile.name}</div>
           <div style={s.sub}>{streakMsg}</div>
         </div>
         <div style={s.streak}>
