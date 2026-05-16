@@ -163,10 +163,23 @@ export function Study({
         </div>
       </div>
 
+      {/* Skip hint (before flip) */}
+      {!flipped && (
+        <div style={{ padding: '0 20px 12px', display: 'flex', justifyContent: 'center' }}>
+          <button
+            style={{ background: 'transparent', border: '1px dashed var(--border)', borderRadius: 10, padding: '6px 20px', fontSize: 12, color: 'var(--text-muted)', fontStyle: 'italic' }}
+            onClick={() => answer(2)}
+            title="Skip this card (mark as Hard)"
+          >
+            Skip →
+          </button>
+        </div>
+      )}
+
       {/* Quality buttons */}
       <div style={{ ...s.qualityArea, opacity: flipped ? 1 : 0, pointerEvents: flipped ? 'auto' : 'none' }}>
         <div style={{ fontSize: 12, color: 'var(--text-muted)', textAlign: 'center', marginBottom: 10 }}>
-          How well did you know it?
+          How well did you know it? <span style={{ color: 'var(--border)' }}>· space to flip · 1–4 to rate</span>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
           {QUALITY.map(({ q, label, color, key }) => (

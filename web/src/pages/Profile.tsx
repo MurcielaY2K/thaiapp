@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useGame } from '../context/GameContext';
 import { ACHIEVEMENTS } from '../utils/achievements';
 import { REGIONS } from '@engine/types';
@@ -25,6 +25,7 @@ const COMPANION_DATA: Record<string, { icon: string; name: string; desc: string 
 
 export function Profile({ onSettings }: { onSettings: () => void }) {
   const { profile, stats, heatmap, earnedAchievementIds, refreshStats, facade } = useGame();
+  const [sessionHistory] = useState(() => facade?.getSessionHistory().slice(-14).reverse() ?? []);
   useEffect(() => { refreshStats(); }, []);
 
   if (!profile || !stats) return null;
@@ -78,6 +79,36 @@ export function Profile({ onSettings }: { onSettings: () => void }) {
         <div style={s.sectionTitle}>Activity — last 16 weeks</div>
         <Heatmap data={heatmap} />
       </div>
+
+      {/* Recent sessions */}
+      {sessionHistory.length > 0 && (
+        <div>
+          <div style={s.sectionTitle}>Recent Sessions · last {sessionHistory.length}</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            {sessionHistory.map((rec, i) => {
+              const pct = Math.round(rec.summary.accuracy * 100);
+              const accColor = pct >= 80 ? 'var(--success)' : pct >= 60 ? 'var(--gold)' : 'var(--error)';
+              return (
+                <div key={rec.id ?? i} style={{ background: 'var(--surface)', borderRadius: 12, padding: '10px 14px', display: 'flex', alignItems: 'center', gap: 12, border: '1px solid var(--border)' }}>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: 13, fontWeight: 600 }}>{rec.date}</div>
+                    <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
+                      {rec.summary.cardsReviewed} cards · {rec.summary.newWordsLearned} new · {Math.max(1, Math.round(rec.summary.sessionDurationSec / 60))}m
+                    </div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: accColor }}>{pct}%</div>
+                    <div style={{ fontSize: 11, color: 'var(--gold)' }}>+{rec.summary.xpEarned} XP</div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Category breakdown */}
+      {facade && <CategoryBreakdown srsMap={facade.srsMap} />}
 
       {/* Achievements */}
       <div>
@@ -174,6 +205,55 @@ function VocabByRegion({ unlockedRegions, srsMap }: { unlockedRegions: string[];
               <div className="progress-track" style={{ height: 5 }}>
                 <div className="progress-fill" style={{ width: `${pct}%`, background: color }} />
               </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function CategoryBreakdown({ srsMap }: { srsMap: Map<string, { interval: number; correctReviews: number; totalReviews: number }> }) {
+  const stats = useMemo(() => {
+    const map: Record<string, { total: number; seen: number; correct: number; reviews: number }> = {};
+    for (const card of VOCABULARY) {
+      if (!map[card.category]) map[card.category] = { total: 0, seen: 0, correct: 0, reviews: 0 };
+      map[card.category].total++;
+      const s = srsMap.get(card.id);
+      if (s) {
+        map[card.category].seen++;
+        map[card.category].correct += s.correctReviews ?? 0;
+        map[card.category].reviews += s.totalReviews ?? 0;
+      }
+    }
+    return Object.entries(map)
+      .filter(([, v]) => v.seen > 0)
+      .sort((a, b) => {
+        const accA = a[1].reviews > 0 ? a[1].correct / a[1].reviews : 0;
+        const accB = b[1].reviews > 0 ? b[1].correct / b[1].reviews : 0;
+        return accB - accA;
+      });
+  }, [srsMap]);
+
+  if (stats.length === 0) return null;
+
+  return (
+    <div>
+      <div style={s.sectionTitle}>Category Performance</div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+        {stats.map(([cat, v]) => {
+          const acc = v.reviews > 0 ? Math.round((v.correct / v.reviews) * 100) : 0;
+          const accColor = acc >= 80 ? 'var(--success)' : acc >= 60 ? 'var(--gold)' : 'var(--warning)';
+          return (
+            <div key={cat} style={{ background: 'var(--surface)', borderRadius: 10, padding: '10px 14px', border: '1px solid var(--border)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
+                <span style={{ fontSize: 13, fontWeight: 600 }}>{cat.replace(/_/g, ' ')}</span>
+                <span style={{ fontSize: 12, fontWeight: 700, color: accColor }}>{acc}% acc</span>
+              </div>
+              <div className="progress-track" style={{ height: 4 }}>
+                <div className="progress-fill" style={{ width: `${acc}%`, background: accColor }} />
+              </div>
+              <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>{v.seen}/{v.total} seen · {v.reviews} reviews</div>
             </div>
           );
         })}
