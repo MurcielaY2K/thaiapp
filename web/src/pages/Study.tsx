@@ -1,7 +1,8 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useGame } from '../context/GameContext';
 import { Session, ReviewQuality } from '@engine/types';
 import { SessionSummary } from '@engine/engine/sessionManager';
+import { VOCABULARY } from '@engine/data/vocabulary';
 import { sfx, speakThai } from '../utils/audio';
 import { updateChallengeProgress } from '../utils/dailyChallenge';
 
@@ -19,10 +20,154 @@ const REGION_COLOR: Record<string, string> = {
   talee_tong: 'var(--r-tt)', mueang_hin: 'var(--r-mh)', wang_loi_faa: 'var(--r-wl)', daen_winyaan: 'var(--r-dw)',
 };
 
+const CATEGORY_ICONS: Record<string, string> = {
+  greetings: '👋', numbers: '🔢', food: '🍜', travel: '✈️', verbs_core: '⚡',
+  adjectives_core: '🎨', direction: '🧭', time: '⏰', family: '👨‍👩‍👧', emotion: '😊',
+  body: '🫀', color: '🌈', transport: '🚕', shopping: '🛍️', nature: '🌿',
+  health: '🏥', culture: '🏛️', weather: '⛅', animals: '🐘', work: '💼',
+  verbs: '💫', adjectives: '✨', spirits: '👻', music: '🎵', temples: '⛩️',
+};
+
 export function Study({
   onComplete,
   onExit,
 }: {
+  onComplete: (summary: SessionSummary, xp: number, questIds: string[]) => void;
+  onExit: () => void;
+}) {
+  const { profile } = useGame();
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [started, setStarted] = useState(false);
+
+  const availableCategories = useMemo(() => {
+    const unlocked = profile?.unlockedRegions ?? ['krung_thon'];
+    const cats = new Set(VOCABULARY.filter(c => unlocked.includes(c.region)).map(c => c.category));
+    return Array.from(cats).sort();
+  }, [profile]);
+
+  if (!started) {
+    return (
+      <StudySetup
+        availableCategories={availableCategories}
+        selectedCategories={selectedCategories}
+        onToggle={cat => setSelectedCategories(prev =>
+          prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat]
+        )}
+        onStart={() => setStarted(true)}
+        onExit={onExit}
+      />
+    );
+  }
+
+  return (
+    <StudySession
+      categoryFilter={selectedCategories.length > 0 ? selectedCategories : undefined}
+      onComplete={onComplete}
+      onExit={onExit}
+    />
+  );
+}
+
+function StudySetup({
+  availableCategories,
+  selectedCategories,
+  onToggle,
+  onStart,
+  onExit,
+}: {
+  availableCategories: string[];
+  selectedCategories: string[];
+  onToggle: (cat: string) => void;
+  onStart: () => void;
+  onExit: () => void;
+}) {
+  return (
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: 'var(--bg)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '16px 20px 12px', paddingTop: 'calc(env(safe-area-inset-top, 0px) + 16px)' }}>
+        <button style={s.exitBtn} onClick={onExit}>✕</button>
+        <span style={{ flex: 1, fontWeight: 700, fontSize: 17, textAlign: 'center' }}>Flashcard Study</span>
+        <div style={{ width: 32 }} />
+      </div>
+
+      <div className="scroll" style={{ flex: 1, padding: 20, display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <div style={{ textAlign: 'center', padding: '8px 0 4px' }}>
+          <div style={{ fontSize: 44 }}>📖</div>
+          <div style={{ fontSize: 18, fontWeight: 800, marginTop: 8 }}>Study Session</div>
+          <div style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 4, lineHeight: 1.5 }}>
+            SRS flashcards — rated by memory. Pick categories to focus, or study everything.
+          </div>
+        </div>
+
+        <div style={{ background: 'var(--surface)', borderRadius: 14, padding: 16, border: '1px solid var(--border)' }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 12 }}>
+            Focus by Category <span style={{ color: 'var(--primary)' }}>{selectedCategories.length > 0 ? `· ${selectedCategories.length} selected` : '· all'}</span>
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+            {availableCategories.map(cat => {
+              const active = selectedCategories.includes(cat);
+              const icon = CATEGORY_ICONS[cat] ?? '📝';
+              return (
+                <button
+                  key={cat}
+                  onClick={() => onToggle(cat)}
+                  style={{
+                    padding: '7px 13px', borderRadius: 999, fontSize: 12, fontWeight: 700, flexShrink: 0,
+                    background: active ? 'var(--primary)' : 'var(--bg)',
+                    border: `1px solid ${active ? 'var(--primary)' : 'var(--border)'}`,
+                    color: active ? '#fff' : 'var(--text-sec)',
+                    transition: 'all 0.15s',
+                  }}
+                >
+                  {icon} {cat.replace(/_/g, ' ')}
+                </button>
+              );
+            })}
+          </div>
+          {selectedCategories.length > 0 && (
+            <button
+              onClick={() => selectedCategories.forEach(c => onToggle(c))}
+              style={{ marginTop: 10, fontSize: 11, color: 'var(--text-muted)', background: 'transparent', border: '1px dashed var(--border)', borderRadius: 8, padding: '4px 12px' }}
+            >
+              Clear selection
+            </button>
+          )}
+        </div>
+
+        <div style={{ background: 'var(--surface)', borderRadius: 14, padding: 14, border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 0.5 }}>How it works</div>
+          {[
+            ['Space / Tap', 'Reveal the translation'],
+            ['1 Again', 'Didn\'t know it — review soon'],
+            ['2 Hard', 'Struggled — shorter interval'],
+            ['3 Good', 'Got it — normal interval'],
+            ['4 Easy', 'Perfect recall — longer interval'],
+          ].map(([key, desc]) => (
+            <div key={key} style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+              <span style={{ fontSize: 11, background: 'var(--surface-hi)', border: '1px solid var(--border)', borderRadius: 6, padding: '2px 7px', fontWeight: 700, color: 'var(--text-sec)', minWidth: 60, textAlign: 'center', flexShrink: 0 }}>{key}</span>
+              <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{desc}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div style={{ padding: '12px 20px', paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 12px)' }}>
+        <button
+          style={{ background: 'var(--primary)', color: '#fff', borderRadius: 14, padding: 18, fontWeight: 700, fontSize: 16, width: '100%' }}
+          onClick={onStart}
+        >
+          {selectedCategories.length > 0 ? `Study ${selectedCategories.map(c => c.replace(/_/g, ' ')).join(', ')}` : 'Start Full Session'} →
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function StudySession({
+  categoryFilter,
+  onComplete,
+  onExit,
+}: {
+  categoryFilter?: string[];
   onComplete: (summary: SessionSummary, xp: number, questIds: string[]) => void;
   onExit: () => void;
 }) {
@@ -35,14 +180,15 @@ export function Study({
   useEffect(() => {
     if (!facade) return;
     try {
-      setSession(facade.startSession());
+      const filter = categoryFilter && categoryFilter.length > 0 ? { categories: categoryFilter } : undefined;
+      setSession(facade.startSession(filter));
       startTime.current = Date.now();
     } catch { onExit(); }
 
     const handler = (e: KeyboardEvent) => {
       if (['1','2','3','4'].includes(e.key)) {
         const q = [0,2,3,4][parseInt(e.key)-1] as Quality;
-        answer(q);
+        answerRef.current(q);
       } else if (e.key === ' ') {
         setFlipped(f => !f);
       }
@@ -51,10 +197,12 @@ export function Study({
     return () => window.removeEventListener('keydown', handler);
   }, []);
 
-  const currentCard = session?.cards[session.currentIndex];
+  const answerRef = useRef<(q: Quality) => void>(() => {});
 
   const answer = useCallback(async (q: Quality) => {
-    if (!facade || !session || !currentCard || !flipped || exiting) return;
+    if (!facade || !session || !flipped || exiting) return;
+    const currentCard = session.cards[session.currentIndex];
+    if (!currentCard) return;
 
     if (q >= 3) sfx.correct(); else sfx.wrong();
 
@@ -79,15 +227,20 @@ export function Study({
     setSession(updated);
     setFlipped(false);
     startTime.current = Date.now();
-  }, [facade, session, currentCard, flipped, exiting]);
+  }, [facade, session, flipped, exiting]);
 
-  if (!session || !currentCard) {
+  answerRef.current = answer;
+
+  if (!session) {
     return (
       <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ color: 'var(--text-sec)' }}>Loading cards…</div>
       </div>
     );
   }
+
+  const currentCard = session.cards[session.currentIndex];
+  if (!currentCard) return null;
 
   const card = currentCard.card;
   const progress = session.currentIndex / session.cards.length;

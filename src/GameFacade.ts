@@ -231,9 +231,17 @@ export class GameFacade {
 
   // ─── Session management ───────────────────────────────────────────────────────
 
-  startSession(): Session {
+  startSession(filter?: { categories?: string[]; region?: string }): Session {
     const { today, dailyGoal } = this.options;
-    const cards = this.unlockedCards();
+    let cards = this.unlockedCards();
+
+    if (filter?.categories && filter.categories.length > 0) {
+      cards = cards.filter(c => filter.categories!.includes(c.category));
+    }
+    if (filter?.region) {
+      cards = cards.filter(c => c.region === filter.region);
+    }
+
     const srsMap = this.srsMap;
 
     for (const card of cards) {
