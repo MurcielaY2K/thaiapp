@@ -24,12 +24,19 @@
       "package": "com.thaiquest.app"
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro",
+      "output": "static",
+      "name": "ThaiQuest",
+      "shortName": "ThaiQuest",
+      "description": "Learn Thai through adventure — a language RPG",
+      "themeColor": "#8B5CF6",
+      "backgroundColor": "#0A0A1B",
+      "lang": "th",
+      "startUrl": "/",
+      "display": "standalone",
+      "orientation": "portrait"
     },
-    "plugins": [
-      [
-        "expo-haptics"
-      ]
-    ]
+    "plugins": []
   }
 }

@@ -1,0 +1,114 @@
+import React, { useEffect } from 'react';
+import { useGame } from '../context/GameContext';
+import { REGIONS } from '@engine/types';
+
+const XP_PER_LEVEL = 500;
+const REGION_COLOR: Record<string, string> = {
+  krung_thon: 'var(--r-kt)', paa_isaan: 'var(--r-pi)', doi_nuea: 'var(--r-dn)',
+  talee_tong: 'var(--r-tt)', mueang_hin: 'var(--r-mh)', wang_loi_faa: 'var(--r-wl)', daen_winyaan: 'var(--r-dw)',
+};
+
+export function Home({ onStudy }: { onStudy: () => void }) {
+  const { profile, stats, refreshStats } = useGame();
+  useEffect(() => { refreshStats(); }, []);
+
+  if (!profile || !stats) return null;
+
+  const levelXP = profile.totalXP % XP_PER_LEVEL;
+  const region = profile.unlockedRegions[profile.unlockedRegions.length - 1] ?? 'krung_thon';
+  const regionCfg = REGIONS[region as keyof typeof REGIONS];
+  const regionColor = REGION_COLOR[region] ?? 'var(--primary)';
+  const canStudy = stats.dueToday > 0 || stats.newAvailable > 0;
+
+  return (
+    <div className="scroll" style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 16 }}>
+      {/* Header */}
+      <div style={s.header}>
+        <div>
+          <div style={s.greeting}>สวัสดี, {profile.name}!</div>
+          <div style={s.sub}>Keep the streak alive</div>
+        </div>
+        <div style={s.streak}>
+          <span style={{ fontSize: 20 }}>🔥</span>
+          <span style={{ fontSize: 20, fontWeight: 800, color: 'var(--gold)' }}>{profile.currentStreak}</span>
+        </div>
+      </div>
+
+      {/* Level bar */}
+      <div style={s.card}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+          <span style={{ fontWeight: 700 }}>Level {profile.currentLevel}</span>
+          <span style={{ color: 'var(--text-sec)', fontSize: 13 }}>{levelXP} / {XP_PER_LEVEL} XP</span>
+        </div>
+        <div className="progress-track" style={{ height: 8 }}>
+          <div className="progress-fill" style={{ width: `${(levelXP / XP_PER_LEVEL) * 100}%`, background: 'var(--gold)' }} />
+        </div>
+        <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4, textAlign: 'right' }}>
+          {profile.totalXP.toLocaleString()} total XP
+        </div>
+      </div>
+
+      {/* Region banner */}
+      <div style={{ ...s.card, borderLeft: `4px solid ${regionColor}` }}>
+        <div style={{ fontWeight: 700, fontSize: 17 }}>{regionCfg.nameThai}</div>
+        <div style={{ fontSize: 13, color: regionColor, fontWeight: 600 }}>{regionCfg.nameEnglish}</div>
+      </div>
+
+      {/* Stats row */}
+      <div style={{ display: 'flex', gap: 10 }}>
+        {[
+          { label: 'Due Today', value: stats.dueToday, icon: '📋', color: stats.dueToday > 0 ? 'var(--warning)' : 'var(--text-muted)' },
+          { label: 'New Words', value: stats.newAvailable, icon: '✨', color: 'var(--success)' },
+          { label: 'Mastered', value: stats.masteredCards, icon: '⭐', color: 'var(--gold)' },
+        ].map(({ label, value, icon, color }) => (
+          <div key={label} style={{ ...s.card, flex: 1, borderTop: `3px solid ${color}`, textAlign: 'center', padding: '12px 8px' }}>
+            <div style={{ fontSize: 18 }}>{icon}</div>
+            <div style={{ fontSize: 20, fontWeight: 800, color }}>{value}</div>
+            <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 2 }}>{label}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Active quests */}
+      {profile.activeQuestIds.length > 0 && (
+        <div>
+          <div style={s.sectionTitle}>Active Quests</div>
+          {profile.activeQuestIds.slice(0, 2).map(qid => (
+            <div key={qid} style={{ ...s.card, borderLeft: `3px solid ${regionColor}`, flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+              <span style={{ fontSize: 16 }}>⚔️</span>
+              <span style={{ flex: 1, fontSize: 13, textTransform: 'capitalize' }}>
+                {qid.replace(/_/g, ' ').replace(/^[a-z]+\s\d+\s/, '')}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Study button */}
+      <button
+        style={{ ...s.studyBtn, background: canStudy ? 'var(--primary)' : 'var(--surface-hi)', color: canStudy ? '#fff' : 'var(--text-muted)' }}
+        onClick={onStudy}
+        disabled={!canStudy}
+      >
+        {canStudy ? `Study Now  ·  ~${stats.estimatedMinutes} min` : 'All caught up! 🎉 Come back tomorrow'}
+      </button>
+
+      <div style={{ display: 'flex', justifyContent: 'center', gap: 20, paddingBottom: 8 }}>
+        <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>📚 {stats.totalCards} cards</span>
+        {stats.strugglingCards > 0 && (
+          <span style={{ fontSize: 12, color: 'var(--warning)' }}>⚠️ {stats.strugglingCards} struggling</span>
+        )}
+      </div>
+    </div>
+  );
+}
+
+const s: Record<string, React.CSSProperties> = {
+  header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
+  greeting: { fontSize: 20, fontWeight: 700 },
+  sub: { fontSize: 13, color: 'var(--text-muted)', marginTop: 2 },
+  streak: { background: 'var(--surface)', border: '1px solid var(--gold)', borderRadius: 999, padding: '6px 14px', display: 'flex', alignItems: 'center', gap: 6 },
+  card: { background: 'var(--surface)', borderRadius: 14, padding: 16, border: '1px solid var(--border)', display: 'flex', flexDirection: 'column' },
+  sectionTitle: { fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 8 },
+  studyBtn: { borderRadius: 14, padding: 18, fontWeight: 700, fontSize: 15, textAlign: 'center', width: '100%' },
+};
