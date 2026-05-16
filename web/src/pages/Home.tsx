@@ -170,6 +170,9 @@ export function Home({ onStudy, onQuiz }: { onStudy: () => void; onQuiz: () => v
         </div>
       )}
 
+      {/* Grammar tip of the day */}
+      <GrammarTip />
+
       {/* Struggling words call to action */}
       {stats.strugglingCards > 0 && (
         <button style={{ ...s.studyBtn, background: 'rgba(249,115,22,0.12)', border: '1px solid var(--warning)', color: 'var(--warning)' }} onClick={onStudy}>
@@ -204,6 +207,36 @@ export function Home({ onStudy, onQuiz }: { onStudy: () => void; onQuiz: () => v
         {stats.strugglingCards > 0 && (
           <span style={{ fontSize: 12, color: 'var(--warning)' }}>⚠️ {stats.strugglingCards} struggling</span>
         )}
+      </div>
+    </div>
+  );
+}
+
+const GRAMMAR_TIPS = [
+  { tip: 'ไม่ (mâi) negates any verb', example: 'กิน → ไม่กิน', meaning: 'eat → don\'t eat' },
+  { tip: 'ไหม (mǎi) turns statements into yes/no questions', example: 'อร่อยไหม?', meaning: 'Is it delicious?' },
+  { tip: 'มาก (mâak) = very/a lot — goes after adjective', example: 'ดีมาก', meaning: 'very good' },
+  { tip: 'กำลัง (gam-lang) = currently doing', example: 'กำลังกิน', meaning: 'currently eating' },
+  { tip: 'จะ (jà) = will/going to (future)', example: 'จะไปตลาด', meaning: 'going to the market' },
+  { tip: 'เคย (koei) = have ever done', example: 'เคยไปภูเก็ตไหม?', meaning: 'Have you ever been to Phuket?' },
+  { tip: 'ครับ / ค่ะ adds politeness at the end', example: 'ขอบคุณครับ', meaning: 'Thank you (male)' },
+  { tip: 'ก็ (gô) = also/too (connects ideas)', example: 'ฉันก็ชอบ', meaning: 'I like it too' },
+  { tip: 'แล้ว (láew) = already / then', example: 'กินแล้ว', meaning: 'already ate' },
+  { tip: 'ยัง (yang) = still / yet', example: 'ยังไม่มา', meaning: 'still hasn\'t come' },
+  { tip: 'ที่สุด (thîi-sùt) = most (superlative)', example: 'อร่อยที่สุด', meaning: 'most delicious' },
+  { tip: 'ด้วย (dûai) = also / too (adds on)', example: 'ขอด้วย', meaning: 'I\'ll have one too' },
+];
+
+function GrammarTip() {
+  const dayIndex = Math.floor(Date.now() / 86400000);
+  const tip = GRAMMAR_TIPS[dayIndex % GRAMMAR_TIPS.length];
+  return (
+    <div style={{ background: 'var(--surface)', borderRadius: 14, padding: 16, border: '1px solid var(--border)' }}>
+      <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--info)', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 8 }}>Grammar Tip of the Day</div>
+      <div style={{ fontWeight: 600, fontSize: 14, color: 'var(--text)', marginBottom: 6 }}>{tip.tip}</div>
+      <div style={{ background: 'var(--surface-hi)', borderRadius: 8, padding: '8px 12px', display: 'flex', alignItems: 'center', gap: 10 }}>
+        <span style={{ fontSize: 20, fontWeight: 700, color: 'var(--primary)' }}>{tip.example}</span>
+        <span style={{ fontSize: 13, color: 'var(--text-muted)', fontStyle: 'italic' }}>"{tip.meaning}"</span>
       </div>
     </div>
   );
