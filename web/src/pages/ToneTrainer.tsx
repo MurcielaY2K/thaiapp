@@ -4,12 +4,12 @@ import { VocabCard, ThaiTone, TONE_COLORS } from '@engine/types';
 import { useGame } from '../context/GameContext';
 import { sfx, speakThai } from '../utils/audio';
 
-const TONES: { tone: ThaiTone; label: string; hint: string; contour: string }[] = [
-  { tone: 'mid',     label: 'Mid',     hint: 'flat, steady',          contour: '━━━━' },
-  { tone: 'low',     label: 'Low',     hint: 'below flat, steady',    contour: '▁▁▁▁' },
-  { tone: 'falling', label: 'Falling', hint: 'starts high, drops',    contour: '◥▁▁▁' },
-  { tone: 'high',    label: 'High',    hint: 'above flat, steady',    contour: '▔▔▔▔' },
-  { tone: 'rising',  label: 'Rising',  hint: 'starts low, rises',     contour: '▁▁▁◤' },
+const TONES: { tone: ThaiTone; label: string; hint: string; contour: string; svgPath: string }[] = [
+  { tone: 'mid',     label: 'Mid',     hint: 'flat, steady',          contour: '━━━━', svgPath: 'M0,20 L40,20' },
+  { tone: 'low',     label: 'Low',     hint: 'below flat, steady',    contour: '▁▁▁▁', svgPath: 'M0,32 L40,32' },
+  { tone: 'falling', label: 'Falling', hint: 'starts high, drops',    contour: '◥▁▁▁', svgPath: 'M0,4 L40,36' },
+  { tone: 'high',    label: 'High',    hint: 'above flat, steady',    contour: '▔▔▔▔', svgPath: 'M0,8 L40,8' },
+  { tone: 'rising',  label: 'Rising',  hint: 'starts low, rises',     contour: '▁▁▁◤', svgPath: 'M0,34 Q20,30 40,6' },
 ];
 
 const QUIZ_SIZE = 10;
@@ -39,6 +39,14 @@ export function ToneTrainer({ onExit }: { onExit: () => void }) {
   })();
 
   useEffect(() => () => { if (timerRef.current) clearTimeout(timerRef.current); }, []);
+
+  // Auto-speak when new question appears
+  useEffect(() => {
+    if (phase === 'question' && cards[current]) {
+      const t = setTimeout(() => speakThai(cards[current].thai), 400);
+      return () => clearTimeout(t);
+    }
+  }, [phase, current, cards]);
 
   const start = useCallback(() => {
     setCards(shuffle(pool).slice(0, QUIZ_SIZE));
@@ -95,6 +103,7 @@ export function ToneTrainer({ onExit }: { onExit: () => void }) {
       {/* Card */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '0 24px 20px', gap: 8 }}>
         <div style={{ fontSize: 13, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 1 }}>What tone is this word?</div>
+        <div style={{ fontSize: 11, color: 'var(--text-muted)', fontStyle: 'italic' }}>Word is auto-spoken · tap 🔊 to replay</div>
         <div style={{ fontSize: 72, fontWeight: 700, lineHeight: 1.1, textAlign: 'center' }}>{card.thai}</div>
         <button
           style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 999, padding: '6px 16px', fontSize: 13, color: 'var(--text-sec)', display: 'flex', alignItems: 'center', gap: 6 }}
@@ -123,12 +132,13 @@ export function ToneTrainer({ onExit }: { onExit: () => void }) {
 
       {/* Tone buttons */}
       <div style={{ padding: '0 20px 24px', display: 'flex', flexDirection: 'column', gap: 8 }}>
-        {TONES.map(({ tone, label, hint, contour }) => {
+        {TONES.map(({ tone, label, hint, svgPath }) => {
           const color = TONE_COLORS[tone];
           const isChosen = chosen === tone;
           const isCorrect = tone === card.tone;
           let bg = 'var(--surface)';
           let border = `1px solid var(--border)`;
+          const feedbackColor = isCorrect ? 'var(--success)' : 'var(--error)';
           if (phase === 'feedback') {
             if (isCorrect) { bg = 'rgba(16,185,129,0.1)'; border = `2px solid var(--success)`; }
             else if (isChosen) { bg = 'rgba(239,68,68,0.1)'; border = `2px solid var(--error)`; }
@@ -141,7 +151,10 @@ export function ToneTrainer({ onExit }: { onExit: () => void }) {
               onClick={() => answer(tone)}
               disabled={phase === 'feedback'}
             >
-              <span style={{ fontSize: 18, color, minWidth: 40, textAlign: 'center', fontFamily: 'monospace', letterSpacing: 2 }}>{contour}</span>
+              <svg width="40" height="40" viewBox="0 0 40 40" style={{ flexShrink: 0 }}>
+                <line x1="0" y1="20" x2="40" y2="20" stroke="var(--border)" strokeWidth="1" strokeDasharray="2,2" />
+                <path d={svgPath} stroke={phase === 'feedback' && (isCorrect || isChosen) ? feedbackColor : color} strokeWidth="2.5" fill="none" strokeLinecap="round" />
+              </svg>
               <div style={{ flex: 1, textAlign: 'left' }}>
                 <span style={{ fontWeight: 700, color: phase === 'feedback' && isCorrect ? 'var(--success)' : 'var(--text)', fontSize: 15 }}>{label}</span>
                 <span style={{ fontSize: 12, color: 'var(--text-muted)', marginLeft: 8 }}>{hint}</span>
@@ -173,9 +186,12 @@ function IntroScreen({ onStart, onExit }: { onStart: () => void; onExit: () => v
           </div>
         </div>
         <div style={{ background: 'var(--surface)', borderRadius: 16, padding: 20, display: 'flex', flexDirection: 'column', gap: 12 }}>
-          {TONES.map(({ tone, label, hint, contour }) => (
+          {TONES.map(({ tone, label, hint, svgPath }) => (
             <div key={tone} style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-              <span style={{ fontSize: 16, color: TONE_COLORS[tone], fontFamily: 'monospace', minWidth: 44, letterSpacing: 2 }}>{contour}</span>
+              <svg width="40" height="28" viewBox="0 0 40 40" style={{ flexShrink: 0 }}>
+                <line x1="0" y1="20" x2="40" y2="20" stroke="var(--border)" strokeWidth="1" strokeDasharray="2,2" />
+                <path d={svgPath} stroke={TONE_COLORS[tone]} strokeWidth="2.5" fill="none" strokeLinecap="round" />
+              </svg>
               <div>
                 <span style={{ fontWeight: 700, color: TONE_COLORS[tone] }}>{label}</span>
                 <span style={{ fontSize: 12, color: 'var(--text-muted)', marginLeft: 8 }}>{hint}</span>
