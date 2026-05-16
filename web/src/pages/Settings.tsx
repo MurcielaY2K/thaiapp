@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useGame } from '../context/GameContext';
 import { VOCABULARY_STATS } from '@engine/data/vocabulary';
-import { speakThai } from '../utils/audio';
+import { speakThai, getAutoPlay, setAutoPlay } from '../utils/audio';
 import { DailyGoal } from '@engine/engine/sessionManager';
 
 function getTheme(): 'dark' | 'light' {
@@ -17,6 +17,7 @@ export function Settings({ onBack }: { onBack: () => void }) {
   const [confirmReset, setConfirmReset] = useState(false);
   const [importStatus, setImportStatus] = useState<'idle' | 'ok' | 'err'>('idle');
   const [theme, setThemeState] = useState<'dark' | 'light'>(getTheme);
+  const [autoPlay, setAutoPlayState] = useState(getAutoPlay);
 
   const toggleTheme = () => {
     const next = theme === 'dark' ? 'light' : 'dark';
@@ -70,13 +71,25 @@ export function Settings({ onBack }: { onBack: () => void }) {
           <InfoRow label="Algorithm" value="SRS · SM-2 spaced repetition" />
           <InfoRow label="Total vocabulary" value={`${VOCABULARY_STATS.total} words`} />
           <InfoRow label="With cultural notes" value={`${VOCABULARY_STATS.withCulturalNotes} cards`} />
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: 4 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: 10, marginBottom: 10, borderBottom: '1px solid var(--border)' }}>
             <span style={{ fontSize: 14, color: 'var(--text-sec)' }}>{theme === 'dark' ? '🌙 Dark mode' : '☀️ Light mode'}</span>
             <button
               onClick={toggleTheme}
               style={{ background: theme === 'light' ? 'var(--primary)' : 'var(--surface-hi)', border: '1px solid var(--border)', borderRadius: 999, padding: '6px 16px', fontSize: 13, fontWeight: 600, color: theme === 'light' ? '#fff' : 'var(--text-sec)' }}
             >
               Switch to {theme === 'dark' ? 'Light' : 'Dark'}
+            </button>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: 4 }}>
+            <div>
+              <div style={{ fontSize: 14, color: 'var(--text-sec)' }}>🔊 Auto-play audio</div>
+              <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>Speak Thai word automatically when flashcard is revealed</div>
+            </div>
+            <button
+              onClick={() => { const next = !autoPlay; setAutoPlay(next); setAutoPlayState(next); }}
+              style={{ background: autoPlay ? 'var(--success)' : 'var(--surface-hi)', border: `1px solid ${autoPlay ? 'var(--success)' : 'var(--border)'}`, borderRadius: 999, padding: '6px 16px', fontSize: 13, fontWeight: 600, color: autoPlay ? '#fff' : 'var(--text-sec)', flexShrink: 0, marginLeft: 12 }}
+            >
+              {autoPlay ? 'On' : 'Off'}
             </button>
           </div>
         </div>

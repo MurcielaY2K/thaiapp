@@ -68,3 +68,11 @@ export function hasThaiTTS(): boolean {
   if (!window.speechSynthesis) return false;
   return window.speechSynthesis.getVoices().some(v => v.lang.startsWith('th'));
 }
+
+const AUTO_PLAY_KEY = 'thaiquest:auto_play';
+export function getAutoPlay(): boolean {
+  return localStorage.getItem(AUTO_PLAY_KEY) !== 'false';
+}
+export function setAutoPlay(v: boolean): void {
+  localStorage.setItem(AUTO_PLAY_KEY, String(v));
+}

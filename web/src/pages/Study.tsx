@@ -3,7 +3,7 @@ import { useGame } from '../context/GameContext';
 import { Session, ReviewQuality } from '@engine/types';
 import { SessionSummary } from '@engine/engine/sessionManager';
 import { VOCABULARY } from '@engine/data/vocabulary';
-import { sfx, speakThai } from '../utils/audio';
+import { sfx, speakThai, getAutoPlay } from '../utils/audio';
 import { updateChallengeProgress } from '../utils/dailyChallenge';
 
 type Quality = 0 | 2 | 3 | 4;
@@ -175,6 +175,8 @@ function StudySession({
   const [session, setSession] = useState<Session | null>(null);
   const [flipped, setFlipped] = useState(false);
   const [exiting, setExiting] = useState(false);
+  const [sessionCorrect, setSessionCorrect] = useState(0);
+  const [sessionTotal, setSessionTotal] = useState(0);
   const startTime = useRef(Date.now());
 
   useEffect(() => {
@@ -197,6 +199,14 @@ function StudySession({
     return () => window.removeEventListener('keydown', handler);
   }, []);
 
+  // Auto-play TTS when card is flipped to reveal
+  useEffect(() => {
+    if (flipped && session && getAutoPlay()) {
+      const card = session.cards[session.currentIndex]?.card;
+      if (card) speakThai(card.thai);
+    }
+  }, [flipped]);
+
   const answerRef = useRef<(q: Quality) => void>(() => {});
 
   const answer = useCallback(async (q: Quality) => {
@@ -204,7 +214,8 @@ function StudySession({
     const currentCard = session.cards[session.currentIndex];
     if (!currentCard) return;
 
-    if (q >= 3) sfx.correct(); else sfx.wrong();
+    if (q >= 3) { sfx.correct(); setSessionCorrect(c => c + 1); } else sfx.wrong();
+    setSessionTotal(t => t + 1);
 
     const timeTaken = Date.now() - startTime.current;
     const result = facade.answerCard(q as ReviewQuality, timeTaken);
@@ -256,7 +267,14 @@ function StudySession({
             <div className="progress-fill" style={{ width: `${progress * 100}%`, background: regionColor }} />
           </div>
         </div>
-        <span style={s.counter}>{session.currentIndex + 1}/{session.cards.length}</span>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', minWidth: 52 }}>
+          <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{session.currentIndex + 1}/{session.cards.length}</span>
+          {sessionTotal > 0 && (
+            <span style={{ fontSize: 10, color: sessionCorrect / sessionTotal >= 0.8 ? 'var(--success)' : sessionCorrect / sessionTotal >= 0.6 ? 'var(--gold)' : 'var(--error)', fontWeight: 700 }}>
+              {Math.round((sessionCorrect / sessionTotal) * 100)}% acc
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Card */}
@@ -267,7 +285,7 @@ function StudySession({
             <div
               className="flip-front"
               style={{ ...s.card, borderTop: `4px solid ${regionColor}`, cursor: 'pointer', minHeight: 300, justifyContent: 'center', alignItems: 'center' }}
-              onClick={() => { sfx.flip(); setFlipped(true); }}
+              onClick={() => { sfx.flip(); setFlipped(true); if (getAutoPlay()) speakThai(card.thai); }}
             >
               <div style={s.catLabel}>{card.category.replace(/_/g, ' ')}{currentCard.isNew && <span style={{ color: 'var(--success)', fontWeight: 700, marginLeft: 6 }}>NEW</span>}</div>
               <div style={s.toneLabel}>{card.tone} tone</div>
