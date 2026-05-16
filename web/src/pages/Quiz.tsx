@@ -155,6 +155,21 @@ export function Quiz({ onExit, favoritesOnly }: { onExit: () => void; favoritesO
     }
   }, [phase, current]);
 
+  // Keyboard shortcuts: A/B/C/D for MC, Enter for typed
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (phase !== 'question') return;
+      const q = questions[current];
+      if (!q) return;
+      if (q.options) {
+        const idx = ['a', 'b', 'c', 'd'].indexOf(e.key.toLowerCase());
+        if (idx >= 0 && idx < q.options.length) answerMC(idx);
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [phase, questions, current, answerMC]);
+
   if (phase === 'setup') return <SetupScreen onSelect={startQuiz} onExit={onExit} favoritesOnly={!!favoritesOnly} />;
   if (phase === 'complete') {
     const score = results.filter(Boolean).length;
@@ -258,7 +273,7 @@ export function Quiz({ onExit, favoritesOnly }: { onExit: () => void; favoritesO
               <button key={i} className={phase === 'feedback' && selectedIdx === i && i !== q.correctIndex ? 'shake' : ''}
                 style={{ background: bg, border, borderRadius: 14, padding: '14px 18px', color, fontWeight: 600, fontSize: q.mode === 'english_to_thai' ? 22 : 15, textAlign: 'left', display: 'flex', alignItems: 'center', gap: 12, transition: 'all 0.2s' }}
                 onClick={() => answerMC(i)} disabled={phase === 'feedback'}>
-                <span style={{ fontSize: 13, color: 'var(--text-muted)', minWidth: 20 }}>{['A', 'B', 'C', 'D'][i]}</span>
+                <span style={{ fontSize: 12, color: phase === 'feedback' && (i === q.correctIndex || i === selectedIdx) ? 'inherit' : 'var(--border)', fontWeight: 700, minWidth: 20, background: 'var(--surface-hi)', borderRadius: 4, padding: '1px 5px', flexShrink: 0 }}>{['A', 'B', 'C', 'D'][i]}</span>
                 <span style={{ flex: 1 }}>{opt}</span>
                 {phase === 'feedback' && i === q.correctIndex && <span>✓</span>}
                 {phase === 'feedback' && i === selectedIdx && i !== q.correctIndex && <span>✗</span>}
