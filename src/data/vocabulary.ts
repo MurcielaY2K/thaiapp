@@ -5166,27 +5166,6 @@ export const MUEANG_HIN_CARDS: VocabCard[] = [
     difficultyRating: 3,
     tags: ['religion', 'culture', 'adjectives'],
   },
-  {
-    id: 'mh_rel_004',
-    type: 'vocabulary',
-    category: 'religion',
-    region: 'mueang_hin',
-    thai: 'ประวัติศาสตร์',
-    romanization: 'pra-wat-ti-saat',
-    ipa: '/prā.wát.tʰi.sàːt/',
-    tone: 'low',
-    consonantClass: 'mid',
-    englishMeaning: 'history',
-    englishAlternatives: ['historical record', 'the past'],
-    exampleSentence: {
-      thai: 'ประวัติศาสตร์ไทยมีความยาวนานกว่าพันปี',
-      romanization: 'pra-wat-ti-saat thai mii khwaam yaao-naan guaa phan pii',
-      englishLiteral: 'history Thai have length long more than thousand years',
-      englishNatural: 'Thai history spans more than a thousand years.',
-    },
-    difficultyRating: 3,
-    tags: ['culture', 'history', 'academic'],
-  },
 
   // ── ROYAL / GOVERNANCE ───────────────────────────────────────────────────────
 
