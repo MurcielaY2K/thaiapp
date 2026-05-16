@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { useGame } from '../context/GameContext';
 import { REGIONS, TONE_COLORS } from '@engine/types';
+import { VOCABULARY } from '@engine/data/vocabulary';
 
 const XP_PER_LEVEL = 500;
 const REGION_COLOR: Record<string, string> = {
@@ -9,7 +10,7 @@ const REGION_COLOR: Record<string, string> = {
 };
 
 export function Home({ onStudy, onQuiz }: { onStudy: () => void; onQuiz: () => void }) {
-  const { profile, stats, refreshStats, wordOfDay, dailyChallenge } = useGame();
+  const { profile, stats, refreshStats, wordOfDay, dailyChallenge, facade } = useGame();
   useEffect(() => { refreshStats(); }, []);
 
   if (!profile || !stats) return null;
@@ -125,6 +126,9 @@ export function Home({ onStudy, onQuiz }: { onStudy: () => void; onQuiz: () => v
         </div>
       )}
 
+      {/* SRS level distribution */}
+      {facade && <SrsLevelChart srsMap={facade.srsMap} />}
+
       {/* Word of the day */}
       {wordOfDay && (
         <div style={{ ...s.card, background: 'var(--surface-hi)', border: '1px solid var(--primary)' }}>
@@ -170,6 +174,47 @@ export function Home({ onStudy, onQuiz }: { onStudy: () => void; onQuiz: () => v
         {stats.strugglingCards > 0 && (
           <span style={{ fontSize: 12, color: 'var(--warning)' }}>⚠️ {stats.strugglingCards} struggling</span>
         )}
+      </div>
+    </div>
+  );
+}
+
+function SrsLevelChart({ srsMap }: { srsMap: Map<string, { interval: number }> }) {
+  const BUCKETS = [
+    { label: 'New',    max: 0,    color: 'var(--border)' },
+    { label: '1d',     max: 2,    color: '#1d5fa8' },
+    { label: '4d',     max: 7,    color: '#2070cc' },
+    { label: '1wk',    max: 14,   color: 'var(--info)' },
+    { label: '2wk',    max: 30,   color: 'var(--primary)' },
+    { label: '1mo+',   max: 9999, color: 'var(--success)' },
+  ];
+
+  const counts = BUCKETS.map(() => 0);
+  const total = VOCABULARY.length;
+  let seen = 0;
+  for (const [, state] of srsMap) {
+    seen++;
+    const iv = state.interval;
+    const bi = BUCKETS.findIndex((b, i) => i === BUCKETS.length - 1 || iv <= b.max);
+    if (bi >= 0) counts[bi]++;
+  }
+  counts[0] = total - seen;
+
+  const max = Math.max(1, ...counts);
+
+  return (
+    <div style={{ background: 'var(--surface)', borderRadius: 14, padding: '14px 16px', border: '1px solid var(--border)' }}>
+      <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 12 }}>SRS Level Distribution</div>
+      <div style={{ display: 'flex', gap: 6, alignItems: 'flex-end', height: 48 }}>
+        {BUCKETS.map((b, i) => (
+          <div key={b.label} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+            <div style={{ width: '100%', height: Math.max(3, (counts[i] / max) * 40), background: counts[i] > 0 ? b.color : 'var(--border)', borderRadius: 3, transition: 'height 0.4s ease' }} />
+            <span style={{ fontSize: 9, color: 'var(--text-muted)', fontWeight: 600 }}>{b.label}</span>
+          </div>
+        ))}
+      </div>
+      <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 8 }}>
+        {seen} / {total} words in SRS · {counts[counts.length - 1]} long-term
       </div>
     </div>
   );
