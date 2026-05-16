@@ -15,15 +15,15 @@ const STEPS = [
     subtitle: 'The science of memory',
     body: 'Our SRS engine shows you each word at exactly the right moment — just before you\'d forget it. Study 15 minutes a day and words stick for life.',
     cta: 'Next →',
-    features: ['📖 Flashcard review', '🧠 5 quiz modes', '🎵 Tone trainer', '🔤 Sentence builder'],
+    features: ['📖 Flashcard review', '🧠 6 quiz modes', '🎵 Tone trainer', '🔤 Sentence builder', '🔡 Thai alphabet', '👂 Listening mode'],
   },
   {
     icon: '⚔️',
     title: 'Quests & Rewards',
     subtitle: 'Gamified learning',
-    body: 'Complete quests to unlock new regions, earn XP and gold, collect spirit companions, and climb to the Spirit Realm.',
+    body: 'Complete quests to unlock new regions, earn XP and gold, collect spirit companions, and climb all the way to the Spirit Realm.',
     cta: 'Next →',
-    features: ['🗺️ 7 regions to explore', '🏆 18 achievements', '🔥 Daily streaks', '🎯 Daily challenges'],
+    features: ['🗺️ 7 regions to explore', '🏆 Achievements', '🔥 Daily streaks', '🎯 Daily challenges'],
   },
 ];
 
