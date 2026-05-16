@@ -81,6 +81,7 @@ const TYPE_MODES: { id: QuizMode; icon: string; title: string; desc: string }[] 
 export function Quiz({ onExit, favoritesOnly, hardOnly }: { onExit: () => void; favoritesOnly?: boolean; hardOnly?: boolean }) {
   const { profile, facade, refreshDailyChallenge } = useGame();
   const [rapidFire, setRapidFire] = useState(false);
+  const [isMixed, setIsMixed] = useState(false);
   const [phase, setPhase] = useState<'setup' | 'question' | 'feedback' | 'complete'>('setup');
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [current, setCurrent] = useState(0);
@@ -116,7 +117,16 @@ export function Quiz({ onExit, favoritesOnly, hardOnly }: { onExit: () => void; 
 
   const startQuiz = useCallback((mode: QuizMode) => {
     const picks = shuffle(pool).slice(0, QUIZ_SIZE);
+    setIsMixed(false);
     setQuestions(picks.map(c => buildQuestion(c, mode, pool)));
+    setCurrent(0); setResults([]); setStreak(0); setSelectedIdx(null); setTypedAnswer(''); setTypedCorrect(null);
+    setPhase('question');
+  }, [pool]);
+
+  const startMixedQuiz = useCallback(() => {
+    const picks = shuffle(pool).slice(0, QUIZ_SIZE);
+    setIsMixed(true);
+    setQuestions(picks.map(c => buildQuestion(c, MC_MODES[Math.floor(Math.random() * MC_MODES.length)].id, pool)));
     setCurrent(0); setResults([]); setStreak(0); setSelectedIdx(null); setTypedAnswer(''); setTypedCorrect(null);
     setPhase('question');
   }, [pool]);
@@ -182,7 +192,7 @@ export function Quiz({ onExit, favoritesOnly, hardOnly }: { onExit: () => void; 
   }, [phase, questions, current, answerMC]);
 
   if (rapidFire) return <RapidFireSession pool={pool} onExit={onExit} />;
-  if (phase === 'setup') return <SetupScreen onSelect={startQuiz} onExit={onExit} favoritesOnly={!!favoritesOnly} hardOnly={!!hardOnly} onRapidFire={() => setRapidFire(true)} />;
+  if (phase === 'setup') return <SetupScreen onSelect={startQuiz} onMixed={startMixedQuiz} onExit={onExit} favoritesOnly={!!favoritesOnly} hardOnly={!!hardOnly} onRapidFire={() => setRapidFire(true)} />;
   if (phase === 'complete') {
     const score = results.filter(Boolean).length;
     return <ScoreScreen score={score} total={questions.length} questions={questions} results={results} onRetry={() => setPhase('setup')} onExit={onExit} />;
@@ -216,7 +226,8 @@ export function Quiz({ onExit, favoritesOnly, hardOnly }: { onExit: () => void; 
       </div>
 
       <div style={s.promptArea}>
-        <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 12, textTransform: 'uppercase', letterSpacing: 1 }}>
+        <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 12, textTransform: 'uppercase', letterSpacing: 1, display: 'flex', alignItems: 'center', gap: 6 }}>
+          {isMixed && <span style={{ fontSize: 9, background: 'var(--primary)', color: '#fff', borderRadius: 4, padding: '2px 6px', fontWeight: 700 }}>{MC_MODES.find(m => m.id === q.mode)?.icon}</span>}
           {q.mode === 'thai_to_english' ? 'What does this mean?' : q.mode === 'english_to_thai' ? 'Write this in Thai' : q.mode === 'romanization' ? 'How is this pronounced?' : q.mode === 'listening' ? 'What did you hear?' : q.mode === 'type_english' ? 'Type the English meaning' : 'Type the romanization'}
         </div>
         {q.mode === 'listening' ? (
@@ -305,7 +316,7 @@ export function Quiz({ onExit, favoritesOnly, hardOnly }: { onExit: () => void; 
   );
 }
 
-function SetupScreen({ onSelect, onExit, favoritesOnly, hardOnly, onRapidFire }: { onSelect: (m: QuizMode) => void; onExit: () => void; favoritesOnly: boolean; hardOnly: boolean; onRapidFire: () => void }) {
+function SetupScreen({ onSelect, onMixed, onExit, favoritesOnly, hardOnly, onRapidFire }: { onSelect: (m: QuizMode) => void; onMixed: () => void; onExit: () => void; favoritesOnly: boolean; hardOnly: boolean; onRapidFire: () => void }) {
   const specialMode = favoritesOnly ? 'favorites' : hardOnly ? 'hard' : null;
   return (
     <div style={s.root}>
@@ -360,6 +371,14 @@ function SetupScreen({ onSelect, onExit, favoritesOnly, hardOnly, onRapidFire }:
         ))}
 
         <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 0.5, marginTop: 8 }}>Challenge</div>
+        <button style={{ ...s.modeCard, background: 'linear-gradient(135deg, rgba(99,102,241,0.12), rgba(139,92,246,0.12))', borderColor: 'var(--primary)' }} onClick={onMixed}>
+          <span style={{ fontSize: 28 }}>🎲</span>
+          <div style={{ flex: 1, textAlign: 'left' }}>
+            <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 2, color: 'var(--primary)' }}>Surprise Me!</div>
+            <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Random mix of all 4 question types</div>
+          </div>
+          <span style={{ fontSize: 10, color: 'var(--primary)', fontWeight: 700 }}>MIXED</span>
+        </button>
         <button style={{ ...s.modeCard, background: 'linear-gradient(135deg, rgba(239,68,68,0.12), rgba(245,158,11,0.12))', borderColor: 'var(--error)' }} onClick={onRapidFire}>
           <span style={{ fontSize: 28 }}>⚡</span>
           <div style={{ flex: 1, textAlign: 'left' }}>
