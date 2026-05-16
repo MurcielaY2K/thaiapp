@@ -15,7 +15,7 @@ const STEPS = [
     subtitle: 'The science of memory',
     body: 'Our SRS engine shows you each word at exactly the right moment — just before you\'d forget it. Study 15 minutes a day and words stick for life.',
     cta: 'Next →',
-    features: ['📖 Flashcard review', '🧠 6 quiz modes', '🎵 Tone trainer', '🔤 Sentence builder', '🔡 Thai alphabet', '👂 Listening mode'],
+    features: ['📖 Flashcard review', '🧠 6 quiz modes', '🃏 Memory match', '🎵 Tone trainer', '🔤 Sentence builder', '🔡 Thai alphabet'],
   },
   {
     icon: '⚔️',

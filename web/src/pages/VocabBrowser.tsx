@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { VOCABULARY } from '@engine/data/vocabulary';
-import { VocabCard, TONE_COLORS, GameRegion, SemanticCategory, ThaiTone, REGIONS } from '@engine/types';
+import { VocabCard, CardSRSState, TONE_COLORS, GameRegion, SemanticCategory, ThaiTone, REGIONS } from '@engine/types';
 import { useGame } from '../context/GameContext';
 import { speakThai } from '../utils/audio';
 import { getFavorites, toggleFavorite } from '../utils/favorites';
@@ -129,7 +129,7 @@ export function VocabBrowser() {
           <CardRow
             key={card.id}
             card={card}
-            seen={srsMap.has(card.id)}
+            srsState={srsMap.get(card.id) as CardSRSState | undefined}
             isFav={favorites.has(card.id)}
             onFavorite={handleToggleFavorite}
             hideRoman={hideRoman}
@@ -164,11 +164,12 @@ function FilterChip({ label, active, onClick, color }: { label: string; active: 
   );
 }
 
-function CardRow({ card, isOpen, toggle, seen, isFav, onFavorite, hideRoman }: {
-  card: VocabCard; isOpen: boolean; toggle: () => void; seen: boolean;
+function CardRow({ card, isOpen, toggle, srsState, isFav, onFavorite, hideRoman }: {
+  card: VocabCard; isOpen: boolean; toggle: () => void; srsState?: CardSRSState;
   isFav: boolean; onFavorite: (id: string, e: React.MouseEvent) => void;
   hideRoman: boolean;
 }) {
+  const seen = !!srsState;
   const regionColor = REGION_COLOR[card.region] ?? 'var(--primary)';
   const toneColor = TONE_COLORS[card.tone];
 
@@ -238,6 +239,23 @@ function CardRow({ card, isOpen, toggle, seen, isFav, onFavorite, hideRoman }: {
               <span style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.5 }}>{card.culturalNote}</span>
             </div>
           )}
+
+          {/* SRS state */}
+          {srsState && (
+            <div style={{ background: 'var(--surface)', borderRadius: 10, padding: '10px 12px', display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+              <SRSPill label="Reviews" value={`${srsState.correctReviews}/${srsState.totalReviews}`} color="var(--info)" />
+              <SRSPill label="Interval" value={srsState.interval > 0 ? `${srsState.interval}d` : 'New'} color="var(--primary)" />
+              <SRSPill label="Ease" value={srsState.easeFactor.toFixed(1)} color="var(--gold)" />
+              <SRSPill
+                label="Next review"
+                value={srsState.isMastered ? '⭐ Mastered' : srsState.nextReviewDate}
+                color={srsState.isMastered ? 'var(--gold)' : 'var(--text-muted)'}
+              />
+            </div>
+          )}
+          {!srsState && (
+            <div style={{ fontSize: 11, color: 'var(--text-muted)', fontStyle: 'italic' }}>Not yet studied · appears in your next session</div>
+          )}
         </div>
       )}
     </div>
@@ -249,5 +267,14 @@ function Tag({ label, color }: { label: string; color: string }) {
     <span style={{ fontSize: 11, color, background: `${color}22`, borderRadius: 6, padding: '2px 8px', fontWeight: 600 }}>
       {label}
     </span>
+  );
+}
+
+function SRSPill({ label, value, color }: { label: string; value: string; color: string }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1, flex: 1, minWidth: 60 }}>
+      <span style={{ fontSize: 13, fontWeight: 700, color }}>{value}</span>
+      <span style={{ fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 0.3 }}>{label}</span>
+    </div>
   );
 }
