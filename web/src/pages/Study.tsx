@@ -189,6 +189,7 @@ function StudySession({
   const [sessionTotal, setSessionTotal] = useState(0);
   const [combo, setCombo] = useState(0);
   const startTime = useRef(Date.now());
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!facade) return;
@@ -220,6 +221,11 @@ function StudySession({
       if (card) speakThai(card.thai);
     }
   }, [flipped]);
+
+  // Scroll to top whenever the card changes or answer is revealed
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ top: 0 });
+  }, [session?.currentIndex, flipped]);
 
   const answerRef = useRef<(q: Quality) => void>(() => {});
 
@@ -286,7 +292,7 @@ function StudySession({
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', minWidth: 52 }}>
           <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{session.currentIndex + 1}/{session.cards.length}</span>
-          {combo >= 3 && <span style={{ fontSize: 10, color: 'var(--gold)', fontWeight: 800 }}>🔥{combo} combo!</span>}
+          {combo >= 3 && <span style={{ fontSize: 10, color: 'var(--gold)', fontWeight: 800 }}>🔥{combo}</span>}
           {combo < 3 && sessionTotal > 0 && (
             <span style={{ fontSize: 10, fontWeight: 700, color: sessionCorrect / sessionTotal >= 0.8 ? 'var(--success)' : sessionCorrect / sessionTotal >= 0.6 ? 'var(--gold)' : 'var(--error)' }}>
               {Math.round((sessionCorrect / sessionTotal) * 100)}%
@@ -295,21 +301,26 @@ function StudySession({
         </div>
       </div>
 
-      {/* Everything in ONE scrollable area — nothing hidden behind viewport edges */}
-      <div className="scroll" style={{ flex: 1, padding: '16px 20px 32px' }}>
-
-        {/* Card header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10, fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 0.8 }}>
-          <span>{card.category.replace(/_/g, ' ')}{currentCard.isNew && <span style={{ color: 'var(--success)', fontWeight: 700, marginLeft: 6 }}>NEW</span>}</span>
+      {/* Scrollable card area — min-height:0 is critical for iOS flex scroll */}
+      <div
+        ref={scrollRef}
+        style={{ flex: 1, minHeight: 0, overflowY: 'auto', WebkitOverflowScrolling: 'touch' as any, padding: '12px 18px', paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 28px)' }}
+      >
+        {/* Card header: category + tone */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8, fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 0.8 }}>
+          <span>
+            {CATEGORY_ICONS[card.category] ?? '📖'} {card.category.replace(/_/g, ' ')}
+            {currentCard.isNew && <span style={{ color: 'var(--success)', fontWeight: 700, marginLeft: 6, fontSize: 9 }}>NEW</span>}
+          </span>
           <span>{card.tone} tone</span>
         </div>
 
-        {/* Thai word */}
-        <div style={{ background: 'var(--surface)', borderRadius: 20, border: '1px solid var(--border)', borderTop: `4px solid ${regionColor}`, padding: '28px 24px', textAlign: 'center', marginBottom: 16 }}>
-          <div style={{ fontSize: 62, fontWeight: 700, lineHeight: 1.15, letterSpacing: -1 }}>{card.thai}</div>
-          <div style={{ fontSize: 20, color: 'var(--text-sec)', marginTop: 10 }}>{card.romanization}</div>
+        {/* Thai word card */}
+        <div style={{ background: 'var(--surface)', borderRadius: 18, borderTop: `4px solid ${regionColor}`, padding: '20px 20px 16px', textAlign: 'center', marginBottom: 12 }}>
+          <div style={{ fontSize: 54, fontWeight: 700, lineHeight: 1.1 }}>{card.thai}</div>
+          <div style={{ fontSize: 16, color: 'var(--text-muted)', marginTop: 6 }}>{card.romanization}</div>
           <button
-            style={{ marginTop: 14, background: 'var(--surface-hi)', border: '1px solid var(--border)', borderRadius: 999, padding: '7px 18px', fontSize: 14, color: 'var(--text-sec)' }}
+            style={{ marginTop: 10, background: 'var(--surface-hi)', border: '1px solid var(--border)', borderRadius: 999, padding: '5px 14px', fontSize: 13, color: 'var(--text-sec)' }}
             onClick={() => speakThai(card.thai)}
           >🔊 Listen</button>
         </div>
@@ -317,67 +328,69 @@ function StudySession({
         {!flipped ? (
           /* ── UNREVEALED ── */
           <button
-            style={{ width: '100%', background: 'var(--primary)', color: '#fff', borderRadius: 16, padding: '20px 0', fontWeight: 800, fontSize: 20, letterSpacing: 0.3 }}
-            onClick={() => { sfx.flip(); setFlipped(true); if (getAutoPlay()) speakThai(card.thai); }}
+            style={{ width: '100%', background: 'var(--primary)', color: '#fff', borderRadius: 14, padding: '18px 0', fontWeight: 800, fontSize: 19 }}
+            onClick={() => { sfx.flip(); setFlipped(true); }}
           >
             Show Answer
           </button>
         ) : (
           /* ── REVEALED ── */
           <>
-            {/* Answer card */}
-            <div style={{ background: 'var(--surface)', borderRadius: 20, border: '1px solid var(--border)', borderTop: `4px solid ${regionColor}`, padding: '20px 22px', marginBottom: 16 }}>
-              <div style={{ textAlign: 'center', marginBottom: 12 }}>
-                <div style={{ fontSize: 28, fontWeight: 800, color: 'var(--gold)' }}>{card.englishMeaning}</div>
-                {card.englishAlternatives?.length ? (
-                  <div style={{ fontSize: 12, color: 'var(--text-muted)', fontStyle: 'italic', marginTop: 4 }}>
-                    also: {card.englishAlternatives.join(', ')}
-                  </div>
-                ) : null}
-              </div>
-
-              {card.exampleSentence && (
-                <div style={{ background: 'var(--surface-hi)', borderRadius: 10, padding: '12px 14px', marginBottom: 10 }}>
-                  <div style={{ fontSize: 15, fontWeight: 600 }}>{card.exampleSentence.thai}</div>
-                  <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 3 }}>{card.exampleSentence.romanization}</div>
-                  <div style={{ fontSize: 12, color: 'var(--text-sec)', fontStyle: 'italic', marginTop: 5 }}>"{card.exampleSentence.englishNatural}"</div>
+            {/* Meaning */}
+            <div style={{ background: 'var(--surface)', borderRadius: 18, borderTop: `4px solid ${regionColor}`, padding: '16px 20px', marginBottom: 10, textAlign: 'center' }}>
+              <div style={{ fontSize: 26, fontWeight: 800, color: 'var(--gold)' }}>{card.englishMeaning}</div>
+              {card.englishAlternatives?.length ? (
+                <div style={{ fontSize: 12, color: 'var(--text-muted)', fontStyle: 'italic', marginTop: 3 }}>
+                  also: {card.englishAlternatives.join(', ')}
                 </div>
-              )}
-
-              {card.culturalNote && (
-                <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start', background: 'var(--surface-hi)', borderRadius: 10, padding: '10px 12px' }}>
-                  <span style={{ fontSize: 14, flexShrink: 0 }}>💡</span>
-                  <span style={{ fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.6 }}>{card.culturalNote}</span>
-                </div>
-              )}
+              ) : null}
             </div>
 
-            {/* Primary: two big buttons */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 10 }}>
+            {/* Primary rating buttons */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 8 }}>
               <button
-                style={{ background: 'rgba(239,68,68,0.12)', border: '2px solid var(--error)', borderRadius: 16, padding: '18px 0', fontWeight: 800, fontSize: 18, color: 'var(--error)' }}
+                style={{ background: 'rgba(239,68,68,0.12)', border: '2px solid var(--error)', borderRadius: 14, padding: '16px 0', fontWeight: 800, fontSize: 17, color: 'var(--error)' }}
                 onClick={() => answer(0)}
-              >✗ Nope</button>
+              >✗ Again</button>
               <button
-                style={{ background: 'rgba(16,185,129,0.12)', border: '2px solid var(--success)', borderRadius: 16, padding: '18px 0', fontWeight: 800, fontSize: 18, color: 'var(--success)' }}
+                style={{ background: 'rgba(16,185,129,0.12)', border: '2px solid var(--success)', borderRadius: 14, padding: '16px 0', fontWeight: 800, fontSize: 17, color: 'var(--success)' }}
                 onClick={() => answer(3)}
               >✓ Got it</button>
             </div>
 
-            {/* Secondary: detailed SRS ratings + next */}
-            <div style={{ display: 'flex', gap: 8 }}>
+            {/* SRS detail row */}
+            <div style={{ display: 'flex', gap: 6 }}>
               {QUALITY.map(({ q, label, color }) => (
                 <button
                   key={q}
-                  style={{ flex: 1, background: 'var(--surface)', border: `1px solid ${color}`, borderRadius: 10, padding: '10px 2px', fontSize: 12, fontWeight: 700, color }}
+                  style={{ flex: 1, background: 'var(--surface)', border: `1px solid ${color}`, borderRadius: 10, padding: '9px 2px', fontSize: 11, fontWeight: 700, color }}
                   onClick={() => answer(q)}
                 >{label}</button>
               ))}
               <button
-                style={{ flex: 1.4, background: 'var(--surface-hi)', border: '1px solid var(--border)', borderRadius: 10, padding: '10px 2px', fontSize: 12, fontWeight: 700, color: 'var(--text-sec)' }}
+                style={{ flex: 1.4, background: 'var(--surface-hi)', border: '1px solid var(--border)', borderRadius: 10, padding: '9px 2px', fontSize: 11, fontWeight: 700, color: 'var(--text-sec)' }}
                 onClick={() => answer(3)}
               >Next →</button>
             </div>
+
+            {/* Extra info (scrollable if needed) */}
+            {(card.exampleSentence || card.culturalNote) && (
+              <div style={{ marginTop: 14 }}>
+                {card.exampleSentence && (
+                  <div style={{ background: 'var(--surface-hi)', borderRadius: 12, padding: '10px 14px', marginBottom: 8 }}>
+                    <div style={{ fontSize: 14, fontWeight: 600 }}>{card.exampleSentence.thai}</div>
+                    <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 2 }}>{card.exampleSentence.romanization}</div>
+                    <div style={{ fontSize: 11, color: 'var(--text-sec)', fontStyle: 'italic', marginTop: 4 }}>"{card.exampleSentence.englishNatural}"</div>
+                  </div>
+                )}
+                {card.culturalNote && (
+                  <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start', background: 'var(--surface-hi)', borderRadius: 12, padding: '8px 12px' }}>
+                    <span style={{ fontSize: 13, flexShrink: 0 }}>💡</span>
+                    <span style={{ fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.5 }}>{card.culturalNote}</span>
+                  </div>
+                )}
+              </div>
+            )}
           </>
         )}
       </div>
@@ -386,7 +399,7 @@ function StudySession({
 }
 
 const s: Record<string, React.CSSProperties> = {
-  root: { height: '100%', display: 'flex', flexDirection: 'column', background: 'var(--bg)' },
-  topBar: { display: 'flex', alignItems: 'center', gap: 10, padding: '16px 20px 12px', paddingTop: 'calc(env(safe-area-inset-top, 0px) + 16px)', flexShrink: 0 },
+  root: { position: 'fixed', inset: 0, display: 'flex', flexDirection: 'column', background: 'var(--bg)' },
+  topBar: { display: 'flex', alignItems: 'center', gap: 10, padding: '12px 18px 10px', paddingTop: 'calc(env(safe-area-inset-top, 0px) + 12px)', flexShrink: 0 },
   exitBtn: { width: 32, height: 32, borderRadius: 999, background: 'var(--surface)', color: 'var(--text-sec)', fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center' },
 };
