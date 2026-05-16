@@ -2,6 +2,8 @@ import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { VOCABULARY } from '@engine/data/vocabulary';
 import { VocabCard } from '@engine/types';
 import { useGame } from '../context/GameContext';
+import { sfx } from '../utils/audio';
+import { updateChallengeProgress } from '../utils/dailyChallenge';
 
 type QuizMode = 'thai_to_english' | 'english_to_thai' | 'romanization' | 'type_english' | 'type_romanization';
 
@@ -97,15 +99,21 @@ export function Quiz({ onExit }: { onExit: () => void }) {
   }, [pool]);
 
   const advance = useCallback((correct: boolean) => {
-    setResults(r => [...r, correct]);
+    if (correct) sfx.correct(); else sfx.wrong();
+    const newResults = [...results, correct];
+    setResults(newResults);
     setPhase('feedback');
     timerRef.current = setTimeout(() => {
       setSelectedIdx(null); setTypedAnswer(''); setTypedCorrect(null);
       const next = current + 1;
-      if (next >= questions.length) setPhase('complete');
-      else { setCurrent(next); setPhase('question'); }
+      if (next >= questions.length) {
+        const score = newResults.filter(Boolean).length;
+        updateChallengeProgress('quiz', score);
+        sfx.complete();
+        setPhase('complete');
+      } else { setCurrent(next); setPhase('question'); }
     }, correct ? 800 : 1500);
-  }, [current, questions.length]);
+  }, [current, questions.length, results]);
 
   const answerMC = useCallback((idx: number) => {
     if (phase !== 'question') return;

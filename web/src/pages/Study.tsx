@@ -2,6 +2,8 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useGame } from '../context/GameContext';
 import { Session, ReviewQuality } from '@engine/types';
 import { SessionSummary } from '@engine/engine/sessionManager';
+import { sfx } from '../utils/audio';
+import { updateChallengeProgress } from '../utils/dailyChallenge';
 
 type Quality = 0 | 2 | 3 | 4;
 
@@ -54,15 +56,20 @@ export function Study({
   const answer = useCallback(async (q: Quality) => {
     if (!facade || !session || !currentCard || !flipped || exiting) return;
 
+    if (q >= 3) sfx.correct(); else sfx.wrong();
+
     const timeTaken = Date.now() - startTime.current;
     const result = facade.answerCard(q as ReviewQuality, timeTaken);
     const updated = result.updatedSession;
 
     if (updated.isComplete) {
       setExiting(true);
+      sfx.complete();
       const endResult = await facade.endSession();
       refreshStats();
       if (endResult) {
+        updateChallengeProgress('study', endResult.summary.cardsReviewed);
+        updateChallengeProgress('new_words', endResult.summary.newWordsLearned);
         onComplete(endResult.summary, endResult.summary.xpEarned, endResult.completedQuestIds);
       }
       return;
@@ -106,7 +113,7 @@ export function Study({
             <div
               className="flip-front"
               style={{ ...s.card, borderTop: `4px solid ${regionColor}`, cursor: 'pointer', minHeight: 300, justifyContent: 'center', alignItems: 'center' }}
-              onClick={() => setFlipped(true)}
+              onClick={() => { sfx.flip(); setFlipped(true); }}
             >
               <div style={s.catLabel}>{card.category.replace(/_/g, ' ')}</div>
               <div style={s.toneLabel}>{card.tone} tone</div>

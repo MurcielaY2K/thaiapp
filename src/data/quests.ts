@@ -731,6 +731,454 @@ const DOI_NUEA_SIDE_QUESTS: Quest[] = [
   },
 ];
 
+// ─── talee_tong (The Golden Sea) — 10 story quests ───────────────────────────
+// Arc: arrive at the port → learn sea vocabulary → trade at market →
+//      survive monsoon → face the Sea Dragon.
+
+const TALEE_TONG_QUESTS: Quest[] = [
+  {
+    id: 'tt_01_port_arrival',
+    type: 'story',
+    region: 'talee_tong',
+    title: 'Arrival at the Golden Shore',
+    description: 'Salt air and the cry of gulls greet you as your vessel rounds the headland. The southern port stretches before you, bright and busy.',
+    flavorText: '"ทะเล — the sea. It gives you everything and asks for everything in return."',
+    objectives: [
+      {
+        type: 'learn_words',
+        count: 10,
+        cardCategory: 'nature',
+        description: 'Learn 10 sea and nature words',
+      },
+    ],
+    rewards: { xp: 250, gold: 50 },
+  },
+  {
+    id: 'tt_02_fishermen_tongue',
+    type: 'story',
+    region: 'talee_tong',
+    title: 'The Fishermen\'s Tongue',
+    description: 'The fishermen speak fast and low, a dialect shaped by wind and salt. One old captain agrees to teach you their trade words.',
+    flavorText: '"คน ประมง ไม่รอใคร — fishermen wait for no one. Neither do words."',
+    objectives: [
+      {
+        type: 'learn_words',
+        count: 8,
+        cardCategory: 'animal',
+        description: 'Learn 8 sea creature and animal words',
+      },
+    ],
+    rewards: { xp: 280, gold: 55 },
+    prerequisiteQuestIds: ['tt_01_port_arrival'],
+  },
+  {
+    id: 'tt_03_harbour_market',
+    type: 'story',
+    region: 'talee_tong',
+    title: 'The Harbour Market',
+    description: 'Dawn brings a frenzy of buyers and sellers along the quay. Dried fish, spices, and woven baskets change hands in a blur of Thai.',
+    flavorText: '"ซื้อ ขาย ต่อราคา — buy, sell, bargain. The market has no mercy for the silent."',
+    objectives: [
+      {
+        type: 'learn_words',
+        count: 8,
+        cardCategory: 'shopping',
+        description: 'Learn 8 market and shopping words',
+      },
+    ],
+    rewards: { xp: 300, gold: 60 },
+    prerequisiteQuestIds: ['tt_02_fishermen_tongue'],
+  },
+  {
+    id: 'tt_04_spice_table',
+    type: 'story',
+    region: 'talee_tong',
+    title: 'The Spice Table',
+    description: 'A matriarch presides over the finest food stall in the port. She will only feed you if you can name each dish in Thai.',
+    flavorText: '"แกงใต้ เผ็ดร้อน — southern curry, fiery hot. Your words must be just as sharp."',
+    objectives: [
+      {
+        type: 'learn_words',
+        count: 6,
+        cardCategory: 'food',
+        description: 'Learn 6 southern food words',
+      },
+    ],
+    rewards: { xp: 300, gold: 65 },
+    prerequisiteQuestIds: ['tt_03_harbour_market'],
+  },
+  {
+    id: 'tt_05_trade_winds',
+    type: 'story',
+    region: 'talee_tong',
+    title: 'Trade Wind Routes',
+    description: 'Merchants from across the gulf pass through here. A navigator teaches you the language of travel and destinations.',
+    flavorText: '"เรือ ท่าเรือ เส้นทาง — ship, harbour, route. Know these and the sea opens."',
+    objectives: [
+      {
+        type: 'learn_words',
+        count: 8,
+        cardCategory: 'travel',
+        description: 'Learn 8 travel and route words',
+      },
+    ],
+    rewards: { xp: 320, gold: 65 },
+    prerequisiteQuestIds: ['tt_04_spice_table'],
+  },
+  {
+    id: 'tt_06_monsoon_watch',
+    type: 'story',
+    region: 'talee_tong',
+    title: 'Reading the Monsoon',
+    description: 'Dark clouds stack on the horizon. Experienced sailors read the sky. You must learn the language of weather before the storm hits.',
+    flavorText: '"ฝน ลม พายุ — rain, wind, storm. The sea speaks these loudest."',
+    objectives: [
+      {
+        type: 'learn_words',
+        count: 8,
+        cardCategory: 'weather',
+        description: 'Learn 8 weather words',
+      },
+    ],
+    rewards: { xp: 350, gold: 75, gems: 1 },
+    prerequisiteQuestIds: ['tt_05_trade_winds'],
+  },
+  {
+    id: 'tt_07_storm_survival',
+    type: 'story',
+    region: 'talee_tong',
+    title: 'Surviving the Storm',
+    description: 'The monsoon strikes with full fury. Lashed by rain, you keep watch with the crew, reviewing everything you know.',
+    flavorText: '"The sea tests what the shore teaches. Forget nothing."',
+    objectives: [
+      {
+        type: 'review_cards',
+        count: 40,
+        description: 'Review 40 cards across any sessions',
+      },
+    ],
+    rewards: { xp: 400, gold: 80, gems: 2 },
+    prerequisiteQuestIds: ['tt_06_monsoon_watch'],
+  },
+  {
+    id: 'tt_08_sea_customs',
+    type: 'story',
+    region: 'talee_tong',
+    title: 'Sea Customs and Ceremony',
+    description: 'Before venturing into deeper waters, the boat captain insists on a blessing ceremony. You must understand the sacred words.',
+    flavorText: '"ไหว้ทะเล — to pay respects to the sea. It is not optional."',
+    objectives: [
+      {
+        type: 'learn_words',
+        count: 6,
+        cardCategory: 'culture',
+        description: 'Learn 6 cultural ceremony words',
+      },
+    ],
+    rewards: { xp: 420, gold: 90, gems: 2 },
+    prerequisiteQuestIds: ['tt_07_storm_survival'],
+  },
+  {
+    id: 'tt_09_deep_water_verbs',
+    type: 'story',
+    region: 'talee_tong',
+    title: 'The Language of Action',
+    description: 'Deep at sea, commands must be fast and correct. The first mate drills you on action words until they flow without thought.',
+    flavorText: '"จับ ดึง ขว้าง วาง — grab, pull, throw, place. Hesitation sinks ships."',
+    objectives: [
+      {
+        type: 'perfect_session',
+        count: 2,
+        description: 'Complete 2 perfect sessions with no Blackout answers',
+      },
+    ],
+    rewards: { xp: 500, gold: 100, gems: 2 },
+    prerequisiteQuestIds: ['tt_08_sea_customs'],
+  },
+  {
+    id: 'tt_10_sea_dragon',
+    type: 'boss',
+    region: 'talee_tong',
+    title: 'The Sea Dragon\'s Challenge',
+    description: 'From the deep, a serpentine shape rises — the Naga of the Southern Sea. It blocks the route forward, its scales gleaming like storm water.',
+    flavorText: '"นาคา ท้าทาย — the Naga challenges. Only words forged in the storm will answer."',
+    objectives: [
+      {
+        type: 'perfect_session',
+        count: 1,
+        description: 'Complete a perfect review session',
+      },
+      {
+        type: 'review_cards',
+        count: 50,
+        description: 'Review 50 cards to prove your mastery of the sea',
+      },
+    ],
+    rewards: { xp: 800, gold: 200, gems: 10, companionId: 'naga_water' },
+    prerequisiteQuestIds: ['tt_09_deep_water_verbs'],
+  },
+];
+
+const TALEE_TONG_SIDE_QUESTS: Quest[] = [
+  {
+    id: 'tt_side_coral_life',
+    type: 'side',
+    region: 'talee_tong',
+    title: 'The Coral Garden',
+    description: 'A marine biologist is cataloguing the reef. She needs someone who can translate her notes for the local fishers.',
+    flavorText: '"ปะการัง ปลา สีสัน — coral, fish, colour. The reef speaks its own language."',
+    objectives: [
+      {
+        type: 'learn_words',
+        count: 5,
+        cardCategory: 'animal',
+        description: 'Learn 5 marine animal words',
+      },
+    ],
+    rewards: { xp: 200, gold: 40 },
+  },
+  {
+    id: 'tt_side_boat_songs',
+    type: 'side',
+    region: 'talee_tong',
+    title: 'Songs of the Sea',
+    description: 'The fishermen\'s songs encode navigation wisdom. An elder agrees to teach you — but only if you keep up with the words.',
+    flavorText: '"เพลงเรือ — boat songs. Every verse is a direction, every chorus a warning."',
+    objectives: [
+      {
+        type: 'review_cards',
+        count: 25,
+        description: 'Review 25 cards to honour the tradition',
+      },
+    ],
+    rewards: { xp: 220, gold: 45 },
+  },
+];
+
+// ─── mueang_hin (The Stone City) — 10 story quests ───────────────────────────
+// Arc: enter the ruins → decipher inscriptions → learn the royal tongue →
+//      prove scholarly worth → face the Stone Scholar boss.
+
+const MUEANG_HIN_QUESTS: Quest[] = [
+  {
+    id: 'mh_01_ruin_gate',
+    type: 'story',
+    region: 'mueang_hin',
+    title: 'The Gate of Carved Stone',
+    description: 'Centuries of jungle have not hidden the grandeur of the stone gate. Apsara reliefs stare down at you, unmoved by time.',
+    flavorText: '"หิน ป่า โบราณ — stone, jungle, ancient. This city has been waiting."',
+    objectives: [
+      {
+        type: 'learn_words',
+        count: 10,
+        cardCategory: 'culture',
+        description: 'Learn 10 cultural and historical words',
+      },
+    ],
+    rewards: { xp: 300, gold: 60 },
+  },
+  {
+    id: 'mh_02_inscription_wall',
+    type: 'story',
+    region: 'mueang_hin',
+    title: 'The Inscription Wall',
+    description: 'An entire wall covered in Khmer script and old Thai script. A scholar crouches at its base, muttering. She needs a second pair of eyes — and a mind that knows its vocabulary.',
+    flavorText: '"จารึก — inscription. Each character is a word that refused to die."',
+    objectives: [
+      {
+        type: 'learn_words',
+        count: 8,
+        cardCategory: 'religion',
+        description: 'Learn 8 religious and ceremonial words',
+      },
+    ],
+    rewards: { xp: 330, gold: 65 },
+    prerequisiteQuestIds: ['mh_01_ruin_gate'],
+  },
+  {
+    id: 'mh_03_royal_tongue',
+    type: 'story',
+    region: 'mueang_hin',
+    title: 'The Royal Register',
+    description: 'The ruins\' inner temple still functions as a ceremonial site. The presiding priest speaks only formal Thai, the register of courts and kings.',
+    flavorText: '"ราชาศัพท์ — the royal vocabulary. Here there is no casual speech."',
+    objectives: [
+      {
+        type: 'learn_words',
+        count: 8,
+        cardCategory: 'professions',
+        description: 'Learn 8 formal title and profession words',
+      },
+    ],
+    rewards: { xp: 360, gold: 70 },
+    prerequisiteQuestIds: ['mh_02_inscription_wall'],
+  },
+  {
+    id: 'mh_04_ceremony_hall',
+    type: 'story',
+    region: 'mueang_hin',
+    title: 'The Ceremony Hall',
+    description: 'A restoration ceremony requires a full retelling of the city\'s founding myth — in Thai, by a willing outsider. You are it.',
+    flavorText: '"พิธี — ceremony. To speak in it is to enter into it."',
+    objectives: [
+      {
+        type: 'review_cards',
+        count: 40,
+        description: 'Review 40 cards to demonstrate readiness',
+      },
+    ],
+    rewards: { xp: 380, gold: 75, gems: 1 },
+    prerequisiteQuestIds: ['mh_03_royal_tongue'],
+  },
+  {
+    id: 'mh_05_time_and_dynasty',
+    type: 'story',
+    region: 'mueang_hin',
+    title: 'The Chronicle of Dynasties',
+    description: 'The head archivist lectures you on the city\'s dynastic calendar. She measures everything in centuries.',
+    flavorText: '"ยุค สมัย ราชวงศ์ — era, period, dynasty. Time here has more layers than stone."',
+    objectives: [
+      {
+        type: 'learn_words',
+        count: 6,
+        cardCategory: 'time_adv',
+        description: 'Learn 6 advanced time and era words',
+      },
+    ],
+    rewards: { xp: 420, gold: 85, gems: 1 },
+    prerequisiteQuestIds: ['mh_04_ceremony_hall'],
+  },
+  {
+    id: 'mh_06_precise_grammar',
+    type: 'story',
+    region: 'mueang_hin',
+    title: 'The Grammar of Power',
+    description: 'A linguist argues that the empire fell because its grammar became imprecise. She intends to prove it — on you.',
+    flavorText: '"ไวยากรณ์ ชัดเจน — grammar, clarity. Power crumbles with ambiguous language."',
+    objectives: [
+      {
+        type: 'learn_words',
+        count: 8,
+        cardCategory: 'grammar',
+        description: 'Learn 8 grammar and connector words',
+      },
+    ],
+    rewards: { xp: 450, gold: 90, gems: 2 },
+    prerequisiteQuestIds: ['mh_05_time_and_dynasty'],
+  },
+  {
+    id: 'mh_07_scholar_debate',
+    type: 'story',
+    region: 'mueang_hin',
+    title: 'The Scholar\'s Debate',
+    description: 'Every month the scholars of the stone city convene to argue interpretations. You are admitted as an observer — then unexpectedly called upon.',
+    flavorText: '"โต้เถียง ด้วยเหตุผล — argue with reason. Opinion without language is just noise."',
+    objectives: [
+      {
+        type: 'learn_words',
+        count: 8,
+        cardCategory: 'verbs_advanced',
+        description: 'Learn 8 advanced action and reasoning verbs',
+      },
+    ],
+    rewards: { xp: 500, gold: 100, gems: 2 },
+    prerequisiteQuestIds: ['mh_06_precise_grammar'],
+  },
+  {
+    id: 'mh_08_descriptive_mastery',
+    type: 'story',
+    region: 'mueang_hin',
+    title: 'The Art of Description',
+    description: 'The chief restorer needs precise descriptions of every carved surface for the archive. Vague words destroy the record.',
+    flavorText: '"ประณีต งดงาม ลึกซึ้ง — intricate, beautiful, profound. These ruins demand all three."',
+    objectives: [
+      {
+        type: 'learn_words',
+        count: 8,
+        cardCategory: 'adjectives_adv',
+        description: 'Learn 8 advanced descriptive words',
+      },
+    ],
+    rewards: { xp: 550, gold: 110, gems: 2 },
+    prerequisiteQuestIds: ['mh_07_scholar_debate'],
+  },
+  {
+    id: 'mh_09_proof_of_worth',
+    type: 'story',
+    region: 'mueang_hin',
+    title: 'Proof of Scholarly Worth',
+    description: 'The Council of Inscriptions will not open the inner sanctum to anyone who cannot demonstrate flawless knowledge of their studies.',
+    flavorText: '"ปราชญ์ — scholar. The title is not given. It is demonstrated."',
+    objectives: [
+      {
+        type: 'perfect_session',
+        count: 2,
+        description: 'Complete 2 perfect review sessions',
+      },
+    ],
+    rewards: { xp: 700, gold: 150, gems: 5 },
+    prerequisiteQuestIds: ['mh_08_descriptive_mastery'],
+  },
+  {
+    id: 'mh_10_stone_scholar',
+    type: 'boss',
+    region: 'mueang_hin',
+    title: 'The Stone Scholar\'s Trial',
+    description: 'At the heart of the inner sanctum a robed figure sits motionless among the carvings — the Stone Scholar, protector of all knowledge buried here. It has not spoken in a generation.',
+    flavorText: '"ผู้เรียนรู้ ผู้พิสูจน์ตัว — the learner who proves themselves. Are you that person?"',
+    objectives: [
+      {
+        type: 'perfect_session',
+        count: 1,
+        description: 'Complete a perfect review session',
+      },
+      {
+        type: 'review_cards',
+        count: 60,
+        description: 'Review 60 cards to demonstrate the full breadth of your knowledge',
+      },
+    ],
+    rewards: { xp: 1000, gold: 250, gems: 15, companionId: 'stone_guardian' },
+    prerequisiteQuestIds: ['mh_09_proof_of_worth'],
+  },
+];
+
+const MUEANG_HIN_SIDE_QUESTS: Quest[] = [
+  {
+    id: 'mh_side_dig_site',
+    type: 'side',
+    region: 'mueang_hin',
+    title: 'The Excavation',
+    description: 'An archaeological team is unearthing a new chamber. They need someone to document finds using the local scholars\' terminology.',
+    flavorText: '"ขุดค้น ค้นพบ บันทึก — excavate, discover, record. Every object has a Thai name."',
+    objectives: [
+      {
+        type: 'learn_words',
+        count: 6,
+        cardCategory: 'culture',
+        description: 'Learn 6 archaeology and culture words',
+      },
+    ],
+    rewards: { xp: 250, gold: 50 },
+  },
+  {
+    id: 'mh_side_temple_rites',
+    type: 'side',
+    region: 'mueang_hin',
+    title: 'The Forgotten Rites',
+    description: 'A junior priest has lost the scroll describing the evening rite. You witnessed it — now you must reconstruct it in words.',
+    flavorText: '"พิธีกรรม — ritual. If it is not spoken, it is not real."',
+    objectives: [
+      {
+        type: 'review_cards',
+        count: 30,
+        description: 'Review 30 cards to recall the sacred sequence',
+      },
+    ],
+    rewards: { xp: 260, gold: 55 },
+  },
+];
+
 // ─── All quests ───────────────────────────────────────────────────────────────
 
 export const ALL_QUESTS: Quest[] = [
@@ -740,6 +1188,10 @@ export const ALL_QUESTS: Quest[] = [
   ...PAA_ISAAN_SIDE_QUESTS,
   ...DOI_NUEA_QUESTS,
   ...DOI_NUEA_SIDE_QUESTS,
+  ...TALEE_TONG_QUESTS,
+  ...TALEE_TONG_SIDE_QUESTS,
+  ...MUEANG_HIN_QUESTS,
+  ...MUEANG_HIN_SIDE_QUESTS,
   ...DAILY_QUEST_POOL,
 ];
 

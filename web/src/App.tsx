@@ -10,11 +10,12 @@ import { SessionComplete } from './pages/SessionComplete';
 import { Quests } from './pages/Quests';
 import { Profile } from './pages/Profile';
 import { VocabBrowser } from './pages/VocabBrowser';
+import { WorldMap } from './pages/WorldMap';
 import { Settings } from './pages/Settings';
 import { TONE_COLORS } from '@engine/types';
 import { SessionSummary } from '@engine/engine/sessionManager';
 
-type Tab = 'home' | 'learn' | 'browse' | 'profile';
+type Tab = 'home' | 'learn' | 'map' | 'browse' | 'profile';
 type View = 'onboarding' | 'main' | 'study' | 'quiz' | 'tone' | 'sentence' | 'session_complete' | 'settings';
 
 interface CompleteState { summary: SessionSummary; xp: number; questIds: string[] }
@@ -22,6 +23,7 @@ interface CompleteState { summary: SessionSummary; xp: number; questIds: string[
 const TABS: { id: Tab; icon: string; label: string }[] = [
   { id: 'home',    icon: '🏠', label: 'Home' },
   { id: 'learn',   icon: '🧠', label: 'Practice' },
+  { id: 'map',     icon: '🗺️', label: 'Map' },
   { id: 'browse',  icon: '📚', label: 'Vocab' },
   { id: 'profile', icon: '🧭', label: 'Profile' },
 ];
@@ -84,6 +86,7 @@ export function App() {
       <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
         {tab === 'home'    && <Home onStudy={() => setView('study')} onQuiz={() => setView('quiz')} />}
         {tab === 'learn'   && <LearnTab onStudy={() => setView('study')} onQuiz={() => setView('quiz')} onTone={() => setView('tone')} onSentence={() => setView('sentence')} />}
+        {tab === 'map'     && <WorldMap />}
         {tab === 'browse'  && <VocabBrowser />}
         {tab === 'profile' && <Profile onSettings={() => setView('settings')} />}
       </div>
