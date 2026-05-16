@@ -26,7 +26,7 @@ export function Study({
   onComplete: (summary: SessionSummary, xp: number, questIds: string[]) => void;
   onExit: () => void;
 }) {
-  const { facade, refreshStats } = useGame();
+  const { facade, refreshStats, refreshDailyChallenge } = useGame();
   const [session, setSession] = useState<Session | null>(null);
   const [flipped, setFlipped] = useState(false);
   const [exiting, setExiting] = useState(false);
@@ -70,6 +70,7 @@ export function Study({
       if (endResult) {
         updateChallengeProgress('study', endResult.summary.cardsReviewed);
         updateChallengeProgress('new_words', endResult.summary.newWordsLearned);
+        refreshDailyChallenge();
         onComplete(endResult.summary, endResult.summary.xpEarned, endResult.completedQuestIds);
       }
       return;

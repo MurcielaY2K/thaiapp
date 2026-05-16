@@ -20,6 +20,7 @@ interface GameContextValue {
   hasProfile: boolean;
   createProfile: (name: string) => Promise<void>;
   refreshStats: () => void;
+  refreshDailyChallenge: () => void;
   resetProgress: () => Promise<void>;
   heatmap: Record<string, number>;
   achievements: Achievement[];
@@ -51,6 +52,10 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   const [dailyChallenge, setDailyChallenge] = useState<DailyChallenge | null>(null);
   const [wordOfDay, setWordOfDay] = useState<VocabCard | null>(null);
   const [dailyGoal, setDailyGoalState] = useState<DailyGoal>(getSavedDailyGoal);
+
+  const refreshDailyChallenge = useCallback(() => {
+    setDailyChallenge(getDailyChallenge());
+  }, []);
 
   const setDailyGoal = useCallback((goal: DailyGoal) => {
     localStorage.setItem(DAILY_GOAL_KEY, goal);
@@ -171,7 +176,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       facade: facadeRef.current,
       profile, stats, isLoading,
       hasProfile: profile !== null,
-      createProfile, refreshStats, resetProgress,
+      createProfile, refreshStats, refreshDailyChallenge, resetProgress,
       heatmap,
       achievements,
       earnedAchievementIds,
