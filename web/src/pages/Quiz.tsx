@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, useEffect } from 'react';
+import React, { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { VOCABULARY } from '@engine/data/vocabulary';
 import { VocabCard } from '@engine/types';
 import { useGame } from '../context/GameContext';
@@ -80,6 +80,7 @@ const TYPE_MODES: { id: QuizMode; icon: string; title: string; desc: string }[] 
 
 export function Quiz({ onExit, favoritesOnly }: { onExit: () => void; favoritesOnly?: boolean }) {
   const { profile } = useGame();
+  const [rapidFire, setRapidFire] = useState(false);
   const [phase, setPhase] = useState<'setup' | 'question' | 'feedback' | 'complete'>('setup');
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [current, setCurrent] = useState(0);
@@ -170,7 +171,8 @@ export function Quiz({ onExit, favoritesOnly }: { onExit: () => void; favoritesO
     return () => window.removeEventListener('keydown', handler);
   }, [phase, questions, current, answerMC]);
 
-  if (phase === 'setup') return <SetupScreen onSelect={startQuiz} onExit={onExit} favoritesOnly={!!favoritesOnly} />;
+  if (rapidFire) return <RapidFireSession pool={pool} onExit={onExit} />;
+  if (phase === 'setup') return <SetupScreen onSelect={startQuiz} onExit={onExit} favoritesOnly={!!favoritesOnly} onRapidFire={() => setRapidFire(true)} />;
   if (phase === 'complete') {
     const score = results.filter(Boolean).length;
     return <ScoreScreen score={score} total={questions.length} questions={questions} results={results} onRetry={() => setPhase('setup')} onExit={onExit} />;
@@ -293,7 +295,7 @@ export function Quiz({ onExit, favoritesOnly }: { onExit: () => void; favoritesO
   );
 }
 
-function SetupScreen({ onSelect, onExit, favoritesOnly }: { onSelect: (m: QuizMode) => void; onExit: () => void; favoritesOnly: boolean }) {
+function SetupScreen({ onSelect, onExit, favoritesOnly, onRapidFire }: { onSelect: (m: QuizMode) => void; onExit: () => void; favoritesOnly: boolean; onRapidFire: () => void }) {
   return (
     <div style={s.root}>
       <div style={s.topBar}>
@@ -338,6 +340,16 @@ function SetupScreen({ onSelect, onExit, favoritesOnly }: { onSelect: (m: QuizMo
             <span style={{ fontSize: 10, color: 'var(--warning)', fontWeight: 700 }}>HARD</span>
           </button>
         ))}
+
+        <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 0.5, marginTop: 8 }}>Challenge</div>
+        <button style={{ ...s.modeCard, background: 'linear-gradient(135deg, rgba(239,68,68,0.12), rgba(245,158,11,0.12))', borderColor: 'var(--error)' }} onClick={onRapidFire}>
+          <span style={{ fontSize: 28 }}>⚡</span>
+          <div style={{ flex: 1, textAlign: 'left' }}>
+            <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 2, color: 'var(--error)' }}>Rapid Fire</div>
+            <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>20 questions · 5 seconds each · auto-advance</div>
+          </div>
+          <span style={{ fontSize: 10, color: 'var(--error)', fontWeight: 700 }}>TIMED</span>
+        </button>
       </div>
     </div>
   );
@@ -399,6 +411,118 @@ function ScoreScreen({ score, total, questions, results, onRetry, onExit }: {
           <button style={{ background: 'var(--primary)', color: '#fff', borderRadius: 12, padding: 16, fontWeight: 700, fontSize: 15 }} onClick={onRetry}>Try Again</button>
           <button style={{ background: 'var(--surface)', color: 'var(--text-sec)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, fontWeight: 600 }} onClick={onExit}>Back to Home</button>
         </div>
+      </div>
+    </div>
+  );
+}
+
+const RAPID_SIZE = 20;
+const RAPID_TIME = 5; // seconds per question
+
+function RapidFireSession({ pool, onExit }: { pool: VocabCard[]; onExit: () => void }) {
+  const questions = useMemo(() => shuffle(pool).slice(0, RAPID_SIZE).map(c => buildQuestion(c, 'thai_to_english', pool)), []);
+  const [current, setCurrent] = useState(0);
+  const [results, setResults] = useState<boolean[]>([]);
+  const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
+  const [timeLeft, setTimeLeft] = useState(RAPID_TIME);
+  const [phase, setPhase] = useState<'question' | 'feedback' | 'complete'>('question');
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const advanceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const advance = useCallback((correct: boolean, chosen: number | null) => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    if (advanceRef.current) clearTimeout(advanceRef.current);
+    if (correct) sfx.correct(); else sfx.wrong();
+    setSelectedIdx(chosen);
+    setResults(r => [...r, correct]);
+    setPhase('feedback');
+    advanceRef.current = setTimeout(() => {
+      const next = current + 1;
+      if (next >= questions.length) { setPhase('complete'); return; }
+      setCurrent(next); setSelectedIdx(null); setTimeLeft(RAPID_TIME); setPhase('question');
+    }, 600);
+  }, [current, questions.length]);
+
+  useEffect(() => {
+    if (phase !== 'question') return;
+    timerRef.current = setInterval(() => {
+      setTimeLeft(t => {
+        if (t <= 1) { clearInterval(timerRef.current!); advance(false, null); return 0; }
+        return t - 1;
+      });
+    }, 1000);
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+  }, [phase, current]);
+
+  useEffect(() => () => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    if (advanceRef.current) clearTimeout(advanceRef.current);
+  }, []);
+
+  if (phase === 'complete' || current >= questions.length) {
+    const score = results.filter(Boolean).length;
+    const pct = Math.round((score / RAPID_SIZE) * 100);
+    return (
+      <div style={s.root}>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 24, gap: 20 }}>
+          <div style={{ fontSize: 72 }}>{pct === 100 ? '🏆' : pct >= 75 ? '⚡' : pct >= 50 ? '💪' : '🎯'}</div>
+          <div style={{ fontSize: 26, fontWeight: 800, textAlign: 'center' }}>Rapid Fire Complete!</div>
+          <div style={{ fontSize: 52, fontWeight: 800, color: pct >= 75 ? 'var(--success)' : 'var(--warning)' }}>{score}/{RAPID_SIZE}</div>
+          <div style={{ fontSize: 15, color: 'var(--text-muted)' }}>{pct}% correct under pressure</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, width: '100%', marginTop: 16 }}>
+            <button style={{ background: 'var(--error)', color: '#fff', borderRadius: 12, padding: 16, fontWeight: 700 }} onClick={() => { setCurrent(0); setResults([]); setSelectedIdx(null); setTimeLeft(RAPID_TIME); setPhase('question'); }}>Try Again ⚡</button>
+            <button style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, color: 'var(--text-sec)' }} onClick={onExit}>Back</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const q = questions[current];
+  const timePct = (timeLeft / RAPID_TIME) * 100;
+  const timerColor = timeLeft <= 2 ? 'var(--error)' : timeLeft <= 3 ? 'var(--warning)' : 'var(--success)';
+
+  return (
+    <div style={s.root}>
+      <div style={s.topBar}>
+        <button style={s.exitBtn} onClick={onExit}>✕</button>
+        <div style={{ flex: 1 }}>
+          <div className="progress-track" style={{ height: 6 }}>
+            <div style={{ height: '100%', width: `${(current / questions.length) * 100}%`, background: 'var(--error)', borderRadius: 999, transition: 'width 0.3s' }} />
+          </div>
+        </div>
+        <span style={s.counter}>{current + 1}/{RAPID_SIZE}</span>
+      </div>
+
+      {/* Countdown timer */}
+      <div style={{ padding: '0 20px 8px' }}>
+        <div style={{ height: 8, background: 'var(--border)', borderRadius: 999, overflow: 'hidden' }}>
+          <div style={{ height: '100%', width: `${timePct}%`, background: timerColor, borderRadius: 999, transition: 'width 1s linear, background 0.3s' }} />
+        </div>
+        <div style={{ fontSize: 12, textAlign: 'right', color: timerColor, fontWeight: 700, marginTop: 3 }}>{timeLeft}s</div>
+      </div>
+
+      <div style={s.promptArea}>
+        <div style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 10 }}>⚡ Rapid Fire — What does this mean?</div>
+        <div style={{ fontSize: 58, fontWeight: 700, textAlign: 'center', lineHeight: 1.2 }}>{q.prompt}</div>
+        {q.promptSub && <div style={{ fontSize: 16, color: 'var(--text-muted)', marginTop: 6 }}>{q.promptSub}</div>}
+      </div>
+
+      <div style={{ padding: '0 20px 24px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {q.options!.map((opt, i) => {
+          let bg = 'var(--surface)', border = '1px solid var(--border)', color = 'var(--text)';
+          if (phase === 'feedback') {
+            if (i === q.correctIndex) { bg = 'rgba(16,185,129,0.15)'; border = '2px solid var(--success)'; color = 'var(--success)'; }
+            else if (i === selectedIdx) { bg = 'rgba(239,68,68,0.15)'; border = '2px solid var(--error)'; color = 'var(--error)'; }
+          }
+          return (
+            <button key={i} style={{ background: bg, border, borderRadius: 12, padding: '12px 16px', color, fontWeight: 600, fontSize: 14, textAlign: 'left', display: 'flex', alignItems: 'center', gap: 10, transition: 'all 0.15s' }}
+              onClick={() => phase === 'question' && advance(i === q.correctIndex, i)} disabled={phase === 'feedback'}>
+              <span style={{ fontSize: 11, color: 'var(--border)', fontWeight: 700 }}>{['A','B','C','D'][i]}</span>
+              <span style={{ flex: 1 }}>{opt}</span>
+            </button>
+          );
+        })}
       </div>
     </div>
   );
