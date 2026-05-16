@@ -3,6 +3,7 @@ import { VOCABULARY } from '@engine/data/vocabulary';
 import { VocabCard } from '@engine/types';
 import { useGame } from '../context/GameContext';
 import { sfx, speakThai, getAutoPlay } from '../utils/audio';
+import { updateChallengeProgress } from '../utils/dailyChallenge';
 
 interface MatchCard {
   id: string;
@@ -140,7 +141,8 @@ export function MatchGame({ onExit }: { onExit: () => void }) {
 
   if (phase === 'complete') {
     const score = Math.max(0, Math.round(pairs * 100 / Math.max(pairs, attempts)));
-    return <ScoreScreen score={score} pairs={pairs} attempts={attempts} timeStr={timeStr} onPlayAgain={() => startGame(difficulty!)} onChangeLevel={() => setPhase('setup')} onExit={onExit} />;
+    updateChallengeProgress('memory_match', 1);
+    return <ScoreScreen score={score} pairs={pairs} attempts={attempts} timeStr={timeStr} difficulty={difficulty!} onPlayAgain={() => startGame(difficulty!)} onChangeLevel={() => setPhase('setup')} onExit={onExit} />;
   }
 
   return (
@@ -281,8 +283,8 @@ function SetupScreen({ pool, onStart, onExit }: { pool: VocabCard[]; onStart: (d
   );
 }
 
-function ScoreScreen({ score, pairs, attempts, timeStr, onPlayAgain, onChangeLevel, onExit }: {
-  score: number; pairs: number; attempts: number; timeStr: string;
+function ScoreScreen({ score, pairs, attempts, timeStr, difficulty, onPlayAgain, onChangeLevel, onExit }: {
+  score: number; pairs: number; attempts: number; timeStr: string; difficulty: Difficulty;
   onPlayAgain: () => void; onChangeLevel: () => void; onExit: () => void;
 }) {
   const emoji = score >= 90 ? '🏆' : score >= 70 ? '⭐' : score >= 50 ? '👍' : '💪';

@@ -3,6 +3,7 @@ import { VOCABULARY } from '@engine/data/vocabulary';
 import { VocabCard, ThaiTone, TONE_COLORS } from '@engine/types';
 import { useGame } from '../context/GameContext';
 import { sfx, speakThai } from '../utils/audio';
+import { updateChallengeProgress } from '../utils/dailyChallenge';
 
 const TONES: { tone: ThaiTone; label: string; hint: string; contour: string; svgPath: string }[] = [
   { tone: 'mid',     label: 'Mid',     hint: 'flat, steady',          contour: '━━━━', svgPath: 'M0,20 L40,20' },
@@ -84,6 +85,7 @@ export function ToneTrainer({ onExit }: { onExit: () => void }) {
   if (phase === 'intro') return <IntroScreen onStart={start} onExit={onExit} />;
   if (phase === 'complete') {
     const score = results.filter(Boolean).length;
+    updateChallengeProgress('tone_trainer', score);
     return <ToneScoreScreen score={score} total={cards.length} cards={cards} results={results} onRetry={() => start(difficulty)} onExit={onExit} />;
   }
 

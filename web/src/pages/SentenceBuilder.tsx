@@ -3,6 +3,7 @@ import { VOCABULARY } from '@engine/data/vocabulary';
 import { VocabCard } from '@engine/types';
 import { useGame } from '../context/GameContext';
 import { sfx, speakThai } from '../utils/audio';
+import { updateChallengeProgress } from '../utils/dailyChallenge';
 
 interface BuildQuestion {
   card: VocabCard;
@@ -114,6 +115,7 @@ export function SentenceBuilder({ onExit }: { onExit: () => void }) {
 
   if (phase === 'complete') {
     const score = results.filter(Boolean).length;
+    updateChallengeProgress('sentence_builder', score);
     return <BuildScoreScreen score={score} total={questions.length} onRetry={initQuestions} onExit={onExit} />;
   }
 

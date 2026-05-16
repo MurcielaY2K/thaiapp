@@ -114,6 +114,8 @@ export function Profile({ onSettings }: { onSettings: () => void }) {
         {[
           ['✨', 'Total XP', profile.totalXP.toLocaleString(), 'var(--gold)'],
           ['🔥', 'Best Streak', profile.longestStreak, 'var(--warning)'],
+          ['🪙', 'Gold', profile.gold.toLocaleString(), 'var(--gold)'],
+          ['💎', 'Gems', profile.gems, 'var(--info)'],
           ['📖', 'Words', profile.totalWordsLearned, 'var(--success)'],
           ['📋', 'Reviewed', profile.totalCardsReviewed, 'var(--info)'],
           ['⭐', 'Mastered', stats.masteredCards, 'var(--gold)'],
