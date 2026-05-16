@@ -18,7 +18,7 @@ export function VocabBrowser() {
   const [filterRegion, setFilterRegion] = useState<GameRegion | 'all'>('all');
   const [filterTone, setFilterTone] = useState<ThaiTone | 'all'>('all');
   const [filterCat, setFilterCat] = useState<string>('all');
-  const [filterStatus, setFilterStatus] = useState<'all' | 'new' | 'seen' | 'favorites'>('all');
+  const [filterStatus, setFilterStatus] = useState<'all' | 'new' | 'seen' | 'favorites' | 'mastered' | 'due'>('all');
   const [expanded, setExpanded] = useState<string | null>(null);
   const [favorites, setFavorites] = useState<Set<string>>(() => getFavorites());
   const [hideRoman, setHideRoman] = useState(false);
@@ -51,6 +51,13 @@ export function VocabBrowser() {
       if (filterStatus === 'new' && srsMap.has(c.id)) return false;
       if (filterStatus === 'seen' && !srsMap.has(c.id)) return false;
       if (filterStatus === 'favorites' && !favorites.has(c.id)) return false;
+      const srsState = srsMap.get(c.id);
+      if (filterStatus === 'mastered' && !srsState?.isMastered) return false;
+      if (filterStatus === 'due') {
+        if (!srsState) return false;
+        const today = new Date().toISOString().split('T')[0];
+        if (srsState.nextReviewDate > today) return false;
+      }
 
       if (!q) return true;
       return (
@@ -118,6 +125,8 @@ export function VocabBrowser() {
           <FilterChip label="All" active={filterStatus === 'all'} onClick={() => setFilterStatus('all')} color="var(--text-sec)" />
           <FilterChip label="🆕 Unseen" active={filterStatus === 'new'} onClick={() => setFilterStatus(filterStatus === 'new' ? 'all' : 'new')} color="var(--success)" />
           <FilterChip label="📖 Studied" active={filterStatus === 'seen'} onClick={() => setFilterStatus(filterStatus === 'seen' ? 'all' : 'seen')} color="var(--info)" />
+          <FilterChip label="⭐ Mastered" active={filterStatus === 'mastered'} onClick={() => setFilterStatus(filterStatus === 'mastered' ? 'all' : 'mastered')} color="var(--gold)" />
+          <FilterChip label="📋 Due" active={filterStatus === 'due'} onClick={() => setFilterStatus(filterStatus === 'due' ? 'all' : 'due')} color="var(--warning)" />
           <FilterChip label={`♥ Saved${favorites.size > 0 ? ` (${favorites.size})` : ''}`} active={filterStatus === 'favorites'} onClick={() => setFilterStatus(filterStatus === 'favorites' ? 'all' : 'favorites')} color="var(--error)" />
           <span style={{ fontSize: 11, color: 'var(--text-muted)', marginLeft: 'auto', flexShrink: 0 }}>{filtered.length} word{filtered.length !== 1 ? 's' : ''}</span>
         </div>
