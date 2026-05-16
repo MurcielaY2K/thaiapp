@@ -12,7 +12,10 @@ const REGION_COLOR: Record<string, string> = {
   talee_tong: 'var(--r-tt)', mueang_hin: 'var(--r-mh)', wang_loi_faa: 'var(--r-wl)', daen_winyaan: 'var(--r-dw)',
 };
 
-export function Home({ onStudy, onQuiz, onFavQuiz, onHardQuiz }: { onStudy: () => void; onQuiz: () => void; onFavQuiz: () => void; onHardQuiz: () => void }) {
+export function Home({ onStudy, onQuiz, onFavQuiz, onHardQuiz, onTone, onMatch, onSentence }: {
+  onStudy: () => void; onQuiz: () => void; onFavQuiz: () => void; onHardQuiz: () => void;
+  onTone: () => void; onMatch: () => void; onSentence: () => void;
+}) {
   const { profile, stats, refreshStats, wordOfDay, dailyChallenge, facade } = useGame();
   useEffect(() => { refreshStats(); }, []);
 
@@ -167,21 +170,43 @@ export function Home({ onStudy, onQuiz, onFavQuiz, onHardQuiz }: { onStudy: () =
       )}
 
       {/* Daily challenge */}
-      {dailyChallenge && (
-        <div style={{ ...s.card, borderLeft: `4px solid ${dailyChallenge.completed ? 'var(--success)' : 'var(--gold)'}` }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-            <div style={{ fontSize: 12, fontWeight: 700, color: dailyChallenge.completed ? 'var(--success)' : 'var(--gold)', textTransform: 'uppercase', letterSpacing: 0.5 }}>
-              {dailyChallenge.completed ? '✅ Daily Challenge Done!' : '🎯 Daily Challenge'}
+      {dailyChallenge && (() => {
+        const challengeColor = dailyChallenge.completed ? 'var(--success)' : 'var(--gold)';
+        const challengeNav: Record<string, (() => void) | undefined> = {
+          study: onStudy, new_words: onStudy, quiz: onQuiz,
+          tone_trainer: onTone, memory_match: onMatch, sentence_builder: onSentence,
+        };
+        const challengeIcon: Record<string, string> = {
+          study: '📖', new_words: '✨', quiz: '🧠',
+          tone_trainer: '🎵', memory_match: '🃏', sentence_builder: '🔤',
+        };
+        const startFn = challengeNav[dailyChallenge.type];
+        return (
+          <div style={{ ...s.card, borderLeft: `4px solid ${challengeColor}` }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: challengeColor, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                {dailyChallenge.completed ? '✅ Daily Challenge Done!' : '🎯 Daily Challenge'}
+              </div>
+              <span style={{ fontSize: 11, color: 'var(--gold)', fontWeight: 700 }}>+{dailyChallenge.xpReward} XP</span>
             </div>
-            <span style={{ fontSize: 11, color: 'var(--gold)', fontWeight: 700 }}>+{dailyChallenge.xpReward} XP</span>
+            <div style={{ fontSize: 14, marginBottom: 8 }}>{dailyChallenge.description}</div>
+            <div className="progress-track" style={{ height: 6 }}>
+              <div className="progress-fill" style={{ width: `${Math.min(100, (dailyChallenge.progress / dailyChallenge.goal) * 100)}%`, background: challengeColor }} />
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 6 }}>
+              <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{dailyChallenge.progress}/{dailyChallenge.goal}</span>
+              {!dailyChallenge.completed && startFn && (
+                <button
+                  style={{ background: 'var(--gold)', color: '#000', borderRadius: 8, padding: '5px 14px', fontWeight: 700, fontSize: 12, display: 'flex', alignItems: 'center', gap: 5 }}
+                  onClick={startFn}
+                >
+                  {challengeIcon[dailyChallenge.type] ?? '▶'} Start Now
+                </button>
+              )}
+            </div>
           </div>
-          <div style={{ fontSize: 14, marginBottom: 8 }}>{dailyChallenge.description}</div>
-          <div className="progress-track" style={{ height: 6 }}>
-            <div className="progress-fill" style={{ width: `${Math.min(100, (dailyChallenge.progress / dailyChallenge.goal) * 100)}%`, background: dailyChallenge.completed ? 'var(--success)' : 'var(--gold)' }} />
-          </div>
-          <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>{dailyChallenge.progress}/{dailyChallenge.goal}</div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* SRS level distribution */}
       {facade && <SrsLevelChart srsMap={facade.srsMap} />}
