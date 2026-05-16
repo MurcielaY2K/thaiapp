@@ -4,6 +4,7 @@ import { VocabCard } from '@engine/types';
 import { useGame } from '../context/GameContext';
 import { sfx, speakThai } from '../utils/audio';
 import { updateChallengeProgress } from '../utils/dailyChallenge';
+import { getFavorites } from '../utils/favorites';
 
 type QuizMode = 'thai_to_english' | 'english_to_thai' | 'romanization' | 'type_english' | 'type_romanization' | 'listening';
 
@@ -77,7 +78,7 @@ const TYPE_MODES: { id: QuizMode; icon: string; title: string; desc: string }[] 
   { id: 'type_romanization',  icon: '✍️', title: 'Type romanization', desc: 'Type how the Thai word is romanized' },
 ];
 
-export function Quiz({ onExit }: { onExit: () => void }) {
+export function Quiz({ onExit, favoritesOnly }: { onExit: () => void; favoritesOnly?: boolean }) {
   const { profile } = useGame();
   const [phase, setPhase] = useState<'setup' | 'question' | 'feedback' | 'complete'>('setup');
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
@@ -92,8 +93,13 @@ export function Quiz({ onExit }: { onExit: () => void }) {
 
   const pool = (() => {
     const unlocked = profile?.unlockedRegions ?? ['krung_thon'];
-    const filtered = VOCABULARY.filter(c => unlocked.includes(c.region));
-    return filtered.length >= 12 ? filtered : VOCABULARY;
+    const base = VOCABULARY.filter(c => unlocked.includes(c.region));
+    if (favoritesOnly) {
+      const favIds = getFavorites();
+      const favCards = base.filter(c => favIds.has(c.id));
+      if (favCards.length >= 4) return favCards;
+    }
+    return base.length >= 12 ? base : VOCABULARY;
   })();
 
   useEffect(() => () => { if (timerRef.current) clearTimeout(timerRef.current); }, []);
@@ -149,7 +155,7 @@ export function Quiz({ onExit }: { onExit: () => void }) {
     }
   }, [phase, current]);
 
-  if (phase === 'setup') return <SetupScreen onSelect={startQuiz} onExit={onExit} />;
+  if (phase === 'setup') return <SetupScreen onSelect={startQuiz} onExit={onExit} favoritesOnly={!!favoritesOnly} />;
   if (phase === 'complete') {
     const score = results.filter(Boolean).length;
     return <ScoreScreen score={score} total={questions.length} questions={questions} results={results} onRetry={() => setPhase('setup')} onExit={onExit} />;
@@ -272,7 +278,7 @@ export function Quiz({ onExit }: { onExit: () => void }) {
   );
 }
 
-function SetupScreen({ onSelect, onExit }: { onSelect: (m: QuizMode) => void; onExit: () => void }) {
+function SetupScreen({ onSelect, onExit, favoritesOnly }: { onSelect: (m: QuizMode) => void; onExit: () => void; favoritesOnly: boolean }) {
   return (
     <div style={s.root}>
       <div style={s.topBar}>
@@ -282,10 +288,17 @@ function SetupScreen({ onSelect, onExit }: { onSelect: (m: QuizMode) => void; on
       </div>
       <div className="scroll" style={{ flex: 1, padding: '12px 20px 32px', display: 'flex', flexDirection: 'column', gap: 12 }}>
         <div style={{ textAlign: 'center', paddingTop: 12, marginBottom: 4 }}>
-          <div style={{ fontSize: 44, marginBottom: 8 }}>🧠</div>
-          <div style={{ fontSize: 22, fontWeight: 800 }}>Test your skills</div>
-          <div style={{ fontSize: 14, color: 'var(--text-muted)', marginTop: 4 }}>10 questions · Choose a mode</div>
+          <div style={{ fontSize: 44, marginBottom: 8 }}>{favoritesOnly ? '♥' : '🧠'}</div>
+          <div style={{ fontSize: 22, fontWeight: 800 }}>{favoritesOnly ? 'Saved Words Quiz' : 'Test your skills'}</div>
+          <div style={{ fontSize: 14, color: 'var(--text-muted)', marginTop: 4 }}>
+            {favoritesOnly ? 'Quiz your bookmarked words · Choose a mode' : '10 questions · Choose a mode'}
+          </div>
         </div>
+        {favoritesOnly && (
+          <div style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid var(--error)', borderRadius: 12, padding: '10px 14px', fontSize: 13, color: 'var(--error)', textAlign: 'center' }}>
+            ♥ Quizzing only your saved words
+          </div>
+        )}
 
         <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 0.5, marginTop: 8 }}>Multiple choice</div>
         {MC_MODES.map(m => (

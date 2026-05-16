@@ -12,7 +12,7 @@ const REGION_COLOR: Record<string, string> = {
   talee_tong: 'var(--r-tt)', mueang_hin: 'var(--r-mh)', wang_loi_faa: 'var(--r-wl)', daen_winyaan: 'var(--r-dw)',
 };
 
-export function Home({ onStudy, onQuiz }: { onStudy: () => void; onQuiz: () => void }) {
+export function Home({ onStudy, onQuiz, onFavQuiz }: { onStudy: () => void; onQuiz: () => void; onFavQuiz: () => void }) {
   const { profile, stats, refreshStats, wordOfDay, dailyChallenge, facade } = useGame();
   useEffect(() => { refreshStats(); }, []);
 
@@ -131,7 +131,7 @@ export function Home({ onStudy, onQuiz }: { onStudy: () => void; onQuiz: () => v
       </button>
 
       {favoriteCount > 0 && (
-        <button style={{ ...s.quizBtn, border: '1px solid var(--error)', color: 'var(--error)', background: 'rgba(239,68,68,0.05)' }} onClick={onQuiz}>
+        <button style={{ ...s.quizBtn, border: '1px solid var(--error)', color: 'var(--error)', background: 'rgba(239,68,68,0.05)' }} onClick={onFavQuiz}>
           <span style={{ fontSize: 22 }}>♥</span>
           <div style={{ flex: 1, textAlign: 'left' }}>
             <div style={{ fontWeight: 700 }}>Quiz Saved Words</div>

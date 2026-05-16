@@ -20,7 +20,7 @@ import { getLevelConfig } from '@engine/engine/gameEngine';
 import { sfx } from './utils/audio';
 
 type Tab = 'home' | 'learn' | 'map' | 'browse' | 'profile';
-type View = 'onboarding' | 'main' | 'study' | 'quiz' | 'tone' | 'sentence' | 'alphabet' | 'phrasebook' | 'session_complete' | 'settings';
+type View = 'onboarding' | 'main' | 'study' | 'quiz' | 'quiz_fav' | 'tone' | 'sentence' | 'alphabet' | 'phrasebook' | 'session_complete' | 'settings';
 
 interface CompleteState { summary: SessionSummary; xp: number; questIds: string[] }
 
@@ -84,6 +84,7 @@ export function App() {
     />
   );
   if (view === 'quiz')     return <Quiz         onExit={() => { setView('main'); setTab('learn'); }} />;
+  if (view === 'quiz_fav') return <Quiz         onExit={() => { setView('main'); setTab('learn'); }} favoritesOnly />;
   if (view === 'tone')     return <ToneTrainer  onExit={() => { setView('main'); setTab('learn'); }} />;
   if (view === 'sentence') return <SentenceBuilder onExit={() => { setView('main'); setTab('learn'); }} />;
   if (view === 'alphabet')    return <AlphabetDrill  onExit={() => { setView('main'); setTab('learn'); }} />;
@@ -139,7 +140,7 @@ export function App() {
       )}
 
       <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-        {tab === 'home'    && <Home onStudy={() => setView('study')} onQuiz={() => setView('quiz')} />}
+        {tab === 'home'    && <Home onStudy={() => setView('study')} onQuiz={() => setView('quiz')} onFavQuiz={() => setView('quiz_fav')} />}
         {tab === 'learn'   && <LearnTab onStudy={() => setView('study')} onQuiz={() => setView('quiz')} onTone={() => setView('tone')} onSentence={() => setView('sentence')} onAlphabet={() => setView('alphabet')} onPhrasebook={() => setView('phrasebook')} />}
         {tab === 'map'     && <MapTab />}
         {tab === 'browse'  && <VocabBrowser />}
