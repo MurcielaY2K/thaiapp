@@ -11,15 +11,17 @@ const REGION_COLOR: Record<string, string> = {
 const ALL_TONES: ThaiTone[] = ['mid', 'low', 'falling', 'high', 'rising'];
 
 export function VocabBrowser() {
-  const { profile } = useGame();
+  const { profile, facade } = useGame();
   const [search, setSearch] = useState('');
   const [filterRegion, setFilterRegion] = useState<GameRegion | 'all'>('all');
   const [filterTone, setFilterTone] = useState<ThaiTone | 'all'>('all');
   const [filterCat, setFilterCat] = useState<string>('all');
+  const [filterStatus, setFilterStatus] = useState<'all' | 'new' | 'seen'>('all');
   const [expanded, setExpanded] = useState<string | null>(null);
 
   const unlocked = profile?.unlockedRegions ?? ['krung_thon'];
   const pool = VOCABULARY.filter(c => unlocked.includes(c.region));
+  const srsMap = facade?.srsMap ?? new Map();
 
   const categories = useMemo(() => {
     const cats = new Set(pool.map(c => c.category));
@@ -32,6 +34,8 @@ export function VocabBrowser() {
       if (filterRegion !== 'all' && c.region !== filterRegion) return false;
       if (filterTone !== 'all' && c.tone !== filterTone) return false;
       if (filterCat !== 'all' && c.category !== filterCat) return false;
+      if (filterStatus === 'new' && srsMap.has(c.id)) return false;
+      if (filterStatus === 'seen' && !srsMap.has(c.id)) return false;
       if (!q) return true;
       return (
         c.thai.includes(q) ||
@@ -40,7 +44,7 @@ export function VocabBrowser() {
         c.englishAlternatives?.some(a => a.toLowerCase().includes(q))
       );
     });
-  }, [pool, search, filterRegion, filterTone, filterCat]);
+  }, [pool, search, filterRegion, filterTone, filterCat, filterStatus, srsMap]);
 
   const unlockedRegions = unlocked as GameRegion[];
 
@@ -87,7 +91,12 @@ export function VocabBrowser() {
           </select>
         </div>
 
-        <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 8 }}>{filtered.length} word{filtered.length !== 1 ? 's' : ''}</div>
+        <div style={{ display: 'flex', gap: 6, marginTop: 8, alignItems: 'center' }}>
+          <FilterChip label="All" active={filterStatus === 'all'} onClick={() => setFilterStatus('all')} color="var(--text-sec)" />
+          <FilterChip label="🆕 Unseen" active={filterStatus === 'new'} onClick={() => setFilterStatus(filterStatus === 'new' ? 'all' : 'new')} color="var(--success)" />
+          <FilterChip label="📖 Studied" active={filterStatus === 'seen'} onClick={() => setFilterStatus(filterStatus === 'seen' ? 'all' : 'seen')} color="var(--info)" />
+          <span style={{ fontSize: 11, color: 'var(--text-muted)', marginLeft: 'auto' }}>{filtered.length} word{filtered.length !== 1 ? 's' : ''}</span>
+        </div>
       </div>
 
       {/* List */}
@@ -96,6 +105,7 @@ export function VocabBrowser() {
           <CardRow
             key={card.id}
             card={card}
+            seen={srsMap.has(card.id)}
             isOpen={expanded === card.id}
             toggle={() => setExpanded(p => p === card.id ? null : card.id)}
           />
@@ -127,7 +137,7 @@ function FilterChip({ label, active, onClick, color }: { label: string; active: 
   );
 }
 
-function CardRow({ card, isOpen, toggle }: { card: VocabCard; isOpen: boolean; toggle: () => void }) {
+function CardRow({ card, isOpen, toggle, seen }: { card: VocabCard; isOpen: boolean; toggle: () => void; seen: boolean }) {
   const regionColor = REGION_COLOR[card.region] ?? 'var(--primary)';
   const toneColor = TONE_COLORS[card.tone];
 
@@ -137,7 +147,10 @@ function CardRow({ card, isOpen, toggle }: { card: VocabCard; isOpen: boolean; t
         style={{ width: '100%', background: 'transparent', padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 14, textAlign: 'left' }}
         onClick={toggle}
       >
-        <div style={{ width: 4, height: 40, borderRadius: 2, background: regionColor, flexShrink: 0 }} />
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, flexShrink: 0 }}>
+          <div style={{ width: 4, height: 32, borderRadius: 2, background: regionColor }} />
+          <div style={{ width: 6, height: 6, borderRadius: '50%', background: seen ? 'var(--success)' : 'var(--border)' }} />
+        </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
             <span style={{ fontSize: 22, fontWeight: 700, color: 'var(--text)' }}>{card.thai}</span>

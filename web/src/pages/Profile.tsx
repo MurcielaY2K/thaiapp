@@ -2,6 +2,7 @@ import React, { useEffect, useMemo } from 'react';
 import { useGame } from '../context/GameContext';
 import { ACHIEVEMENTS } from '../utils/achievements';
 import { REGIONS } from '@engine/types';
+import { VOCABULARY } from '@engine/data/vocabulary';
 
 const XP_PER_LEVEL = 500;
 const REGION_COLOR: Record<string, string> = {
@@ -11,8 +12,18 @@ const REGION_COLOR: Record<string, string> = {
 
 const RARITY_COLOR = { common: 'var(--text-sec)', rare: 'var(--info)', legendary: 'var(--gold)' };
 
+const COMPANION_DATA: Record<string, { icon: string; name: string; desc: string }> = {
+  phi_lok:           { icon: '👻', name: 'Phi Lok',          desc: 'Spirit of the Golden Port' },
+  rice_spirit:       { icon: '🌾', name: 'Rice Spirit',       desc: 'Keeper of the harvest plains' },
+  mountain_eagle:    { icon: '🦅', name: 'Mountain Eagle',    desc: 'Guardian of the northern peaks' },
+  naga_water:        { icon: '🐉', name: 'Naga Water',        desc: 'Serpent lord of the Golden Sea' },
+  stone_guardian:    { icon: '🗿', name: 'Stone Guardian',    desc: 'Ancient warden of the ruins' },
+  phoenix_spirit:    { icon: '🔥', name: 'Phoenix Spirit',    desc: 'Celestial flame of the Sky Palace' },
+  enlightened_spirit:{ icon: '✨', name: 'Enlightened Spirit', desc: 'Sage of the Spirit Realm' },
+};
+
 export function Profile({ onSettings }: { onSettings: () => void }) {
-  const { profile, stats, heatmap, earnedAchievementIds, refreshStats } = useGame();
+  const { profile, stats, heatmap, earnedAchievementIds, refreshStats, facade } = useGame();
   useEffect(() => { refreshStats(); }, []);
 
   if (!profile || !stats) return null;
@@ -103,22 +114,67 @@ export function Profile({ onSettings }: { onSettings: () => void }) {
         </div>
       </div>
 
+      {/* Vocabulary by region */}
+      <VocabByRegion unlockedRegions={profile.unlockedRegions} srsMap={facade?.srsMap ?? new Map()} />
+
       {/* Companions */}
       {profile.collectedCompanionIds.length > 0 && (
         <div>
-          <div style={s.sectionTitle}>Companions</div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
-            {profile.collectedCompanionIds.map((cid: string) => (
-              <div key={cid} style={{ background: 'var(--surface)', border: '1px solid var(--primary)', borderRadius: 14, padding: '12px 16px', textAlign: 'center' }}>
-                <div style={{ fontSize: 28 }}>🐾</div>
-                <div style={{ fontSize: 12, color: 'var(--primary)', fontWeight: 600, marginTop: 4 }}>{cid}</div>
-              </div>
-            ))}
+          <div style={s.sectionTitle}>Companions · {profile.collectedCompanionIds.length} collected</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {profile.collectedCompanionIds.map((cid: string) => {
+              const c = COMPANION_DATA[cid] ?? { icon: '🐾', name: cid, desc: 'Mysterious companion' };
+              return (
+                <div key={cid} style={{ background: 'var(--surface)', border: '1px solid var(--primary)', borderRadius: 14, padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 14 }}>
+                  <span style={{ fontSize: 32 }}>{c.icon}</span>
+                  <div>
+                    <div style={{ fontWeight: 700, fontSize: 15, color: 'var(--primary)' }}>{c.name}</div>
+                    <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{c.desc}</div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
 
       <div style={{ paddingBottom: 20 }} />
+    </div>
+  );
+}
+
+function VocabByRegion({ unlockedRegions, srsMap }: { unlockedRegions: string[]; srsMap: Map<string, unknown> }) {
+  const regionCounts = useMemo(() => {
+    const counts: Record<string, { total: number; seen: number }> = {};
+    for (const card of VOCABULARY) {
+      if (!counts[card.region]) counts[card.region] = { total: 0, seen: 0 };
+      counts[card.region].total++;
+      if (srsMap.has(card.id)) counts[card.region].seen++;
+    }
+    return counts;
+  }, [srsMap]);
+
+  return (
+    <div>
+      <div style={s.sectionTitle}>Vocabulary by Region</div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {unlockedRegions.map(r => {
+          const color = REGION_COLOR[r] ?? 'var(--primary)';
+          const { total = 0, seen = 0 } = regionCounts[r] ?? {};
+          const pct = total > 0 ? Math.round((seen / total) * 100) : 0;
+          return (
+            <div key={r} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 12 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                <span style={{ fontSize: 13, fontWeight: 600, color }}>{REGIONS[r as keyof typeof REGIONS].nameEnglish}</span>
+                <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{seen}/{total} seen</span>
+              </div>
+              <div className="progress-track" style={{ height: 5 }}>
+                <div className="progress-fill" style={{ width: `${pct}%`, background: color }} />
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
