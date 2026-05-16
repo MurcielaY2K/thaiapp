@@ -146,13 +146,25 @@ export function App() {
 
       <nav className="bottom-nav">
         {TABS.map(({ id, icon, label }) => (
-          <button key={id} className={`nav-tab${tab === id ? ' active' : ''}`} onClick={() => setTab(id)}>
+          <button key={id} className={`nav-tab${tab === id ? ' active' : ''}`} onClick={() => setTab(id)} style={{ position: 'relative' }}>
             <span className="icon">{icon}</span>
+            {id === 'home' && <DueBadge />}
             {label}
           </button>
         ))}
       </nav>
     </>
+  );
+}
+
+function DueBadge() {
+  const { stats } = useGame();
+  const due = (stats?.dueToday ?? 0) + (stats?.newAvailable ?? 0);
+  if (due === 0) return null;
+  return (
+    <span style={{ position: 'absolute', top: 4, right: 'calc(50% - 18px)', background: 'var(--error)', color: '#fff', borderRadius: 999, fontSize: 9, fontWeight: 800, padding: '1px 5px', minWidth: 16, textAlign: 'center', lineHeight: '14px' }}>
+      {due > 99 ? '99+' : due}
+    </span>
   );
 }
 

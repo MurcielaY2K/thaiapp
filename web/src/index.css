@@ -29,6 +29,20 @@
   --r-dw:        #C084FC;
 }
 
+/* Light theme */
+[data-theme="light"] {
+  --bg:         #F8F9FB;
+  --surface:    #FFFFFF;
+  --surface-hi: #F1F5F9;
+  --border:     #E2E8F0;
+  --text:       #0F172A;
+  --text-sec:   #475569;
+  --text-muted: #94A3B8;
+  --primary:    #7C3AED;
+  --primary-dk: #6D28D9;
+  --good:       #4F46E5;
+}
+
 html, body, #root {
   height: 100%;
   background: var(--bg);

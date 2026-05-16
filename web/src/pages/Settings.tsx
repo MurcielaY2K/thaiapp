@@ -3,10 +3,25 @@ import { useGame } from '../context/GameContext';
 import { VOCABULARY_STATS } from '@engine/data/vocabulary';
 import { speakThai } from '../utils/audio';
 
+function getTheme(): 'dark' | 'light' {
+  return (localStorage.getItem('thaiquest:theme') as 'dark' | 'light') ?? 'dark';
+}
+function setTheme(t: 'dark' | 'light') {
+  localStorage.setItem('thaiquest:theme', t);
+  document.documentElement.setAttribute('data-theme', t === 'light' ? 'light' : '');
+}
+
 export function Settings({ onBack }: { onBack: () => void }) {
   const { resetProgress } = useGame();
   const [confirmReset, setConfirmReset] = useState(false);
   const [importStatus, setImportStatus] = useState<'idle' | 'ok' | 'err'>('idle');
+  const [theme, setThemeState] = useState<'dark' | 'light'>(getTheme);
+
+  const toggleTheme = () => {
+    const next = theme === 'dark' ? 'light' : 'dark';
+    setTheme(next);
+    setThemeState(next);
+  };
 
   const handleExport = () => {
     const data = localStorage.getItem('thaiquest_save') ?? '{}';
@@ -54,6 +69,15 @@ export function Settings({ onBack }: { onBack: () => void }) {
           <InfoRow label="Algorithm" value="SRS · SM-2 spaced repetition" />
           <InfoRow label="Total vocabulary" value={`${VOCABULARY_STATS.total} words`} />
           <InfoRow label="With cultural notes" value={`${VOCABULARY_STATS.withCulturalNotes} cards`} />
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: 4 }}>
+            <span style={{ fontSize: 14, color: 'var(--text-sec)' }}>{theme === 'dark' ? '🌙 Dark mode' : '☀️ Light mode'}</span>
+            <button
+              onClick={toggleTheme}
+              style={{ background: theme === 'light' ? 'var(--primary)' : 'var(--surface-hi)', border: '1px solid var(--border)', borderRadius: 999, padding: '6px 16px', fontSize: 13, fontWeight: 600, color: theme === 'light' ? '#fff' : 'var(--text-sec)' }}
+            >
+              Switch to {theme === 'dark' ? 'Light' : 'Dark'}
+            </button>
+          </div>
         </div>
 
         {/* Thai Grammar Quick Reference */}
