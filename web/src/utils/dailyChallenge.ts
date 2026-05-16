@@ -43,11 +43,14 @@ export function getDailyChallenge(): DailyChallenge {
   return challenge;
 }
 
-export function updateChallengeProgress(type: DailyChallenge['type'], amount: number): DailyChallenge {
+export function updateChallengeProgress(
+  type: DailyChallenge['type'],
+  amount: number,
+): { challenge: DailyChallenge; justCompleted: boolean } {
   const challenge = getDailyChallenge();
-  if (challenge.completed || challenge.type !== type) return challenge;
+  if (challenge.completed || challenge.type !== type) return { challenge, justCompleted: false };
   const progress = Math.min(challenge.goal, challenge.progress + amount);
   const updated = { ...challenge, progress, completed: progress >= challenge.goal };
   localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-  return updated;
+  return { challenge: updated, justCompleted: updated.completed };
 }

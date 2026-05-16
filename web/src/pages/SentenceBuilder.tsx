@@ -30,7 +30,7 @@ function buildQuestion(card: VocabCard): BuildQuestion | null {
 }
 
 export function SentenceBuilder({ onExit }: { onExit: () => void }) {
-  const { profile } = useGame();
+  const { profile, refreshDailyChallenge, awardChallengeXP } = useGame();
   const [phase, setPhase] = useState<'question' | 'feedback' | 'complete'>('question');
   const [questions, setQuestions] = useState<BuildQuestion[]>([]);
   const [current, setCurrent] = useState(0);
@@ -66,6 +66,14 @@ export function SentenceBuilder({ onExit }: { onExit: () => void }) {
   useEffect(() => { initQuestions(); }, []);
 
   useEffect(() => () => { if (timerRef.current) clearTimeout(timerRef.current); }, []);
+
+  useEffect(() => {
+    if (phase !== 'complete') return;
+    const score = results.filter(Boolean).length;
+    const r = updateChallengeProgress('sentence_builder', score);
+    if (r.justCompleted) awardChallengeXP(r.challenge.xpReward);
+    refreshDailyChallenge();
+  }, [phase]);
 
   const placeTile = useCallback((word: string, idx: number) => {
     if (phase !== 'question') return;
@@ -115,7 +123,6 @@ export function SentenceBuilder({ onExit }: { onExit: () => void }) {
 
   if (phase === 'complete') {
     const score = results.filter(Boolean).length;
-    updateChallengeProgress('sentence_builder', score);
     return <BuildScoreScreen score={score} total={questions.length} onRetry={initQuestions} onExit={onExit} />;
   }
 

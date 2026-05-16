@@ -22,6 +22,7 @@ interface GameContextValue {
   refreshStats: () => void;
   refreshDailyChallenge: () => void;
   resetProgress: () => Promise<void>;
+  awardChallengeXP: (xp: number) => Promise<void>;
   heatmap: Record<string, number>;
   achievements: Achievement[];
   earnedAchievementIds: Set<string>;
@@ -159,6 +160,14 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  const awardChallengeXP = useCallback(async (xp: number) => {
+    const f = facadeRef.current;
+    if (!f) return;
+    const p = f.profile;
+    await f.saveProfile({ ...p, totalXP: p.totalXP + xp });
+    refreshStats();
+  }, [refreshStats]);
+
   const resetProgress = useCallback(async () => {
     if (!facadeRef.current) return;
     await facadeRef.current.resetProgress();
@@ -176,7 +185,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       facade: facadeRef.current,
       profile, stats, isLoading,
       hasProfile: profile !== null,
-      createProfile, refreshStats, refreshDailyChallenge, resetProgress,
+      createProfile, refreshStats, refreshDailyChallenge, resetProgress, awardChallengeXP,
       heatmap,
       achievements,
       earnedAchievementIds,

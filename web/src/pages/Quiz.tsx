@@ -79,7 +79,7 @@ const TYPE_MODES: { id: QuizMode; icon: string; title: string; desc: string }[] 
 ];
 
 export function Quiz({ onExit, favoritesOnly, hardOnly }: { onExit: () => void; favoritesOnly?: boolean; hardOnly?: boolean }) {
-  const { profile, facade, refreshDailyChallenge } = useGame();
+  const { profile, facade, refreshDailyChallenge, awardChallengeXP } = useGame();
   const [rapidFire, setRapidFire] = useState(false);
   const [isMixed, setIsMixed] = useState(false);
   const [phase, setPhase] = useState<'setup' | 'question' | 'feedback' | 'complete'>('setup');
@@ -143,7 +143,8 @@ export function Quiz({ onExit, favoritesOnly, hardOnly }: { onExit: () => void; 
       const next = current + 1;
       if (next >= questions.length) {
         const score = newResults.filter(Boolean).length;
-        updateChallengeProgress('quiz', score);
+        const qr = updateChallengeProgress('quiz', score);
+        if (qr.justCompleted) awardChallengeXP(qr.challenge.xpReward);
         refreshDailyChallenge();
         sfx.complete();
         setPhase('complete');

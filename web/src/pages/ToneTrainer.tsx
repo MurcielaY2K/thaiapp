@@ -32,7 +32,7 @@ function shuffle<T>(arr: T[]): T[] {
 }
 
 export function ToneTrainer({ onExit }: { onExit: () => void }) {
-  const { profile } = useGame();
+  const { profile, refreshDailyChallenge, awardChallengeXP } = useGame();
   const [phase, setPhase] = useState<'intro' | 'question' | 'feedback' | 'complete'>('intro');
   const [difficulty, setDifficulty] = useState<ToneDifficulty>('easy');
   const [cards, setCards] = useState<VocabCard[]>([]);
@@ -82,10 +82,17 @@ export function ToneTrainer({ onExit }: { onExit: () => void }) {
     }, correct ? 900 : 1800);
   }, [phase, cards, current]);
 
+  useEffect(() => {
+    if (phase !== 'complete') return;
+    const score = results.filter(Boolean).length;
+    const r = updateChallengeProgress('tone_trainer', score);
+    if (r.justCompleted) awardChallengeXP(r.challenge.xpReward);
+    refreshDailyChallenge();
+  }, [phase]);
+
   if (phase === 'intro') return <IntroScreen onStart={start} onExit={onExit} />;
   if (phase === 'complete') {
     const score = results.filter(Boolean).length;
-    updateChallengeProgress('tone_trainer', score);
     return <ToneScoreScreen score={score} total={cards.length} cards={cards} results={results} onRetry={() => start(difficulty)} onExit={onExit} />;
   }
 

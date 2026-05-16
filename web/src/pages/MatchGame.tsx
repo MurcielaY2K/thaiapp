@@ -45,7 +45,7 @@ function buildCards(cards: VocabCard[], pairs: number): MatchCard[] {
 }
 
 export function MatchGame({ onExit }: { onExit: () => void }) {
-  const { profile } = useGame();
+  const { profile, refreshDailyChallenge, awardChallengeXP } = useGame();
   const [difficulty, setDifficulty] = useState<Difficulty | null>(null);
   const [cards, setCards] = useState<MatchCard[]>([]);
   const [firstFlipped, setFirstFlipped] = useState<string | null>(null);
@@ -76,6 +76,13 @@ export function MatchGame({ onExit }: { onExit: () => void }) {
       setPhase('complete');
     }
   }, [cards, phase]);
+
+  useEffect(() => {
+    if (phase !== 'complete') return;
+    const r = updateChallengeProgress('memory_match', 1);
+    if (r.justCompleted) awardChallengeXP(r.challenge.xpReward);
+    refreshDailyChallenge();
+  }, [phase]);
 
   const startGame = useCallback((diff: Difficulty) => {
     setDifficulty(diff);
@@ -141,7 +148,6 @@ export function MatchGame({ onExit }: { onExit: () => void }) {
 
   if (phase === 'complete') {
     const score = Math.max(0, Math.round(pairs * 100 / Math.max(pairs, attempts)));
-    updateChallengeProgress('memory_match', 1);
     return <ScoreScreen score={score} pairs={pairs} attempts={attempts} timeStr={timeStr} difficulty={difficulty!} onPlayAgain={() => startGame(difficulty!)} onChangeLevel={() => setPhase('setup')} onExit={onExit} />;
   }
 
