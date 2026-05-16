@@ -1,5 +1,6 @@
 import React from 'react';
 import { REGIONS, GameRegion } from '@engine/types';
+import { VOCABULARY } from '@engine/data/vocabulary';
 import { useGame } from '../context/GameContext';
 
 const REGION_ORDER: GameRegion[] = [
@@ -27,11 +28,30 @@ const REGION_COLOR: Record<GameRegion, string> = {
   daen_winyaan: 'var(--r-dw)',
 };
 
+const REGION_DIFFICULTY: Record<GameRegion, { label: string; stars: number }> = {
+  krung_thon:   { label: 'Beginner',     stars: 1 },
+  paa_isaan:    { label: 'Beginner+',    stars: 1 },
+  doi_nuea:     { label: 'Intermediate', stars: 2 },
+  talee_tong:   { label: 'Intermediate', stars: 2 },
+  mueang_hin:   { label: 'Advanced',     stars: 3 },
+  wang_loi_faa: { label: 'Advanced',     stars: 3 },
+  daen_winyaan: { label: 'Expert',       stars: 4 },
+};
+
 export function WorldMap() {
   const { profile, facade } = useGame();
   if (!profile) return null;
 
   const unlocked = new Set(profile.unlockedRegions);
+  const srsMap = facade?.srsMap ?? new Map();
+
+  // Pre-compute vocab counts per region
+  const vocabByRegion = VOCABULARY.reduce((acc, c) => {
+    if (!acc[c.region]) acc[c.region] = { total: 0, seen: 0 };
+    acc[c.region].total++;
+    if (srsMap.has(c.id)) acc[c.region].seen++;
+    return acc;
+  }, {} as Record<string, { total: number; seen: number }>);
 
   return (
     <div className="scroll" style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 0 }}>
@@ -87,19 +107,36 @@ export function WorldMap() {
 
               <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 10, lineHeight: 1.5 }}>{cfg.description}</div>
 
-              <div style={{ display: 'flex', gap: 16, fontSize: 12, color: 'var(--text-muted)', marginBottom: isUnlocked ? 10 : 0 }}>
+              <div style={{ display: 'flex', gap: 12, fontSize: 12, color: 'var(--text-muted)', marginBottom: 10, flexWrap: 'wrap' }}>
                 <span>📚 {cfg.cardCount} words</span>
                 <span>⚔️ {cfg.questCount} quests</span>
-                <span>👹 {cfg.bossName}</span>
+                <span style={{ color: REGION_DIFFICULTY[region].stars >= 3 ? 'var(--warning)' : 'var(--text-muted)' }}>
+                  {'★'.repeat(REGION_DIFFICULTY[region].stars)}{'☆'.repeat(4 - REGION_DIFFICULTY[region].stars)} {REGION_DIFFICULTY[region].label}
+                </span>
               </div>
+
+              {isUnlocked && (() => {
+                const vc = vocabByRegion[region] ?? { total: 0, seen: 0 };
+                const vocabPct = vc.total > 0 ? Math.round((vc.seen / vc.total) * 100) : 0;
+                return (
+                  <div style={{ marginBottom: board ? 10 : 0 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: 'var(--text-muted)', marginBottom: 3 }}>
+                      <span>Vocabulary</span><span>{vc.seen}/{vc.total} words studied</span>
+                    </div>
+                    <div className="progress-track" style={{ height: 4 }}>
+                      <div className="progress-fill" style={{ width: `${vocabPct}%`, background: `${color}cc` }} />
+                    </div>
+                  </div>
+                );
+              })()}
 
               {isUnlocked && board && (
                 <>
-                  <div className="progress-track" style={{ height: 5, marginBottom: 4 }}>
-                    <div className="progress-fill" style={{ width: `${questPct}%`, background: color }} />
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: 'var(--text-muted)', marginBottom: 3 }}>
+                    <span>Quests</span><span>{doneQuests}/{totalQuests} completed</span>
                   </div>
-                  <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-                    {doneQuests}/{totalQuests} quests · {questPct}% complete
+                  <div className="progress-track" style={{ height: 4 }}>
+                    <div className="progress-fill" style={{ width: `${questPct}%`, background: color }} />
                   </div>
                 </>
               )}
