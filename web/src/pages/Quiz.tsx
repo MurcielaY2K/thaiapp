@@ -77,6 +77,7 @@ export function Quiz({ onExit }: { onExit: () => void }) {
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [current, setCurrent] = useState(0);
   const [results, setResults] = useState<boolean[]>([]);
+  const [streak, setStreak] = useState(0);
   const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
   const [typedAnswer, setTypedAnswer] = useState('');
   const [typedCorrect, setTypedCorrect] = useState<boolean | null>(null);
@@ -94,12 +95,14 @@ export function Quiz({ onExit }: { onExit: () => void }) {
   const startQuiz = useCallback((mode: QuizMode) => {
     const picks = shuffle(pool).slice(0, QUIZ_SIZE);
     setQuestions(picks.map(c => buildQuestion(c, mode, pool)));
-    setCurrent(0); setResults([]); setSelectedIdx(null); setTypedAnswer(''); setTypedCorrect(null);
+    setCurrent(0); setResults([]); setStreak(0); setSelectedIdx(null); setTypedAnswer(''); setTypedCorrect(null);
     setPhase('question');
   }, [pool]);
 
   const advance = useCallback((correct: boolean) => {
     if (correct) sfx.correct(); else { sfx.wrong(); speakThai(questions[current].card.thai); }
+    const newStreak = correct ? streak + 1 : 0;
+    setStreak(newStreak);
     const newResults = [...results, correct];
     setResults(newResults);
     setPhase('feedback');
@@ -157,6 +160,11 @@ export function Quiz({ onExit }: { onExit: () => void }) {
           </div>
         </div>
         <span style={s.counter}>{current + 1}/{questions.length}</span>
+        {streak >= 3 && (
+          <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--gold)', background: 'rgba(245,158,11,0.15)', borderRadius: 999, padding: '3px 10px', flexShrink: 0 }}>
+            🔥 {streak}
+          </span>
+        )}
       </div>
 
       <div style={{ display: 'flex', gap: 6, padding: '0 20px 16px', justifyContent: 'center' }}>
