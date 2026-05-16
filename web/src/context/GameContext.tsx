@@ -19,9 +19,11 @@ interface GameContextValue {
   achievements: Achievement[];
   earnedAchievementIds: Set<string>;
   newAchievements: Achievement[];
+  levelUp: number | null;
   dailyChallenge: DailyChallenge | null;
   wordOfDay: VocabCard | null;
   dismissNewAchievements: () => void;
+  dismissLevelUp: () => void;
   refreshAchievements: () => void;
 }
 
@@ -36,6 +38,8 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   const [achievements, setAchievements] = useState<Achievement[]>(ACHIEVEMENTS);
   const [earnedAchievementIds, setEarnedAchievementIds] = useState<Set<string>>(new Set());
   const [newAchievements, setNewAchievements] = useState<Achievement[]>([]);
+  const [levelUp, setLevelUp] = useState<number | null>(null);
+  const prevLevelRef = useRef<number>(1);
   const [dailyChallenge, setDailyChallenge] = useState<DailyChallenge | null>(null);
   const [wordOfDay, setWordOfDay] = useState<VocabCard | null>(null);
 
@@ -63,6 +67,10 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       setStats(currentStats);
       setProfile(currentProfile);
       setHeatmap(f.getReviewHeatmap());
+      if (currentProfile.currentLevel > prevLevelRef.current) {
+        setLevelUp(currentProfile.currentLevel);
+      }
+      prevLevelRef.current = currentProfile.currentLevel;
       // Check achievements whenever stats are refreshed
       const newly = checkAchievements(currentProfile, currentStats);
       const earned = getEarnedIds();
@@ -75,6 +83,10 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
   const dismissNewAchievements = useCallback(() => {
     setNewAchievements([]);
+  }, []);
+
+  const dismissLevelUp = useCallback(() => {
+    setLevelUp(null);
   }, []);
 
   useEffect(() => {
@@ -95,6 +107,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         setProfile(currentProfile);
         setStats(currentStats);
         setHeatmap(facade.getReviewHeatmap());
+        prevLevelRef.current = currentProfile.currentLevel;
         const newly = checkAchievements(currentProfile, currentStats);
         const earned = getEarnedIds();
         setEarnedAchievementIds(new Set(earned));
@@ -145,9 +158,11 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       achievements,
       earnedAchievementIds,
       newAchievements,
+      levelUp,
       dailyChallenge,
       wordOfDay,
       dismissNewAchievements,
+      dismissLevelUp,
       refreshAchievements,
     }}>
       {children}

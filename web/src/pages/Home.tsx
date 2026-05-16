@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { useGame } from '../context/GameContext';
 import { REGIONS, TONE_COLORS } from '@engine/types';
 import { VOCABULARY } from '@engine/data/vocabulary';
+import { getLevelConfig } from '@engine/engine/gameEngine';
 
 const XP_PER_LEVEL = 500;
 const REGION_COLOR: Record<string, string> = {
@@ -16,6 +17,7 @@ export function Home({ onStudy, onQuiz }: { onStudy: () => void; onQuiz: () => v
   if (!profile || !stats) return null;
 
   const levelXP = profile.totalXP % XP_PER_LEVEL;
+  const levelCfg = getLevelConfig(profile.currentLevel);
   const region = profile.unlockedRegions[profile.unlockedRegions.length - 1] ?? 'krung_thon';
   const regionCfg = REGIONS[region as keyof typeof REGIONS];
   const regionColor = REGION_COLOR[region] ?? 'var(--primary)';
@@ -50,6 +52,7 @@ export function Home({ onStudy, onQuiz }: { onStudy: () => void; onQuiz: () => v
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <span style={{ fontSize: 16 }}>⚡</span>
             <span style={{ fontWeight: 700 }}>Level {profile.currentLevel}</span>
+            <span style={{ fontSize: 13, color: 'var(--primary)', fontWeight: 600 }}>{levelCfg.titleThai}</span>
           </div>
           <span style={{ color: 'var(--text-sec)', fontSize: 13 }}>{levelXP} / {XP_PER_LEVEL} XP</span>
         </div>

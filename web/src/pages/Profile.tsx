@@ -3,6 +3,7 @@ import { useGame } from '../context/GameContext';
 import { ACHIEVEMENTS } from '../utils/achievements';
 import { REGIONS } from '@engine/types';
 import { VOCABULARY } from '@engine/data/vocabulary';
+import { getLevelConfig } from '@engine/engine/gameEngine';
 
 const XP_PER_LEVEL = 500;
 const REGION_COLOR: Record<string, string> = {
@@ -29,6 +30,7 @@ export function Profile({ onSettings }: { onSettings: () => void }) {
   if (!profile || !stats) return null;
 
   const levelXP = profile.totalXP % XP_PER_LEVEL;
+  const levelCfg = getLevelConfig(profile.currentLevel);
 
   return (
     <div className="scroll" style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 20 }}>
@@ -41,7 +43,8 @@ export function Profile({ onSettings }: { onSettings: () => void }) {
           </button>
         </div>
         <div style={{ fontSize: 24, fontWeight: 800 }}>{profile.name}</div>
-        <div style={{ fontSize: 13, color: 'var(--primary)', fontWeight: 600 }}>Level {profile.currentLevel} Traveler</div>
+        <div style={{ fontSize: 22, color: 'var(--primary)', fontWeight: 700, letterSpacing: 0.5 }}>{levelCfg.titleThai}</div>
+        <div style={{ fontSize: 13, color: 'var(--text-muted)', fontWeight: 600 }}>Level {profile.currentLevel} · {levelCfg.titleEnglish} · {levelCfg.titleRomanized}</div>
         <div style={{ width: '100%', marginTop: 14, display: 'flex', flexDirection: 'column', gap: 6 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: 'var(--text-muted)' }}>
             <span>XP to next level</span><span>{levelXP} / {XP_PER_LEVEL}</span>

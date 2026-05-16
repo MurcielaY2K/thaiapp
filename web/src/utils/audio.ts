@@ -22,13 +22,12 @@ function beep(freq: number, duration: number, type: OscillatorType = 'sine', gai
 }
 
 export const sfx = {
-  correct: () => { beep(523, 0.08); setTimeout(() => beep(784, 0.12), 80); },
-  wrong:   () => { beep(220, 0.18, 'sawtooth', 0.12); },
-  flip:    () => beep(1200, 0.03, 'sine', 0.06),
-  tap:     () => beep(800, 0.04, 'sine', 0.05),
-  complete:() => {
-    [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => beep(f, 0.15), i * 90));
-  },
+  correct:  () => { beep(523, 0.08); setTimeout(() => beep(784, 0.12), 80); },
+  wrong:    () => { beep(220, 0.18, 'sawtooth', 0.12); },
+  flip:     () => beep(1200, 0.03, 'sine', 0.06),
+  tap:      () => beep(800, 0.04, 'sine', 0.05),
+  complete: () => { [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => beep(f, 0.15), i * 90)); },
+  levelUp:  () => { [392, 523, 659, 784, 1047, 1319].forEach((f, i) => setTimeout(() => beep(f, 0.2, 'sine', 0.18), i * 80)); },
 };
 
 let ttsVoice: SpeechSynthesisVoice | null | undefined = undefined;

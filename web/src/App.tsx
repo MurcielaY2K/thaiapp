@@ -14,6 +14,8 @@ import { WorldMap } from './pages/WorldMap';
 import { Settings } from './pages/Settings';
 import { TONE_COLORS } from '@engine/types';
 import { SessionSummary } from '@engine/engine/sessionManager';
+import { getLevelConfig } from '@engine/engine/gameEngine';
+import { sfx } from './utils/audio';
 
 type Tab = 'home' | 'learn' | 'map' | 'browse' | 'profile';
 type View = 'onboarding' | 'main' | 'study' | 'quiz' | 'tone' | 'sentence' | 'session_complete' | 'settings';
@@ -29,7 +31,7 @@ const TABS: { id: Tab; icon: string; label: string }[] = [
 ];
 
 export function App() {
-  const { isLoading, hasProfile, newAchievements, dismissNewAchievements } = useGame();
+  const { isLoading, hasProfile, newAchievements, dismissNewAchievements, levelUp, dismissLevelUp } = useGame();
   const [view, setView] = useState<View>('main');
   const [tab, setTab] = useState<Tab>('home');
   const [complete, setComplete] = useState<CompleteState | null>(null);
@@ -53,6 +55,17 @@ export function App() {
       return () => clearTimeout(t);
     }
   }, [newAchievements]);
+
+  // Level-up toast
+  const [showLevelUp, setShowLevelUp] = useState(false);
+  useEffect(() => {
+    if (levelUp !== null) {
+      setShowLevelUp(true);
+      sfx.levelUp();
+      const t = setTimeout(() => { setShowLevelUp(false); dismissLevelUp(); }, 4000);
+      return () => clearTimeout(t);
+    }
+  }, [levelUp]);
 
   if (isLoading) return (
     <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
@@ -96,6 +109,19 @@ export function App() {
           <button style={{ background: 'transparent', color: 'var(--text-muted)', fontSize: 18, padding: 4, flexShrink: 0 }} onClick={() => setShowInstall(false)}>✕</button>
         </div>
       )}
+
+      {/* Level-up toast */}
+      {showLevelUp && levelUp !== null && (() => {
+        const cfg = getLevelConfig(levelUp);
+        return (
+          <div style={{ position: 'fixed', top: 20, left: '50%', transform: 'translateX(-50%)', zIndex: 1001, background: 'linear-gradient(135deg, var(--primary), var(--gold))', borderRadius: 16, padding: '14px 22px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, boxShadow: '0 6px 32px rgba(0,0,0,0.5)', animation: 'slideUp 0.3s ease forwards', maxWidth: 300 }}>
+            <div style={{ fontSize: 28 }}>⚡</div>
+            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.8)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1 }}>Level Up!</div>
+            <div style={{ fontSize: 22, fontWeight: 800, color: '#fff' }}>{cfg.titleThai}</div>
+            <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.9)' }}>Level {levelUp} · {cfg.titleEnglish}</div>
+          </div>
+        );
+      })()}
 
       {/* Achievement toast */}
       {toastAchievement && (

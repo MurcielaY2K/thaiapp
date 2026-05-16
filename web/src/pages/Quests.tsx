@@ -69,10 +69,11 @@ function QuestRow({ entry, color, isOpen, toggle }: { entry: QuestBoardEntry; co
   const { quest, status, progress, progressPercent } = entry;
   const icon = status === 'completed' ? '✅' : status === 'active' ? '⚔️' : status === 'available' ? '📜' : '🔒';
   const statusColor = status === 'completed' ? 'var(--success)' : status === 'active' ? color : status === 'available' ? 'var(--text-sec)' : 'var(--text-muted)';
+  const expandable = status === 'active' || status === 'available';
 
   return (
-    <div style={{ background: 'var(--surface)', borderRadius: 12, padding: 14, border: '1px solid var(--border)', marginBottom: 8, opacity: status === 'locked' ? 0.45 : 1 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: status !== 'locked' ? 'pointer' : 'default' }} onClick={status !== 'locked' ? toggle : undefined}>
+    <div style={{ background: 'var(--surface)', borderRadius: 12, padding: 14, border: `1px solid ${status === 'active' ? color : 'var(--border)'}`, marginBottom: 8, opacity: status === 'locked' ? 0.4 : 1 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: expandable ? 'pointer' : 'default' }} onClick={expandable ? toggle : undefined}>
         <span style={{ fontSize: 18, width: 24, textAlign: 'center' }}>{icon}</span>
         <div style={{ flex: 1 }}>
           <div style={{ fontSize: 14, fontWeight: 600 }}>{quest.title}</div>
@@ -80,7 +81,7 @@ function QuestRow({ entry, color, isOpen, toggle }: { entry: QuestBoardEntry; co
             {status.toUpperCase()}{quest.type === 'boss' ? ' • BOSS' : ''}
           </div>
         </div>
-        {status === 'active' && <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{isOpen ? '▲' : '▼'}</span>}
+        {expandable && <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{isOpen ? '▲' : '▼'}</span>}
       </div>
 
       {status === 'active' && (
@@ -88,29 +89,34 @@ function QuestRow({ entry, color, isOpen, toggle }: { entry: QuestBoardEntry; co
           <div className="progress-track" style={{ height: 4 }}>
             <div className="progress-fill" style={{ width: `${progressPercent}%`, background: color }} />
           </div>
+          <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>{progressPercent}% complete</div>
         </div>
       )}
 
-      {isOpen && status === 'active' && (
+      {isOpen && (
         <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: 10 }}>
           <div style={{ fontSize: 13, color: 'var(--text-sec)', lineHeight: 1.5 }}>{quest.description}</div>
           <div style={{ fontSize: 12, color: 'var(--text-muted)', fontStyle: 'italic' }}>{quest.flavorText}</div>
           {quest.objectives.map((obj, i) => {
             const cur = progress?.objectives[i]?.current ?? 0;
+            const pct = Math.min(100, (cur / obj.count) * 100);
             return (
               <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ fontSize: 12, color: 'var(--text-sec)' }}>{obj.description}</span>
-                  <span style={{ fontSize: 12, fontWeight: 700, color }}>{cur}/{obj.count}</span>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: status === 'available' ? 'var(--text-muted)' : color }}>{status === 'available' ? `0/${obj.count}` : `${cur}/${obj.count}`}</span>
                 </div>
                 <div className="progress-track" style={{ height: 3 }}>
-                  <div className="progress-fill" style={{ width: `${Math.min(100, (cur / obj.count) * 100)}%`, background: color }} />
+                  <div className="progress-fill" style={{ width: `${status === 'available' ? 0 : pct}%`, background: color }} />
                 </div>
               </div>
             );
           })}
-          <div style={{ fontSize: 12, color: 'var(--gold)' }}>
-            ✨ {quest.rewards.xp} XP{quest.rewards.gold ? `  🪙 ${quest.rewards.gold}` : ''}{quest.rewards.gems ? `  💎 ${quest.rewards.gems}` : ''}{quest.rewards.companionId ? '  🐾 Companion!' : ''}
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', fontSize: 12 }}>
+            <span style={{ color: 'var(--gold)', fontWeight: 600 }}>✨ {quest.rewards.xp} XP</span>
+            {quest.rewards.gold ? <span style={{ color: 'var(--gold)' }}>🪙 {quest.rewards.gold}</span> : null}
+            {quest.rewards.gems ? <span style={{ color: 'var(--info)' }}>💎 {quest.rewards.gems}</span> : null}
+            {quest.rewards.companionId ? <span style={{ color: 'var(--primary)' }}>🐾 Companion Unlocked!</span> : null}
           </div>
         </div>
       )}

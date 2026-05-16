@@ -1,10 +1,36 @@
 import React, { useState } from 'react';
 import { useGame } from '../context/GameContext';
 import { VOCABULARY_STATS } from '@engine/data/vocabulary';
+import { speakThai } from '../utils/audio';
 
 export function Settings({ onBack }: { onBack: () => void }) {
   const { resetProgress } = useGame();
   const [confirmReset, setConfirmReset] = useState(false);
+  const [importStatus, setImportStatus] = useState<'idle' | 'ok' | 'err'>('idle');
+
+  const handleExport = () => {
+    const data = localStorage.getItem('thaiquest_save') ?? '{}';
+    const blob = new Blob([data], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = `thaiquest-backup-${new Date().toISOString().split('T')[0]}.json`;
+    a.click(); URL.revokeObjectURL(url);
+  };
+
+  const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        JSON.parse(ev.target?.result as string);
+        localStorage.setItem('thaiquest_save', ev.target?.result as string);
+        setImportStatus('ok');
+        setTimeout(() => window.location.reload(), 1200);
+      } catch { setImportStatus('err'); }
+    };
+    reader.readAsText(file);
+  };
 
   const handleReset = async () => {
     await resetProgress();
@@ -115,12 +141,45 @@ export function Settings({ onBack }: { onBack: () => void }) {
           ))}
         </div>
 
+        {/* Thai consonant classes */}
+        <div style={s.section}>
+          <div style={s.sectionTitle}>Thai Consonant Classes</div>
+          <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 12, lineHeight: 1.5 }}>
+            Every Thai consonant belongs to one of three classes. The class determines the tone of the syllable.
+          </div>
+          {[
+            { cls: 'Mid class', color: 'var(--text-sec)', examples: 'ก จ ด ต บ ป อ', note: 'Tone depends on tone mark; default is mid tone. 9 consonants.' },
+            { cls: 'High class', color: 'var(--info)', examples: 'ข ฉ ถ ผ ฝ ส ห', note: 'Tone shifts up vs. mid class. Default is rising tone. 11 consonants.' },
+            { cls: 'Low class', color: 'var(--success)', examples: 'ง น ม ย ว ร ล', note: 'Most consonants. Default is mid tone, but shift differently with marks. 24 consonants.' },
+          ].map(({ cls, color, examples, note }) => (
+            <div key={cls} style={{ paddingBottom: 14, marginBottom: 14, borderBottom: '1px solid var(--border)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
+                <div style={{ width: 8, height: 8, borderRadius: '50%', background: color, flexShrink: 0 }} />
+                <span style={{ fontWeight: 700, fontSize: 14, color }}>{cls}</span>
+              </div>
+              <div style={{ fontSize: 20, letterSpacing: 6, color: 'var(--text)', marginBottom: 4, fontWeight: 600 }}>{examples}</div>
+              <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.5 }}>{note}</div>
+            </div>
+          ))}
+        </div>
+
         {/* Data */}
         <div style={s.section}>
-          <div style={s.sectionTitle}>Data</div>
+          <div style={s.sectionTitle}>Data &amp; Backup</div>
           <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 14, lineHeight: 1.5 }}>
-            All progress is stored locally in your browser. Clearing browser data or using a different device will not carry over your progress.
+            All progress is stored locally in your browser. Export a backup to keep your data safe.
           </div>
+          <div style={{ display: 'flex', gap: 10, marginBottom: 14 }}>
+            <button style={{ flex: 1, background: 'var(--primary)', color: '#fff', borderRadius: 12, padding: 12, fontWeight: 700, fontSize: 13 }} onClick={handleExport}>
+              📤 Export Backup
+            </button>
+            <label style={{ flex: 1, background: 'var(--surface-hi)', border: '1px solid var(--border)', borderRadius: 12, padding: 12, fontWeight: 700, fontSize: 13, textAlign: 'center', cursor: 'pointer', color: 'var(--text-sec)' }}>
+              📥 Import Backup
+              <input type="file" accept=".json" style={{ display: 'none' }} onChange={handleImport} />
+            </label>
+          </div>
+          {importStatus === 'ok' && <div style={{ fontSize: 13, color: 'var(--success)', marginBottom: 12 }}>✓ Imported! Reloading…</div>}
+          {importStatus === 'err' && <div style={{ fontSize: 13, color: 'var(--error)', marginBottom: 12 }}>✗ Invalid file. Please use a ThaiQuest backup.</div>}
           {!confirmReset ? (
             <button style={s.dangerBtn} onClick={() => setConfirmReset(true)}>
               Reset All Progress

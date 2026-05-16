@@ -5,7 +5,7 @@ import { useGame } from '../context/GameContext';
 import { sfx, speakThai } from '../utils/audio';
 import { updateChallengeProgress } from '../utils/dailyChallenge';
 
-type QuizMode = 'thai_to_english' | 'english_to_thai' | 'romanization' | 'type_english' | 'type_romanization';
+type QuizMode = 'thai_to_english' | 'english_to_thai' | 'romanization' | 'type_english' | 'type_romanization' | 'listening';
 
 interface QuizQuestion {
   card: VocabCard;
@@ -53,6 +53,11 @@ function buildQuestion(card: VocabCard, mode: QuizMode, pool: VocabCard[]): Quiz
     const opts = shuffle([correct, ...distractors(card, pool, 'romanization')]);
     return { card, mode, prompt: card.thai, promptSub: card.englishMeaning, options: opts, correctIndex: opts.indexOf(correct) };
   }
+  if (mode === 'listening') {
+    const correct = card.englishMeaning;
+    const opts = shuffle([correct, ...distractors(card, pool, 'englishMeaning')]);
+    return { card, mode, prompt: '🔊', promptSub: 'Listen and choose the meaning', options: opts, correctIndex: opts.indexOf(correct) };
+  }
   if (mode === 'type_english') {
     const answers = [card.englishMeaning, ...(card.englishAlternatives ?? [])].map(s => s.toLowerCase().trim());
     return { card, mode, prompt: card.thai, promptSub: card.romanization, correctAnswers: answers };
@@ -64,7 +69,8 @@ function buildQuestion(card: VocabCard, mode: QuizMode, pool: VocabCard[]): Quiz
 const MC_MODES: { id: QuizMode; icon: string; title: string; desc: string }[] = [
   { id: 'thai_to_english',    icon: '🇹🇭', title: 'Thai → English',   desc: 'Read Thai, choose the meaning' },
   { id: 'english_to_thai',    icon: '🔤', title: 'English → Thai',   desc: 'Read English, pick the Thai word' },
-  { id: 'romanization',       icon: '🔊', title: 'Pronunciation',     desc: 'Match Thai to its romanization' },
+  { id: 'romanization',       icon: '🗣️', title: 'Pronunciation',     desc: 'Match Thai to its romanization' },
+  { id: 'listening',          icon: '👂', title: 'Listening',          desc: 'Hear the word, choose the meaning' },
 ];
 const TYPE_MODES: { id: QuizMode; icon: string; title: string; desc: string }[] = [
   { id: 'type_english',       icon: '⌨️', title: 'Type the meaning',  desc: 'Type the English meaning of the Thai word' },
@@ -138,6 +144,9 @@ export function Quiz({ onExit }: { onExit: () => void }) {
     if (phase === 'question' && questions[current]?.correctAnswers) {
       setTimeout(() => inputRef.current?.focus(), 100);
     }
+    if (phase === 'question' && questions[current]?.mode === 'listening') {
+      setTimeout(() => speakThai(questions[current].card.thai), 300);
+    }
   }, [phase, current]);
 
   if (phase === 'setup') return <SetupScreen onSelect={startQuiz} onExit={onExit} />;
@@ -175,12 +184,25 @@ export function Quiz({ onExit }: { onExit: () => void }) {
 
       <div style={s.promptArea}>
         <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 12, textTransform: 'uppercase', letterSpacing: 1 }}>
-          {q.mode === 'thai_to_english' ? 'What does this mean?' : q.mode === 'english_to_thai' ? 'Write this in Thai' : q.mode === 'romanization' ? 'How is this pronounced?' : q.mode === 'type_english' ? 'Type the English meaning' : 'Type the romanization'}
+          {q.mode === 'thai_to_english' ? 'What does this mean?' : q.mode === 'english_to_thai' ? 'Write this in Thai' : q.mode === 'romanization' ? 'How is this pronounced?' : q.mode === 'listening' ? 'What did you hear?' : q.mode === 'type_english' ? 'Type the English meaning' : 'Type the romanization'}
         </div>
-        <div style={{ fontSize: q.mode === 'english_to_thai' ? 26 : 58, fontWeight: 700, textAlign: 'center', lineHeight: 1.2, color: 'var(--text)', marginBottom: 8 }}>{q.prompt}</div>
-        {q.promptSub && <div style={{ fontSize: 16, color: 'var(--text-muted)', textAlign: 'center' }}>{q.promptSub}</div>}
+        {q.mode === 'listening' ? (
+          <>
+            <button
+              style={{ fontSize: 72, background: 'var(--surface)', border: '3px solid var(--info)', borderRadius: '50%', width: 110, height: 110, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 12, flexShrink: 0 }}
+              onClick={() => speakThai(q.card.thai)}
+            >👂</button>
+            <div style={{ fontSize: 14, color: 'var(--info)', fontWeight: 600, marginBottom: 4 }}>Tap to listen again</div>
+            {phase === 'feedback' && (
+              <div style={{ fontSize: 28, fontWeight: 700, color: 'var(--text)', marginTop: 8 }}>{q.card.thai}</div>
+            )}
+          </>
+        ) : (
+          <div style={{ fontSize: q.mode === 'english_to_thai' ? 26 : 58, fontWeight: 700, textAlign: 'center', lineHeight: 1.2, color: 'var(--text)', marginBottom: 8 }}>{q.prompt}</div>
+        )}
+        {q.promptSub && q.mode !== 'listening' && <div style={{ fontSize: 16, color: 'var(--text-muted)', textAlign: 'center' }}>{q.promptSub}</div>}
         <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 8, textAlign: 'center', fontStyle: 'italic' }}>
-          {q.card.category.replace(/_/g, ' ')} · {q.card.tone} tone
+          {q.card.category.replace(/_/g, ' ')}{q.mode !== 'listening' && ` · ${q.card.tone} tone`}
         </div>
       </div>
 
