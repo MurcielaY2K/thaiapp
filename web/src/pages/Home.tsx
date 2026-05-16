@@ -161,6 +161,9 @@ export function Home({ onStudy, onQuiz, onFavQuiz }: { onStudy: () => void; onQu
       {/* SRS level distribution */}
       {facade && <SrsLevelChart srsMap={facade.srsMap} />}
 
+      {/* 7-day review forecast */}
+      {facade && <ReviewForecast srsMap={facade.srsMap} />}
+
       {/* Word of the day */}
       {wordOfDay && (
         <div style={{ ...s.card, background: 'var(--surface-hi)', border: '1px solid var(--primary)' }}>
@@ -305,6 +308,44 @@ function SrsLevelChart({ srsMap }: { srsMap: Map<string, { interval: number }> }
       </div>
       <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 8 }}>
         {seen} / {total} words in SRS · {counts[counts.length - 1]} long-term
+      </div>
+    </div>
+  );
+}
+
+function ReviewForecast({ srsMap }: { srsMap: Map<string, { nextReviewDate: string; isNew?: boolean }> }) {
+  const days = 7;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const counts = Array.from({ length: days }, (_, i) => {
+    const d = new Date(today);
+    d.setDate(d.getDate() + i);
+    const dateStr = d.toISOString().split('T')[0];
+    let n = 0;
+    for (const [, s] of srsMap) {
+      if (s.nextReviewDate === dateStr && !s.isNew) n++;
+    }
+    return { label: i === 0 ? 'Today' : i === 1 ? 'Tmrw' : d.toLocaleDateString('en', { weekday: 'short' }), count: n };
+  });
+
+  const max = Math.max(1, ...counts.map(c => c.count));
+  const total7 = counts.reduce((s, c) => s + c.count, 0);
+  if (total7 === 0) return null;
+
+  return (
+    <div style={{ background: 'var(--surface)', borderRadius: 14, padding: '14px 16px', border: '1px solid var(--border)' }}>
+      <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 12 }}>
+        7-Day Review Forecast · {total7} cards
+      </div>
+      <div style={{ display: 'flex', gap: 6, alignItems: 'flex-end', height: 52 }}>
+        {counts.map(({ label, count }, i) => (
+          <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+            {count > 0 && <span style={{ fontSize: 9, color: 'var(--text-muted)', fontWeight: 700 }}>{count}</span>}
+            <div style={{ width: '100%', height: Math.max(3, (count / max) * 36), background: i === 0 ? 'var(--warning)' : count > 0 ? 'var(--info)' : 'var(--border)', borderRadius: 3, transition: 'height 0.3s' }} />
+            <span style={{ fontSize: 9, color: i === 0 ? 'var(--warning)' : 'var(--text-muted)', fontWeight: i === 0 ? 700 : 600 }}>{label}</span>
+          </div>
+        ))}
       </div>
     </div>
   );
