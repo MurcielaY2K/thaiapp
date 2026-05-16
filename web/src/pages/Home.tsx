@@ -46,13 +46,25 @@ export function Home({ onStudy, onQuiz }: { onStudy: () => void; onQuiz: () => v
         </div>
       </div>
 
+      {/* Streak milestone */}
+      {profile.currentStreak > 0 && [7, 30, 100, 365].includes(profile.currentStreak) && (
+        <div className="anim-scale" style={{ background: 'linear-gradient(135deg, rgba(245,158,11,0.15), rgba(239,68,68,0.08))', border: '1px solid var(--gold)', borderRadius: 14, padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 12 }}>
+          <span style={{ fontSize: 28 }}>{profile.currentStreak >= 365 ? '🏆' : profile.currentStreak >= 100 ? '💎' : profile.currentStreak >= 30 ? '⭐' : '🔥'}</span>
+          <div>
+            <div style={{ fontWeight: 800, fontSize: 15, color: 'var(--gold)' }}>{profile.currentStreak}-Day Streak!</div>
+            <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+              {profile.currentStreak === 7 ? 'One full week of learning Thai!' : profile.currentStreak === 30 ? 'One month! คุณเก่งมาก!' : profile.currentStreak === 100 ? 'A hundred days! ยอดเยี่ยม!' : 'A full year! คุณเป็นนักเรียนไทย!'}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Level bar */}
       <div style={s.card}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <span style={{ fontSize: 16 }}>⚡</span>
-            <span style={{ fontWeight: 700 }}>Level {profile.currentLevel}</span>
-            <span style={{ fontSize: 13, color: 'var(--primary)', fontWeight: 600 }}>{levelCfg.titleThai}</span>
+            <span style={{ fontWeight: 700 }}>Level {profile.currentLevel} · {levelCfg.titleThai}</span>
           </div>
           <span style={{ color: 'var(--text-sec)', fontSize: 13 }}>{levelXP} / {XP_PER_LEVEL} XP</span>
         </div>
@@ -61,7 +73,7 @@ export function Home({ onStudy, onQuiz }: { onStudy: () => void; onQuiz: () => v
         </div>
         <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 6, display: 'flex', justifyContent: 'space-between' }}>
           <span>{profile.totalXP.toLocaleString()} total XP</span>
-          <span>{XP_PER_LEVEL - levelXP} XP to level {profile.currentLevel + 1}</span>
+          <span>{XP_PER_LEVEL - levelXP} XP → {getLevelConfig(profile.currentLevel + 1).titleThai}</span>
         </div>
       </div>
 

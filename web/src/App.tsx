@@ -6,6 +6,7 @@ import { Study } from './pages/Study';
 import { Quiz } from './pages/Quiz';
 import { ToneTrainer } from './pages/ToneTrainer';
 import { SentenceBuilder } from './pages/SentenceBuilder';
+import { AlphabetDrill } from './pages/AlphabetDrill';
 import { SessionComplete } from './pages/SessionComplete';
 import { Quests } from './pages/Quests';
 import { Profile } from './pages/Profile';
@@ -18,7 +19,7 @@ import { getLevelConfig } from '@engine/engine/gameEngine';
 import { sfx } from './utils/audio';
 
 type Tab = 'home' | 'learn' | 'map' | 'browse' | 'profile';
-type View = 'onboarding' | 'main' | 'study' | 'quiz' | 'tone' | 'sentence' | 'session_complete' | 'settings';
+type View = 'onboarding' | 'main' | 'study' | 'quiz' | 'tone' | 'sentence' | 'alphabet' | 'session_complete' | 'settings';
 
 interface CompleteState { summary: SessionSummary; xp: number; questIds: string[] }
 
@@ -84,6 +85,7 @@ export function App() {
   if (view === 'quiz')     return <Quiz         onExit={() => { setView('main'); setTab('learn'); }} />;
   if (view === 'tone')     return <ToneTrainer  onExit={() => { setView('main'); setTab('learn'); }} />;
   if (view === 'sentence') return <SentenceBuilder onExit={() => { setView('main'); setTab('learn'); }} />;
+  if (view === 'alphabet') return <AlphabetDrill  onExit={() => { setView('main'); setTab('learn'); }} />;
   if (view === 'session_complete' && complete) return (
     <SessionComplete
       summary={complete.summary} xpGained={complete.xp} completedQuestIds={complete.questIds}
@@ -136,7 +138,7 @@ export function App() {
 
       <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
         {tab === 'home'    && <Home onStudy={() => setView('study')} onQuiz={() => setView('quiz')} />}
-        {tab === 'learn'   && <LearnTab onStudy={() => setView('study')} onQuiz={() => setView('quiz')} onTone={() => setView('tone')} onSentence={() => setView('sentence')} />}
+        {tab === 'learn'   && <LearnTab onStudy={() => setView('study')} onQuiz={() => setView('quiz')} onTone={() => setView('tone')} onSentence={() => setView('sentence')} onAlphabet={() => setView('alphabet')} />}
         {tab === 'map'     && <MapTab />}
         {tab === 'browse'  && <VocabBrowser />}
         {tab === 'profile' && <Profile onSettings={() => setView('settings')} />}
@@ -183,14 +185,14 @@ function MapTab() {
   );
 }
 
-function LearnTab({ onStudy, onQuiz, onTone, onSentence }: { onStudy: () => void; onQuiz: () => void; onTone: () => void; onSentence: () => void }) {
+function LearnTab({ onStudy, onQuiz, onTone, onSentence, onAlphabet }: { onStudy: () => void; onQuiz: () => void; onTone: () => void; onSentence: () => void; onAlphabet: () => void }) {
   const activities = [
     {
       icon: '📖', title: 'Flashcard Study', desc: 'SRS-based review — the best way to build long-term memory', color: 'var(--primary)', badge: '',
       onClick: onStudy,
     },
     {
-      icon: '🧠', title: 'Multiple Choice Quiz', desc: 'Thai→English, English→Thai, or Pronunciation', color: 'var(--info)', badge: '5 modes',
+      icon: '🧠', title: 'Multiple Choice Quiz', desc: 'Thai→English, English→Thai, Listening, and more', color: 'var(--info)', badge: '6 modes',
       onClick: onQuiz,
     },
     {
@@ -200,6 +202,10 @@ function LearnTab({ onStudy, onQuiz, onTone, onSentence }: { onStudy: () => void
     {
       icon: '🔤', title: 'Sentence Builder', desc: 'Arrange romanized words into correct sentence order', color: 'var(--gold)', badge: '',
       onClick: onSentence,
+    },
+    {
+      icon: '🔡', title: 'Thai Alphabet', desc: 'Explore consonants & vowels — tap to hear pronunciation', color: 'var(--warning)', badge: '29 consonants',
+      onClick: onAlphabet,
     },
   ];
 
