@@ -6310,6 +6310,115 @@ export const TALEE_TONG_CARDS: VocabCard[] = [
     tags: ['verbs', 'south', 'maritime', 'leisure'],
   },
 
+  // ── NATURE (sea/weather) ──────────────────────────────────────────────────
+
+  {
+    id: 'tt_nat_001',
+    type: 'vocabulary',
+    category: 'nature',
+    region: 'talee_tong',
+    thai: 'คลื่น',
+    romanization: 'khluen',
+    ipa: '/kʰlɯːn/',
+    tone: 'mid',
+    englishMeaning: 'wave (ocean)',
+    exampleSentence: {
+      thai: 'คลื่นทะเลสูงมากในช่วงมรสุม',
+      romanization: 'khluen tha-le suung maak nai chuang mo-ra-sum',
+      englishLiteral: 'wave sea high very in period monsoon',
+      englishNatural: 'The ocean waves are very high during the monsoon.',
+    },
+    culturalNote: 'คลื่น (waves) is also used metaphorically in Thai — คลื่นเสียง means sound wave, and คลื่นวิทยุ is a radio wave. The southern islands are famous for their calm คลื่นนิ่ง (still waters).',
+    difficultyRating: 2,
+    tags: ['nature', 'sea', 'south'],
+  },
+
+  {
+    id: 'tt_nat_002',
+    type: 'vocabulary',
+    category: 'nature',
+    region: 'talee_tong',
+    thai: 'หาดทราย',
+    romanization: 'haat saai',
+    ipa: '/hàːt saːj/',
+    tone: 'low',
+    englishMeaning: 'sand beach',
+    exampleSentence: {
+      thai: 'หาดทรายขาวในภาคใต้งดงามมาก',
+      romanization: 'haat saai khao nai phak tai ngot-ngaam maak',
+      englishLiteral: 'beach sand white in south beautiful very',
+      englishNatural: 'The white sand beaches in the south are breathtaking.',
+    },
+    culturalNote: 'Southern Thailand\'s beaches (หาดทราย) are world-famous. The clearest distinction is หาดทรายขาว (white sand beach) vs. หาดหิน (rocky beach). Hat Yai, Krabi, and Ko Samui all draw millions each year.',
+    difficultyRating: 2,
+    tags: ['nature', 'sea', 'south', 'travel'],
+  },
+
+  {
+    id: 'tt_nat_003',
+    type: 'vocabulary',
+    category: 'nature',
+    region: 'talee_tong',
+    thai: 'พระอาทิตย์ตก',
+    romanization: 'phra-aa-thit tok',
+    ipa: '/pʰrá.ʔāː.tʰít tòk/',
+    tone: 'low',
+    englishMeaning: 'sunset',
+    exampleSentence: {
+      thai: 'พระอาทิตย์ตกที่เกาะสวยมาก',
+      romanization: 'phra-aa-thit tok thi ko suai maak',
+      englishLiteral: 'sunset at island beautiful very',
+      englishNatural: 'The sunset at the island is stunning.',
+    },
+    culturalNote: 'พระอาทิตย์ (sun) literally means "Lord Sun" — the prefix พระ indicates royalty or divinity. พระอาทิตย์ขึ้น (sunrise) and พระอาทิตย์ตก (sunset) are deeply aesthetic concepts in Thai culture.',
+    difficultyRating: 3,
+    tags: ['nature', 'time', 'beauty'],
+  },
+
+  // ── MARINE LIFE ───────────────────────────────────────────────────────────
+
+  {
+    id: 'tt_ani_001',
+    type: 'vocabulary',
+    category: 'animal',
+    region: 'talee_tong',
+    thai: 'เต่า',
+    romanization: 'tao',
+    ipa: '/tào/',
+    tone: 'low',
+    englishMeaning: 'turtle',
+    exampleSentence: {
+      thai: 'เต่าทะเลวางไข่บนหาดทราย',
+      romanization: 'tao tha-le wang khai bon haat saai',
+      englishLiteral: 'turtle sea lay egg on beach',
+      englishNatural: 'Sea turtles lay their eggs on the sand beach.',
+    },
+    culturalNote: 'Sea turtles (เต่าทะเล) are sacred in Thai culture and legally protected. Nesting beaches on Ko Lanta and Phuket have conservation programs. Releasing baby turtles (ปล่อยเต่า) is a traditional merit-making activity.',
+    difficultyRating: 2,
+    tags: ['animal', 'marine', 'south'],
+  },
+
+  {
+    id: 'tt_ani_002',
+    type: 'vocabulary',
+    category: 'animal',
+    region: 'talee_tong',
+    thai: 'โลมา',
+    romanization: 'lo-maa',
+    ipa: '/loː.māː/',
+    tone: 'mid',
+    englishMeaning: 'dolphin',
+    exampleSentence: {
+      thai: 'โลมาว่ายน้ำเล่นใกล้เรือประมง',
+      romanization: 'lo-maa wai-naam len glai ruea pra-mong',
+      englishLiteral: 'dolphin swim play near boat fishing',
+      englishNatural: 'Dolphins swim playfully near the fishing boats.',
+    },
+    culturalNote: 'Irrawaddy dolphins (โลมาอิรวดี) are rare freshwater dolphins found in the Mekong and Songkhla Lake. They\'re protected and considered good luck by fishermen.',
+    difficultyRating: 2,
+    tags: ['animal', 'marine', 'south'],
+  },
+
 ];
 
 // Merge talee_tong cards into the main VOCABULARY array

@@ -42,6 +42,15 @@ export const ACHIEVEMENTS: Achievement[] = [
   { id: 'regions_7',     icon: '🗺️', rarity: 'legendary', title: 'Globe Trotter',    description: 'Unlock all 7 regions',               check: (p) => p.unlockedRegions.length >= 7 },
   { id: 'xp_5000',       icon: '✨', rarity: 'rare',      title: 'XP Hunter',        description: 'Earn 5,000 total XP',                check: (p) => p.totalXP >= 5000 },
   { id: 'xp_25000',      icon: '🌟', rarity: 'legendary', title: 'Legend',           description: 'Earn 25,000 total XP',               check: (p) => p.totalXP >= 25000 },
+  { id: 'streak_14',     icon: '🗓️', rarity: 'common',    title: 'Two Weeks',        description: '14-day learning streak',             check: (p) => p.currentStreak >= 14 },
+  { id: 'streak_50',     icon: '🎖️', rarity: 'rare',      title: 'Fifty Days',       description: '50-day learning streak',             check: (p) => p.currentStreak >= 50 },
+  { id: 'words_150',     icon: '📕', rarity: 'rare',      title: 'Intermediate',     description: 'Learn 150 words',                    check: (p) => p.totalWordsLearned >= 150 },
+  { id: 'words_400',     icon: '🌍', rarity: 'legendary', title: 'Near Fluent',      description: 'Learn 400 words',                    check: (p) => p.totalWordsLearned >= 400 },
+  { id: 'mastered_200',  icon: '🌠', rarity: 'legendary', title: 'Grandmaster',      description: 'Master 200 cards',                   check: (_, s) => s.masteredCards >= 200 },
+  { id: 'xp_10000',      icon: '💡', rarity: 'rare',      title: 'XP Master',        description: 'Earn 10,000 total XP',               check: (p) => p.totalXP >= 10000 },
+  { id: 'reviews_2000',  icon: '🔁', rarity: 'legendary', title: 'Unstoppable Mind', description: 'Review 2,000 cards total',            check: (p) => p.totalCardsReviewed >= 2000 },
+  { id: 'gold_5000',     icon: '🏅', rarity: 'rare',      title: 'Gold Baron',       description: 'Accumulate 5,000 gold',              check: (p) => p.gold >= 5000 },
+  { id: 'gems_25',       icon: '💍', rarity: 'rare',      title: 'Gem Collector',    description: 'Collect 25 gems',                    check: (p) => p.gems >= 25 },
 ];
 
 export function getEarnedIds(): Set<string> {
