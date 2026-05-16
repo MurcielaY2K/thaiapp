@@ -80,6 +80,9 @@ export function Profile({ onSettings }: { onSettings: () => void }) {
         <Heatmap data={heatmap} />
       </div>
 
+      {/* Weekly XP chart */}
+      {sessionHistory.length > 0 && <WeeklyXPChart sessions={sessionHistory} />}
+
       {/* Recent sessions */}
       {sessionHistory.length > 0 && (
         <div>
@@ -257,6 +260,42 @@ function CategoryBreakdown({ srsMap }: { srsMap: Map<string, { interval: number;
             </div>
           );
         })}
+      </div>
+    </div>
+  );
+}
+
+function WeeklyXPChart({ sessions }: { sessions: Array<{ date: string; summary: { xpEarned: number } }> }) {
+  const days = 7;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const bars = Array.from({ length: days }, (_, i) => {
+    const d = new Date(today);
+    d.setDate(d.getDate() - (days - 1 - i));
+    const dateStr = d.toISOString().split('T')[0];
+    const xp = sessions.filter(s => s.date === dateStr).reduce((sum, s) => sum + s.summary.xpEarned, 0);
+    const label = i === days - 1 ? 'Today' : d.toLocaleDateString('en', { weekday: 'short' });
+    return { label, xp, isToday: i === days - 1 };
+  });
+
+  const totalWeekXP = bars.reduce((s, b) => s + b.xp, 0);
+  const maxXP = Math.max(1, ...bars.map(b => b.xp));
+  if (totalWeekXP === 0) return null;
+
+  return (
+    <div>
+      <div style={s.sectionTitle}>This Week · {totalWeekXP.toLocaleString()} XP</div>
+      <div style={{ background: 'var(--surface)', borderRadius: 14, padding: '16px 16px 12px', border: '1px solid var(--border)' }}>
+        <div style={{ display: 'flex', gap: 6, alignItems: 'flex-end', height: 64 }}>
+          {bars.map(({ label, xp, isToday }) => (
+            <div key={label} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+              {xp > 0 && <span style={{ fontSize: 9, color: isToday ? 'var(--gold)' : 'var(--text-muted)', fontWeight: 700 }}>{xp}</span>}
+              <div style={{ width: '100%', height: Math.max(3, (xp / maxXP) * 44), background: isToday ? 'var(--gold)' : xp > 0 ? 'var(--primary)' : 'var(--border)', borderRadius: 3 }} />
+              <span style={{ fontSize: 9, color: isToday ? 'var(--gold)' : 'var(--text-muted)', fontWeight: isToday ? 700 : 500 }}>{label}</span>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
