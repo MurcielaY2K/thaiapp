@@ -43,9 +43,17 @@ export function Home({ onStudy, onQuiz, onFavQuiz, onHardQuiz }: { onStudy: () =
           <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 2 }}>{profile.name}</div>
           <div style={s.sub}>{streakMsg}</div>
         </div>
-        <div style={s.streak}>
-          <span style={{ fontSize: 20 }}>🔥</span>
-          <span style={{ fontSize: 20, fontWeight: 800, color: 'var(--gold)' }}>{profile.currentStreak}</span>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+          <div style={s.streak}>
+            <span style={{ fontSize: 20 }}>🔥</span>
+            <span style={{ fontSize: 20, fontWeight: 800, color: 'var(--gold)' }}>{profile.currentStreak}</span>
+          </div>
+          {profile.streakShields > 0 && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 10, color: 'var(--info)', fontWeight: 700 }}>
+              {'🛡️'.repeat(Math.min(profile.streakShields, 3))}
+              {profile.streakShields > 3 && <span>+{profile.streakShields - 3}</span>}
+            </div>
+          )}
         </div>
       </div>
 

@@ -5050,6 +5050,115 @@ const DOI_NUEA_CARDS: VocabCard[] = [
     tags: ['time'],
   },
 
+  // ── FOOD (Northern Thai cuisine) ──────────────────────────────────────────
+
+  {
+    id: 'dn_fod_001',
+    type: 'vocabulary',
+    category: 'food',
+    region: 'doi_nuea',
+    thai: 'ข้าวซอย',
+    romanization: 'khaao soi',
+    ipa: '/kʰâːw sɔːj/',
+    tone: 'falling',
+    englishMeaning: 'Khao Soi (curry noodle soup)',
+    exampleSentence: {
+      thai: 'ข้าวซอยเชียงใหม่อร่อยที่สุดในโลก',
+      romanization: 'khaao soi chiang-mai a-roi thi-sut nai lok',
+      englishLiteral: 'khao soi Chiang Mai delicious most in world',
+      englishNatural: 'Chiang Mai\'s Khao Soi is the most delicious in the world.',
+    },
+    culturalNote: 'Khao Soi (ข้าวซอย) is Chiang Mai\'s most iconic dish — a rich coconut curry with egg noodles, topped with crispy fried noodles. It reflects the Burmese influence on Lanna cuisine.',
+    difficultyRating: 2,
+    tags: ['food', 'north', 'lanna'],
+  },
+
+  {
+    id: 'dn_fod_002',
+    type: 'vocabulary',
+    category: 'food',
+    region: 'doi_nuea',
+    thai: 'แกงฮังเล',
+    romanization: 'gaeng hang-le',
+    ipa: '/kɛːŋ haŋ.lêː/',
+    tone: 'falling',
+    englishMeaning: 'Burmese-style pork curry (Hang Lay)',
+    exampleSentence: {
+      thai: 'แกงฮังเลมีรสชาติเผ็ดและหวาน',
+      romanization: 'gaeng hang-le mii rot-chaat phet lae wan',
+      englishLiteral: 'curry hang-lay have taste spicy and sweet',
+      englishNatural: 'Hang Lay curry has a spicy and sweet flavour.',
+    },
+    culturalNote: 'แกงฮังเล originates from Burma and was adapted into Northern Thai cuisine. It uses tamarind, ginger, and peanuts — distinct from Central Thai curries.',
+    difficultyRating: 3,
+    tags: ['food', 'north', 'lanna'],
+  },
+
+  {
+    id: 'dn_fod_003',
+    type: 'vocabulary',
+    category: 'food',
+    region: 'doi_nuea',
+    thai: 'ไส้อั่ว',
+    romanization: 'sai ua',
+    ipa: '/sâj ʔûa/',
+    tone: 'falling',
+    englishMeaning: 'Northern Thai sausage (Sai Oua)',
+    exampleSentence: {
+      thai: 'ไส้อั่วอบสมุนไพรหอมมากเลย',
+      romanization: 'sai ua op sa-mun-phrai hom maak loei',
+      englishLiteral: 'sausage baked herb fragrant very',
+      englishNatural: 'Sai Oua baked with herbs smells incredible.',
+    },
+    culturalNote: 'ไส้อั่ว is a fragrant northern sausage seasoned with lemongrass, kaffir lime, galangal, and chilies. It\'s sold on every street corner in Chiang Mai.',
+    difficultyRating: 3,
+    tags: ['food', 'north', 'lanna'],
+  },
+
+  // ── FAMILY / SOCIAL ────────────────────────────────────────────────────────
+
+  {
+    id: 'dn_soc_001',
+    type: 'vocabulary',
+    category: 'culture',
+    region: 'doi_nuea',
+    thai: 'เพื่อนบ้าน',
+    romanization: 'phuean-baan',
+    ipa: '/pʰɯːan.bâːn/',
+    tone: 'falling',
+    englishMeaning: 'neighbour',
+    exampleSentence: {
+      thai: 'เพื่อนบ้านของเรามีน้ำใจมาก',
+      romanization: 'phuean-baan khong rao mii naam-jai maak',
+      englishLiteral: 'neighbour of us have kindness much',
+      englishNatural: 'Our neighbours are very kind.',
+    },
+    culturalNote: 'ชุมชน (community spirit) is strong in Northern Thai villages. Neighbors (เพื่อนบ้าน) are often considered extended family, especially in rural Chiang Rai and Lamphun.',
+    difficultyRating: 2,
+    tags: ['social', 'community'],
+  },
+
+  {
+    id: 'dn_soc_002',
+    type: 'vocabulary',
+    category: 'culture',
+    region: 'doi_nuea',
+    thai: 'ผู้เฒ่า',
+    romanization: 'phu-thao',
+    ipa: '/pʰûː.tʰâo/',
+    tone: 'falling',
+    englishMeaning: 'elder / village elder',
+    exampleSentence: {
+      thai: 'ผู้เฒ่าในหมู่บ้านนี้รู้เรื่องราวมาก',
+      romanization: 'phu-thao nai muu-baan nii ruu ruang-raao maak',
+      englishLiteral: 'elder in village this know stories much',
+      englishNatural: 'The village elders know many stories.',
+    },
+    culturalNote: 'ผู้เฒ่า (village elders) hold great respect in Northern Thai society. They preserve oral histories, mediate disputes, and lead traditional ceremonies in Lanna communities.',
+    difficultyRating: 3,
+    tags: ['culture', 'lanna', 'social'],
+  },
+
 ];
 
 // Merge doi_nuea cards into the main VOCABULARY array
