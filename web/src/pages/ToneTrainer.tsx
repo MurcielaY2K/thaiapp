@@ -2,6 +2,7 @@ import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { VOCABULARY } from '@engine/data/vocabulary';
 import { VocabCard, ThaiTone, TONE_COLORS } from '@engine/types';
 import { useGame } from '../context/GameContext';
+import { sfx, speakThai } from '../utils/audio';
 
 const TONES: { tone: ThaiTone; label: string; hint: string; contour: string }[] = [
   { tone: 'mid',     label: 'Mid',     hint: 'flat, steady',          contour: '━━━━' },
@@ -51,6 +52,7 @@ export function ToneTrainer({ onExit }: { onExit: () => void }) {
     if (phase !== 'question') return;
     const card = cards[current];
     const correct = tone === card.tone;
+    if (correct) sfx.correct(); else { sfx.wrong(); speakThai(card.thai); }
     setChosen(tone);
     setResults(r => [...r, correct]);
     setPhase('feedback');
@@ -94,7 +96,12 @@ export function ToneTrainer({ onExit }: { onExit: () => void }) {
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '0 24px 20px', gap: 8 }}>
         <div style={{ fontSize: 13, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 1 }}>What tone is this word?</div>
         <div style={{ fontSize: 72, fontWeight: 700, lineHeight: 1.1, textAlign: 'center' }}>{card.thai}</div>
-        <div style={{ fontSize: 20, color: 'var(--text-sec)' }}>{card.romanization}</div>
+        <button
+          style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 999, padding: '6px 16px', fontSize: 13, color: 'var(--text-sec)', display: 'flex', alignItems: 'center', gap: 6 }}
+          onClick={() => speakThai(card.thai)}
+        >
+          🔊 <span>{card.romanization}</span>
+        </button>
         <div style={{ fontSize: 15, color: 'var(--text-muted)', fontStyle: 'italic' }}>{card.englishMeaning}</div>
 
         {/* Feedback overlay */}
