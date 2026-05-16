@@ -12,7 +12,7 @@ const REGION_COLOR: Record<string, string> = {
   talee_tong: 'var(--r-tt)', mueang_hin: 'var(--r-mh)', wang_loi_faa: 'var(--r-wl)', daen_winyaan: 'var(--r-dw)',
 };
 
-export function Home({ onStudy, onQuiz, onFavQuiz }: { onStudy: () => void; onQuiz: () => void; onFavQuiz: () => void }) {
+export function Home({ onStudy, onQuiz, onFavQuiz, onHardQuiz }: { onStudy: () => void; onQuiz: () => void; onFavQuiz: () => void; onHardQuiz: () => void }) {
   const { profile, stats, refreshStats, wordOfDay, dailyChallenge, facade } = useGame();
   useEffect(() => { refreshStats(); }, []);
 
@@ -202,11 +202,11 @@ export function Home({ onStudy, onQuiz, onFavQuiz }: { onStudy: () => void; onQu
 
       {/* Struggling words call to action */}
       {stats.strugglingCards > 0 && (
-        <button style={{ ...s.studyBtn, background: 'rgba(249,115,22,0.12)', border: '1px solid var(--warning)', color: 'var(--warning)' }} onClick={onStudy}>
+        <button style={{ ...s.studyBtn, background: 'rgba(249,115,22,0.12)', border: '1px solid var(--warning)', color: 'var(--warning)' }} onClick={onHardQuiz}>
           <span style={{ fontSize: 22 }}>⚠️</span>
           <div style={{ flex: 1, textAlign: 'left' }}>
             <div style={{ fontWeight: 700 }}>{stats.strugglingCards} Struggling Word{stats.strugglingCards !== 1 ? 's' : ''}</div>
-            <div style={{ fontSize: 12, opacity: 0.8, marginTop: 2 }}>Study session will prioritize these cards</div>
+            <div style={{ fontSize: 12, opacity: 0.8, marginTop: 2 }}>Quiz only your difficult words</div>
           </div>
           <span style={{ fontSize: 18 }}>→</span>
         </button>
