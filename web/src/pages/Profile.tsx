@@ -6,6 +6,18 @@ import { VOCABULARY } from '@engine/data/vocabulary';
 import { getLevelConfig } from '@engine/engine/gameEngine';
 
 const XP_PER_LEVEL = 500;
+
+const AVATARS: { id: string; icon: string; label: string }[] = [
+  { id: 'avatar_1', icon: '🧭', label: 'Explorer' },
+  { id: 'avatar_2', icon: '⚔️', label: 'Warrior' },
+  { id: 'avatar_3', icon: '🎓', label: 'Scholar' },
+  { id: 'avatar_4', icon: '🌸', label: 'Spirit' },
+  { id: 'avatar_5', icon: '🐉', label: 'Dragon' },
+  { id: 'avatar_6', icon: '🔮', label: 'Mystic' },
+  { id: 'avatar_7', icon: '🌊', label: 'Wave' },
+  { id: 'avatar_8', icon: '⭐', label: 'Star' },
+];
+
 const REGION_COLOR: Record<string, string> = {
   krung_thon: 'var(--r-kt)', paa_isaan: 'var(--r-pi)', doi_nuea: 'var(--r-dn)',
   talee_tong: 'var(--r-tt)', mueang_hin: 'var(--r-mh)', wang_loi_faa: 'var(--r-wl)', daen_winyaan: 'var(--r-dw)',
@@ -26,19 +38,28 @@ const COMPANION_DATA: Record<string, { icon: string; name: string; desc: string 
 export function Profile({ onSettings }: { onSettings: () => void }) {
   const { profile, stats, heatmap, earnedAchievementIds, refreshStats, facade } = useGame();
   const [sessionHistory] = useState(() => facade?.getSessionHistory().slice(-14).reverse() ?? []);
+  const [showAvatarPicker, setShowAvatarPicker] = useState(false);
   useEffect(() => { refreshStats(); }, []);
 
   if (!profile || !stats) return null;
 
   const levelXP = profile.totalXP % XP_PER_LEVEL;
   const levelCfg = getLevelConfig(profile.currentLevel);
+  const currentAvatar = AVATARS.find(a => a.id === profile.avatarId) ?? AVATARS[0];
 
   return (
     <div className="scroll" style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 20 }}>
       {/* Hero card */}
       <div style={s.heroCard}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', width: '100%', marginBottom: 12 }}>
-          <div style={s.avatar}>🧭</div>
+          <button
+            style={{ ...s.avatar, cursor: 'pointer', position: 'relative' }}
+            onClick={() => setShowAvatarPicker(true)}
+            title="Change avatar"
+          >
+            {currentAvatar.icon}
+            <span style={{ position: 'absolute', bottom: -2, right: -2, fontSize: 11, background: 'var(--primary)', borderRadius: '50%', width: 16, height: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700 }}>✎</span>
+          </button>
           <button style={{ background: 'var(--surface-hi)', border: '1px solid var(--border)', borderRadius: 10, padding: '8px 14px', fontSize: 13, color: 'var(--text-sec)', fontWeight: 600 }} onClick={onSettings}>
             ⚙️ Settings
           </button>
@@ -177,6 +198,44 @@ export function Profile({ onSettings }: { onSettings: () => void }) {
 
       <div style={{ paddingBottom: 20 }} />
     </div>
+
+    {/* Avatar picker modal */}
+    {showAvatarPicker && (
+      <div
+        style={{ position: 'fixed', inset: 0, zIndex: 500, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}
+        onClick={() => setShowAvatarPicker(false)}
+      >
+        <div
+          style={{ background: 'var(--surface)', borderRadius: '20px 20px 0 0', padding: '20px 20px 32px', width: '100%', maxWidth: 480 }}
+          onClick={e => e.stopPropagation()}
+        >
+          <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 16, textAlign: 'center' }}>Choose Avatar</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
+            {AVATARS.map(av => (
+              <button
+                key={av.id}
+                onClick={async () => {
+                  if (!facade || !profile) return;
+                  await facade.saveProfile({ ...profile, avatarId: av.id });
+                  refreshStats();
+                  setShowAvatarPicker(false);
+                }}
+                style={{
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
+                  background: profile.avatarId === av.id ? 'var(--primary)' : 'var(--surface-hi)',
+                  border: `2px solid ${profile.avatarId === av.id ? 'var(--primary)' : 'var(--border)'}`,
+                  borderRadius: 14, padding: '12px 8px',
+                  transition: 'all 0.15s',
+                }}
+              >
+                <span style={{ fontSize: 28 }}>{av.icon}</span>
+                <span style={{ fontSize: 10, fontWeight: 600, color: profile.avatarId === av.id ? '#fff' : 'var(--text-muted)' }}>{av.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    )}
   );
 }
 
