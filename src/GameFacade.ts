@@ -163,6 +163,15 @@ export class GameFacade {
     return [...this.state.sessionHistory];
   }
 
+  /** Returns a map of YYYY-MM-DD → number of cards reviewed that day, from session history */
+  getReviewHeatmap(): Record<string, number> {
+    const map: Record<string, number> = {};
+    for (const record of this.state.sessionHistory) {
+      map[record.date] = (map[record.date] ?? 0) + record.summary.cardsReviewed;
+    }
+    return map;
+  }
+
   // ─── Quest methods ────────────────────────────────────────────────────────────
 
   /**

@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useGame } from '../context/GameContext';
-import { REGIONS } from '@engine/types';
+import { REGIONS, TONE_COLORS } from '@engine/types';
 
 const XP_PER_LEVEL = 500;
 const REGION_COLOR: Record<string, string> = {
@@ -9,7 +9,7 @@ const REGION_COLOR: Record<string, string> = {
 };
 
 export function Home({ onStudy, onQuiz }: { onStudy: () => void; onQuiz: () => void }) {
-  const { profile, stats, refreshStats } = useGame();
+  const { profile, stats, refreshStats, wordOfDay, dailyChallenge } = useGame();
   useEffect(() => { refreshStats(); }, []);
 
   if (!profile || !stats) return null;
@@ -107,6 +107,46 @@ export function Home({ onStudy, onQuiz }: { onStudy: () => void; onQuiz: () => v
         </div>
         <span style={{ fontSize: 18 }}>→</span>
       </button>
+
+      {/* Daily challenge */}
+      {dailyChallenge && (
+        <div style={{ ...s.card, borderLeft: `4px solid ${dailyChallenge.completed ? 'var(--success)' : 'var(--gold)'}` }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+            <div style={{ fontSize: 12, fontWeight: 700, color: dailyChallenge.completed ? 'var(--success)' : 'var(--gold)', textTransform: 'uppercase', letterSpacing: 0.5 }}>
+              {dailyChallenge.completed ? '✅ Daily Challenge Done!' : '🎯 Daily Challenge'}
+            </div>
+            <span style={{ fontSize: 11, color: 'var(--gold)', fontWeight: 700 }}>+{dailyChallenge.xpReward} XP</span>
+          </div>
+          <div style={{ fontSize: 14, marginBottom: 8 }}>{dailyChallenge.description}</div>
+          <div className="progress-track" style={{ height: 6 }}>
+            <div className="progress-fill" style={{ width: `${Math.min(100, (dailyChallenge.progress / dailyChallenge.goal) * 100)}%`, background: dailyChallenge.completed ? 'var(--success)' : 'var(--gold)' }} />
+          </div>
+          <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>{dailyChallenge.progress}/{dailyChallenge.goal}</div>
+        </div>
+      )}
+
+      {/* Word of the day */}
+      {wordOfDay && (
+        <div style={{ ...s.card, background: 'var(--surface-hi)', border: '1px solid var(--primary)' }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 10 }}>Word of the Day</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 32, fontWeight: 700 }}>{wordOfDay.thai}</div>
+              <div style={{ fontSize: 14, color: 'var(--text-muted)' }}>{wordOfDay.romanization}</div>
+              <div style={{ fontSize: 15, color: 'var(--text-sec)', marginTop: 4 }}>{wordOfDay.englishMeaning}</div>
+            </div>
+            <div style={{ textAlign: 'right' }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: TONE_COLORS[wordOfDay.tone], background: `${TONE_COLORS[wordOfDay.tone]}22`, borderRadius: 8, padding: '4px 10px' }}>{wordOfDay.tone}</div>
+              <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 6 }}>{wordOfDay.category.replace(/_/g, ' ')}</div>
+            </div>
+          </div>
+          {wordOfDay.culturalNote && (
+            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 10, paddingTop: 10, borderTop: '1px solid var(--border)', fontStyle: 'italic', lineHeight: 1.5 }}>
+              💡 {wordOfDay.culturalNote}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Active quests */}
       {profile.activeQuestIds.length > 0 && (

@@ -1,7 +1,10 @@
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { GameFacade, DashboardStats } from '@engine/GameFacade';
-import { UserProfile } from '@engine/types';
+import { UserProfile, VocabCard } from '@engine/types';
+import { VOCABULARY } from '@engine/data/vocabulary';
 import { LocalStorageAdapter } from '../storage/localStorageAdapter';
+import { Achievement, checkAchievements, getEarnedIds, ACHIEVEMENTS } from '../utils/achievements';
+import { DailyChallenge, getDailyChallenge } from '../utils/dailyChallenge';
 
 interface GameContextValue {
   facade: GameFacade | null;
@@ -12,6 +15,14 @@ interface GameContextValue {
   createProfile: (name: string) => Promise<void>;
   refreshStats: () => void;
   resetProgress: () => Promise<void>;
+  heatmap: Record<string, number>;
+  achievements: Achievement[];
+  earnedAchievementIds: Set<string>;
+  newAchievements: Achievement[];
+  dailyChallenge: DailyChallenge | null;
+  wordOfDay: VocabCard | null;
+  dismissNewAchievements: () => void;
+  refreshAchievements: () => void;
 }
 
 const GameContext = createContext<GameContextValue | null>(null);
@@ -21,17 +32,57 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [heatmap, setHeatmap] = useState<Record<string, number>>({});
+  const [achievements, setAchievements] = useState<Achievement[]>(ACHIEVEMENTS);
+  const [earnedAchievementIds, setEarnedAchievementIds] = useState<Set<string>>(new Set());
+  const [newAchievements, setNewAchievements] = useState<Achievement[]>([]);
+  const [dailyChallenge, setDailyChallenge] = useState<DailyChallenge | null>(null);
+  const [wordOfDay, setWordOfDay] = useState<VocabCard | null>(null);
+
+  const refreshAchievements = useCallback(() => {
+    const f = facadeRef.current;
+    if (!f) return;
+    try {
+      const currentProfile = f.profile;
+      const currentStats = f.getDashboardStats();
+      const newly = checkAchievements(currentProfile, currentStats);
+      const earned = getEarnedIds();
+      setEarnedAchievementIds(new Set(earned));
+      if (newly.length) {
+        setNewAchievements(prev => [...prev, ...newly]);
+      }
+    } catch { /* not initialized */ }
+  }, []);
 
   const refreshStats = useCallback(() => {
     const f = facadeRef.current;
     if (!f) return;
     try {
-      setStats(f.getDashboardStats());
-      setProfile(f.profile);
+      const currentStats = f.getDashboardStats();
+      const currentProfile = f.profile;
+      setStats(currentStats);
+      setProfile(currentProfile);
+      setHeatmap(f.getReviewHeatmap());
+      // Check achievements whenever stats are refreshed
+      const newly = checkAchievements(currentProfile, currentStats);
+      const earned = getEarnedIds();
+      setEarnedAchievementIds(new Set(earned));
+      if (newly.length) {
+        setNewAchievements(prev => [...prev, ...newly]);
+      }
     } catch { /* not initialized */ }
   }, []);
 
+  const dismissNewAchievements = useCallback(() => {
+    setNewAchievements([]);
+  }, []);
+
   useEffect(() => {
+    // Compute word of day once on mount
+    const dayIndex = Math.floor(Date.now() / 86400000);
+    setWordOfDay(VOCABULARY[dayIndex % VOCABULARY.length]);
+    setDailyChallenge(getDailyChallenge());
+
     const boot = async () => {
       const storage = new LocalStorageAdapter();
       const facade = new GameFacade(storage);
@@ -39,8 +90,17 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       const saved = await storage.load();
       if (saved) {
         await facade.init();
-        setProfile(facade.profile);
-        setStats(facade.getDashboardStats());
+        const currentProfile = facade.profile;
+        const currentStats = facade.getDashboardStats();
+        setProfile(currentProfile);
+        setStats(currentStats);
+        setHeatmap(facade.getReviewHeatmap());
+        const newly = checkAchievements(currentProfile, currentStats);
+        const earned = getEarnedIds();
+        setEarnedAchievementIds(new Set(earned));
+        if (newly.length) {
+          setNewAchievements(newly);
+        }
       }
       setIsLoading(false);
     };
@@ -50,8 +110,17 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   const createProfile = useCallback(async (name: string) => {
     if (!facadeRef.current) return;
     await facadeRef.current.init(name);
-    setProfile(facadeRef.current.profile);
-    setStats(facadeRef.current.getDashboardStats());
+    const currentProfile = facadeRef.current.profile;
+    const currentStats = facadeRef.current.getDashboardStats();
+    setProfile(currentProfile);
+    setStats(currentStats);
+    setHeatmap(facadeRef.current.getReviewHeatmap());
+    const newly = checkAchievements(currentProfile, currentStats);
+    const earned = getEarnedIds();
+    setEarnedAchievementIds(new Set(earned));
+    if (newly.length) {
+      setNewAchievements(prev => [...prev, ...newly]);
+    }
   }, []);
 
   const resetProgress = useCallback(async () => {
@@ -59,6 +128,9 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     await facadeRef.current.resetProgress();
     setProfile(null);
     setStats(null);
+    setHeatmap({});
+    setNewAchievements([]);
+    setEarnedAchievementIds(new Set());
     const storage = new LocalStorageAdapter();
     facadeRef.current = new GameFacade(storage);
   }, []);
@@ -69,6 +141,14 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       profile, stats, isLoading,
       hasProfile: profile !== null,
       createProfile, refreshStats, resetProgress,
+      heatmap,
+      achievements,
+      earnedAchievementIds,
+      newAchievements,
+      dailyChallenge,
+      wordOfDay,
+      dismissNewAchievements,
+      refreshAchievements,
     }}>
       {children}
     </GameContext.Provider>
