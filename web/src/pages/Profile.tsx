@@ -192,16 +192,37 @@ export function Profile({ onSettings, onShop }: { onSettings: () => void; onShop
           Achievements · {earnedAchievementIds.size}/{ACHIEVEMENTS.length}
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {ACHIEVEMENTS.map(a => {
+          {[...ACHIEVEMENTS].sort((a, b) => {
+            const ae = earnedAchievementIds.has(a.id) ? 1 : 0;
+            const be = earnedAchievementIds.has(b.id) ? 1 : 0;
+            if (ae !== be) return be - ae; // earned first
+            const ap = !ae && a.progress ? a.progress(profile, stats)?.[0] ?? 0 : 0;
+            const bp = !be && b.progress ? b.progress(profile, stats)?.[0] ?? 0 : 0;
+            return bp - ap; // higher progress first within unearned
+          }).map(a => {
             const earned = earnedAchievementIds.has(a.id);
+            const prog = !earned && a.progress ? a.progress(profile, stats) : null;
+            const progPct = prog ? Math.round((prog[0] / prog[1]) * 100) : 0;
+            const rarityColor = RARITY_COLOR[a.rarity];
             return (
-              <div key={a.id} style={{ background: 'var(--surface)', border: `1px solid ${earned ? RARITY_COLOR[a.rarity] : 'var(--border)'}`, borderRadius: 12, padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 12, opacity: earned ? 1 : 0.4 }}>
+              <div key={a.id} style={{ background: 'var(--surface)', border: `1px solid ${earned ? rarityColor : prog && progPct > 0 ? 'var(--border)' : 'var(--border)'}`, borderRadius: 12, padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 12, opacity: earned ? 1 : prog && progPct > 0 ? 0.75 : 0.4 }}>
                 <span style={{ fontSize: 26, filter: earned ? 'none' : 'grayscale(1)' }}>{a.icon}</span>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontWeight: 700, fontSize: 14, color: earned ? 'var(--text)' : 'var(--text-muted)' }}>{a.title}</div>
                   <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{a.description}</div>
+                  {!earned && prog && progPct > 0 && (
+                    <div style={{ marginTop: 6 }}>
+                      <div className="progress-track" style={{ height: 3 }}>
+                        <div className="progress-fill" style={{ width: `${progPct}%`, background: rarityColor, opacity: 0.7 }} />
+                      </div>
+                      <div style={{ fontSize: 9, color: 'var(--text-muted)', marginTop: 2 }}>{prog[0].toLocaleString()} / {prog[1].toLocaleString()}</div>
+                    </div>
+                  )}
                 </div>
-                <span style={{ fontSize: 10, fontWeight: 700, color: RARITY_COLOR[a.rarity], textTransform: 'uppercase', letterSpacing: 0.5 }}>{a.rarity}</span>
+                {earned
+                  ? <span style={{ fontSize: 14, color: rarityColor }}>✓</span>
+                  : <span style={{ fontSize: 10, fontWeight: 700, color: rarityColor, textTransform: 'uppercase', letterSpacing: 0.5 }}>{a.rarity}</span>
+                }
               </div>
             );
           })}
