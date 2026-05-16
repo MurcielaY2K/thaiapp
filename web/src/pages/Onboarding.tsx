@@ -13,9 +13,9 @@ const STEPS = [
     icon: '🧠',
     title: 'Smart Spaced Repetition',
     subtitle: 'The science of memory',
-    body: 'Our SRS engine shows you each word at exactly the right moment — just before you\'d forget it. Study 15 minutes a day and words stick for life.',
+    body: 'Our SRS engine shows you each word at exactly the right moment — just before you\'d forget it. Start with flashcards, then unlock 6 more study modes as your vocabulary grows.',
     cta: 'Next →',
-    features: ['📖 Flashcard review', '🧠 6 quiz modes', '🃏 Memory match', '🎵 Tone trainer', '🔤 Sentence builder', '🔡 Thai alphabet'],
+    features: ['📖 Start with flashcards', '🔓 Unlock Quiz at 5 words', '🔓 More modes up to 35 words'],
   },
   {
     icon: '⚔️',

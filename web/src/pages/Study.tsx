@@ -24,8 +24,10 @@ const CATEGORY_ICONS: Record<string, string> = {
   greetings: '👋', numbers: '🔢', food: '🍜', travel: '✈️', verbs_core: '⚡',
   adjectives_core: '🎨', direction: '🧭', time: '⏰', family: '👨‍👩‍👧', emotion: '😊',
   body: '🫀', color: '🌈', transport: '🚕', shopping: '🛍️', nature: '🌿',
-  health: '🏥', culture: '🏛️', weather: '⛅', animals: '🐘', work: '💼',
+  health: '🏥', culture: '🏛️', weather: '⛅', animal: '🐘', work: '💼',
   verbs: '💫', adjectives: '✨', spirits: '👻', music: '🎵', temples: '⛩️',
+  landscape: '🏞️', ocean: '🌊', sky: '🌌', cosmic: '🔭', island: '🏝️',
+  mountain: '🏔️', stone: '🪨', sacred: '🕯️', mystical: '🔮',
 };
 
 export function Study({

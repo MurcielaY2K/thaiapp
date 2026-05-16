@@ -20,7 +20,7 @@ import { TONE_COLORS } from '@engine/types';
 import { SessionSummary } from '@engine/engine/sessionManager';
 import { getLevelConfig } from '@engine/engine/gameEngine';
 import { sfx } from './utils/audio';
-import { getFeatureUnlocks, UNLOCK_AT } from './utils/featureUnlocks';
+import { getFeatureUnlocks, UNLOCK_AT, FeatureUnlocks } from './utils/featureUnlocks';
 
 type Tab = 'home' | 'learn' | 'map' | 'browse' | 'profile';
 type View = 'onboarding' | 'main' | 'study' | 'quiz' | 'quiz_fav' | 'quiz_hard' | 'tone' | 'sentence' | 'alphabet' | 'phrasebook' | 'match' | 'session_complete' | 'settings' | 'shop';
@@ -44,6 +44,29 @@ export function App() {
   const [studyState, setStudyState] = useState<StudyState>({});
 
   const unlocks = profile ? getFeatureUnlocks(profile) : null;
+
+  // Feature unlock toast
+  const [unlockToast, setUnlockToast] = useState<string | null>(null);
+  const prevUnlocksRef = React.useRef<FeatureUnlocks | null>(null);
+  useEffect(() => {
+    if (!unlocks) return;
+    const prev = prevUnlocksRef.current;
+    prevUnlocksRef.current = unlocks;
+    if (!prev) return;
+    const FEATURE_LABELS: Partial<Record<keyof FeatureUnlocks, string>> = {
+      quiz: 'Quiz Mode', phrasebook: 'Phrasebook', memoryMatch: 'Memory Match',
+      toneTrainer: 'Tone Trainer', alphabetDrill: 'Thai Alphabet', sentenceBuilder: 'Sentence Builder',
+      vocabBrowser: 'Vocab Browser',
+    };
+    for (const [key, label] of Object.entries(FEATURE_LABELS) as [keyof FeatureUnlocks, string][]) {
+      if (!prev[key] && unlocks[key]) {
+        setUnlockToast(label);
+        sfx.correct();
+        const t = setTimeout(() => setUnlockToast(null), 4000);
+        return () => clearTimeout(t);
+      }
+    }
+  }, [unlocks]);
 
   // PWA install prompt
   const [installPrompt, setInstallPrompt] = useState<Event | null>(null);
@@ -138,6 +161,17 @@ export function App() {
           </div>
         );
       })()}
+
+      {/* Feature unlock toast */}
+      {unlockToast && (
+        <div style={{ position: 'fixed', top: 20, left: '50%', transform: 'translateX(-50%)', zIndex: 1002, background: 'linear-gradient(135deg, #2563EB, #7C3AED)', borderRadius: 16, padding: '14px 22px', display: 'flex', alignItems: 'center', gap: 10, boxShadow: '0 6px 32px rgba(0,0,0,0.5)', animation: 'slideUp 0.3s ease forwards', maxWidth: 300, whiteSpace: 'nowrap' }}>
+          <span style={{ fontSize: 24 }}>🔓</span>
+          <div>
+            <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.75)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1 }}>Feature Unlocked!</div>
+            <div style={{ fontWeight: 800, color: '#fff', fontSize: 15 }}>{unlockToast}</div>
+          </div>
+        </div>
+      )}
 
       {/* Achievement toast */}
       {toastAchievement && (
