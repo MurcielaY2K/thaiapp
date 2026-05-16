@@ -4,6 +4,7 @@ import { ACHIEVEMENTS } from '../utils/achievements';
 import { REGIONS } from '@engine/types';
 import { VOCABULARY } from '@engine/data/vocabulary';
 import { getLevelConfig, SPIRIT_COMPANIONS } from '@engine/engine/gameEngine';
+import { getFeatureUnlocks } from '../utils/featureUnlocks';
 
 const XP_PER_LEVEL = 500;
 
@@ -42,6 +43,7 @@ export function Profile({ onSettings, onShop }: { onSettings: () => void; onShop
 
   if (!profile || !stats) return null;
 
+  const unlocks = getFeatureUnlocks(profile);
   const levelXP = profile.totalXP % XP_PER_LEVEL;
   const levelCfg = getLevelConfig(profile.currentLevel);
   const currentAvatar = AVATARS.find(a => a.id === profile.avatarId) ?? AVATARS[0];
@@ -82,7 +84,7 @@ export function Profile({ onSettings, onShop }: { onSettings: () => void; onShop
             <span style={{ position: 'absolute', bottom: -2, right: -2, fontSize: 11, background: 'var(--primary)', borderRadius: '50%', width: 16, height: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700 }}>✎</span>
           </button>
           <div style={{ display: 'flex', gap: 8 }}>
-            {onShop && (
+            {onShop && unlocks.shop && (
               <button style={{ background: 'var(--surface-hi)', border: '1px solid var(--gold)', borderRadius: 10, padding: '8px 14px', fontSize: 13, color: 'var(--gold)', fontWeight: 700 }} onClick={onShop}>
                 🏪 Shop
               </button>
@@ -184,10 +186,10 @@ export function Profile({ onSettings, onShop }: { onSettings: () => void; onShop
       )}
 
       {/* Category breakdown */}
-      {facade && <CategoryBreakdown srsMap={facade.srsMap} />}
+      {unlocks.categoryBreakdown && facade && <CategoryBreakdown srsMap={facade.srsMap} />}
 
       {/* Achievements */}
-      <div>
+      {unlocks.achievements && <div>
         <div style={s.sectionTitle}>
           Achievements · {earnedAchievementIds.size}/{ACHIEVEMENTS.length}
         </div>
@@ -227,7 +229,7 @@ export function Profile({ onSettings, onShop }: { onSettings: () => void; onShop
             );
           })}
         </div>
-      </div>
+      </div>}
 
       {/* Regions */}
       <div>

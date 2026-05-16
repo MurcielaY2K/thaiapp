@@ -20,6 +20,7 @@ import { TONE_COLORS } from '@engine/types';
 import { SessionSummary } from '@engine/engine/sessionManager';
 import { getLevelConfig } from '@engine/engine/gameEngine';
 import { sfx } from './utils/audio';
+import { getFeatureUnlocks, UNLOCK_AT } from './utils/featureUnlocks';
 
 type Tab = 'home' | 'learn' | 'map' | 'browse' | 'profile';
 type View = 'onboarding' | 'main' | 'study' | 'quiz' | 'quiz_fav' | 'quiz_hard' | 'tone' | 'sentence' | 'alphabet' | 'phrasebook' | 'match' | 'session_complete' | 'settings' | 'shop';
@@ -36,11 +37,13 @@ const TABS: { id: Tab; icon: string; label: string }[] = [
 ];
 
 export function App() {
-  const { isLoading, hasProfile, newAchievements, dismissNewAchievements, levelUp, dismissLevelUp } = useGame();
+  const { isLoading, hasProfile, newAchievements, dismissNewAchievements, levelUp, dismissLevelUp, profile } = useGame();
   const [view, setView] = useState<View>('main');
   const [tab, setTab] = useState<Tab>('home');
   const [complete, setComplete] = useState<CompleteState | null>(null);
   const [studyState, setStudyState] = useState<StudyState>({});
+
+  const unlocks = profile ? getFeatureUnlocks(profile) : null;
 
   // PWA install prompt
   const [installPrompt, setInstallPrompt] = useState<Event | null>(null);
@@ -148,21 +151,30 @@ export function App() {
       )}
 
       <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-        {tab === 'home'    && <Home onStudy={() => setView('study')} onQuiz={() => setView('quiz')} onFavQuiz={() => setView('quiz_fav')} onHardQuiz={() => setView('quiz_hard')} onTone={() => setView('tone')} onMatch={() => setView('match')} onSentence={() => setView('sentence')} />}
-        {tab === 'learn'   && <LearnTab onStudy={() => setView('study')} onQuiz={() => setView('quiz')} onTone={() => setView('tone')} onSentence={() => setView('sentence')} onAlphabet={() => setView('alphabet')} onPhrasebook={() => setView('phrasebook')} onMatch={() => setView('match')} />}
+        {tab === 'home'    && <Home onStudy={() => setView('study')} onQuiz={() => setView('quiz')} onFavQuiz={() => setView('quiz_fav')} onHardQuiz={() => setView('quiz_hard')} onTone={() => setView('tone')} onMatch={() => setView('match')} onSentence={() => setView('sentence')} unlocks={unlocks} />}
+        {tab === 'learn'   && <LearnTab onStudy={() => setView('study')} onQuiz={() => setView('quiz')} onTone={() => setView('tone')} onSentence={() => setView('sentence')} onAlphabet={() => setView('alphabet')} onPhrasebook={() => setView('phrasebook')} onMatch={() => setView('match')} unlocks={unlocks} />}
         {tab === 'map'     && <MapTab onStudyRegion={r => { setStudyState({ region: r }); setView('study'); }} />}
         {tab === 'browse'  && <VocabBrowser />}
         {tab === 'profile' && <Profile onSettings={() => setView('settings')} onShop={() => setView('shop')} />}
       </div>
 
       <nav className="bottom-nav">
-        {TABS.map(({ id, icon, label }) => (
-          <button key={id} className={`nav-tab${tab === id ? ' active' : ''}`} onClick={() => setTab(id)} style={{ position: 'relative' }}>
-            <span className="icon">{icon}</span>
-            {id === 'home' && <DueBadge />}
-            {label}
-          </button>
-        ))}
+        {TABS.map(({ id, icon, label }) => {
+          const locked = id === 'browse' && unlocks && !unlocks.vocabBrowser;
+          return (
+            <button
+              key={id}
+              className={`nav-tab${tab === id ? ' active' : ''}`}
+              onClick={() => { if (!locked) setTab(id); }}
+              style={{ position: 'relative', opacity: locked ? 0.4 : 1 }}
+              title={locked ? `Vocab unlocks after learning ${UNLOCK_AT.vocabBrowser} words` : undefined}
+            >
+              <span className="icon">{locked ? '🔒' : icon}</span>
+              {id === 'home' && <DueBadge />}
+              {label}
+            </button>
+          );
+        })}
       </nav>
     </>
   );
@@ -208,35 +220,45 @@ function MapTab({ onStudyRegion }: { onStudyRegion: (region: string) => void }) 
   );
 }
 
-function LearnTab({ onStudy, onQuiz, onTone, onSentence, onAlphabet, onPhrasebook, onMatch }: { onStudy: () => void; onQuiz: () => void; onTone: () => void; onSentence: () => void; onAlphabet: () => void; onPhrasebook: () => void; onMatch: () => void }) {
+function LearnTab({ onStudy, onQuiz, onTone, onSentence, onAlphabet, onPhrasebook, onMatch, unlocks }: {
+  onStudy: () => void; onQuiz: () => void; onTone: () => void; onSentence: () => void;
+  onAlphabet: () => void; onPhrasebook: () => void; onMatch: () => void;
+  unlocks: ReturnType<typeof getFeatureUnlocks> | null;
+}) {
   const activities = [
     {
-      icon: '📖', title: 'Flashcard Study', desc: 'SRS-based review — the best way to build long-term memory', color: 'var(--primary)', badge: '',
-      onClick: onStudy,
+      icon: '📖', title: 'Flashcard Study', desc: 'SRS-based review — the best way to build long-term memory',
+      color: 'var(--primary)', badge: '', onClick: onStudy, unlocked: true,
     },
     {
-      icon: '🧠', title: 'Multiple Choice Quiz', desc: 'Thai→English, English→Thai, Listening, and more', color: 'var(--info)', badge: '6 modes',
-      onClick: onQuiz,
+      icon: '🧠', title: 'Multiple Choice Quiz', desc: 'Thai→English, English→Thai, Listening, and more',
+      color: 'var(--info)', badge: '6 modes', onClick: onQuiz,
+      unlocked: unlocks?.quiz ?? false, unlockAt: UNLOCK_AT.quiz,
     },
     {
-      icon: '🃏', title: 'Memory Match', desc: 'Flip cards to match Thai words to English meanings', color: 'var(--r-pi)', badge: '3 difficulties',
-      onClick: onMatch,
+      icon: '💬', title: 'Phrasebook', desc: 'Practical everyday phrases with native TTS playback',
+      color: 'var(--r-wl)', badge: '7 categories', onClick: onPhrasebook,
+      unlocked: unlocks?.phrasebook ?? false, unlockAt: UNLOCK_AT.phrasebook,
     },
     {
-      icon: '🎵', title: 'Tone Trainer', desc: 'Identify the 5 Thai tones — mid, low, falling, high, rising', color: '#6BBF6E', badge: '',
-      onClick: onTone,
+      icon: '🃏', title: 'Memory Match', desc: 'Flip cards to match Thai words to English meanings',
+      color: 'var(--r-pi)', badge: '3 difficulties', onClick: onMatch,
+      unlocked: unlocks?.memoryMatch ?? false, unlockAt: UNLOCK_AT.memoryMatch,
     },
     {
-      icon: '🔤', title: 'Sentence Builder', desc: 'Arrange romanized words into correct sentence order', color: 'var(--gold)', badge: '',
-      onClick: onSentence,
+      icon: '🎵', title: 'Tone Trainer', desc: 'Identify the 5 Thai tones — mid, low, falling, high, rising',
+      color: '#6BBF6E', badge: '', onClick: onTone,
+      unlocked: unlocks?.toneTrainer ?? false, unlockAt: UNLOCK_AT.toneTrainer,
     },
     {
-      icon: '🔡', title: 'Thai Alphabet', desc: 'Explore consonants & vowels — tap to hear pronunciation', color: 'var(--warning)', badge: '29 consonants',
-      onClick: onAlphabet,
+      icon: '🔡', title: 'Thai Alphabet', desc: 'Explore consonants & vowels — tap to hear pronunciation',
+      color: 'var(--warning)', badge: '29 consonants', onClick: onAlphabet,
+      unlocked: unlocks?.alphabetDrill ?? false, unlockAt: UNLOCK_AT.alphabetDrill,
     },
     {
-      icon: '💬', title: 'Phrasebook', desc: 'Practical everyday phrases with native TTS playback', color: 'var(--r-wl)', badge: '7 categories',
-      onClick: onPhrasebook,
+      icon: '🔤', title: 'Sentence Builder', desc: 'Arrange romanized words into correct sentence order',
+      color: 'var(--gold)', badge: '', onClick: onSentence,
+      unlocked: unlocks?.sentenceBuilder ?? false, unlockAt: UNLOCK_AT.sentenceBuilder,
     },
   ];
 
@@ -252,17 +274,36 @@ function LearnTab({ onStudy, onQuiz, onTone, onSentence, onAlphabet, onPhraseboo
     <div className="scroll" style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 14 }}>
       <div style={{ fontSize: 26, fontWeight: 800 }}>Practice</div>
 
-      {activities.map(a => (
-        <button key={a.title} style={{ background: 'var(--surface)', border: `1px solid var(--border)`, borderLeft: `4px solid ${a.color}`, borderRadius: 14, padding: '18px 18px', display: 'flex', alignItems: 'center', gap: 16, textAlign: 'left', width: '100%' }} onClick={a.onClick}>
-          <span style={{ fontSize: 32, flexShrink: 0 }}>{a.icon}</span>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 3 }}>{a.title}</div>
-            <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.4 }}>{a.desc}</div>
-            {a.badge && <span style={{ fontSize: 10, color: a.color, background: `${a.color}22`, borderRadius: 6, padding: '2px 8px', fontWeight: 700, display: 'inline-block', marginTop: 4 }}>{a.badge}</span>}
-          </div>
-          <span style={{ color: 'var(--text-muted)', fontSize: 18 }}>→</span>
-        </button>
-      ))}
+      {activities.map(a => {
+        const locked = !a.unlocked;
+        return (
+          <button
+            key={a.title}
+            style={{
+              background: 'var(--surface)',
+              border: `1px solid var(--border)`,
+              borderLeft: `4px solid ${locked ? 'var(--border)' : a.color}`,
+              borderRadius: 14, padding: '16px 18px', display: 'flex', alignItems: 'center', gap: 16,
+              textAlign: 'left', width: '100%',
+              opacity: locked ? 0.55 : 1,
+              cursor: locked ? 'default' : 'pointer',
+            }}
+            onClick={locked ? undefined : a.onClick}
+            disabled={locked}
+          >
+            <span style={{ fontSize: 30, flexShrink: 0, filter: locked ? 'grayscale(1)' : 'none' }}>{locked ? '🔒' : a.icon}</span>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 3, color: locked ? 'var(--text-muted)' : 'var(--text)' }}>{a.title}</div>
+              {locked
+                ? <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Learn {a.unlockAt} words to unlock</div>
+                : <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.4 }}>{a.desc}</div>
+              }
+              {!locked && a.badge && <span style={{ fontSize: 10, color: a.color, background: `${a.color}22`, borderRadius: 6, padding: '2px 8px', fontWeight: 700, display: 'inline-block', marginTop: 4 }}>{a.badge}</span>}
+            </div>
+            {!locked && <span style={{ color: 'var(--text-muted)', fontSize: 18 }}>→</span>}
+          </button>
+        );
+      })}
 
       {/* Quick tone reference */}
       <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 14, padding: 16 }}>

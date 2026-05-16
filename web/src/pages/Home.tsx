@@ -5,6 +5,7 @@ import { VOCABULARY } from '@engine/data/vocabulary';
 import { getLevelConfig, SPIRIT_COMPANIONS } from '@engine/engine/gameEngine';
 import { speakThai } from '../utils/audio';
 import { getFavorites } from '../utils/favorites';
+import { FeatureUnlocks } from '../utils/featureUnlocks';
 
 const XP_PER_LEVEL = 500;
 const REGION_COLOR: Record<string, string> = {
@@ -12,9 +13,10 @@ const REGION_COLOR: Record<string, string> = {
   talee_tong: 'var(--r-tt)', mueang_hin: 'var(--r-mh)', wang_loi_faa: 'var(--r-wl)', daen_winyaan: 'var(--r-dw)',
 };
 
-export function Home({ onStudy, onQuiz, onFavQuiz, onHardQuiz, onTone, onMatch, onSentence }: {
+export function Home({ onStudy, onQuiz, onFavQuiz, onHardQuiz, onTone, onMatch, onSentence, unlocks }: {
   onStudy: () => void; onQuiz: () => void; onFavQuiz: () => void; onHardQuiz: () => void;
   onTone: () => void; onMatch: () => void; onSentence: () => void;
+  unlocks: FeatureUnlocks | null;
 }) {
   const { profile, stats, refreshStats, wordOfDay, dailyChallenge, facade } = useGame();
   useEffect(() => { refreshStats(); }, []);
@@ -118,22 +120,24 @@ export function Home({ onStudy, onQuiz, onFavQuiz, onHardQuiz, onTone, onMatch, 
         <div style={{ fontSize: 32 }}>🗺️</div>
       </div>
 
-      {/* Stats row */}
-      <div style={{ display: 'flex', gap: 10 }}>
-        {[
-          { label: 'Due Today', value: stats.dueToday, icon: '📋', color: stats.dueToday > 0 ? 'var(--warning)' : 'var(--success)' },
-          { label: 'New Words', value: stats.newAvailable, icon: '✨', color: 'var(--info)' },
-          { label: 'Mastered', value: stats.masteredCards, icon: '⭐', color: 'var(--gold)' },
-        ].map(({ label, value, icon, color }) => (
-          <div key={label} style={{ ...s.card, flex: 1, borderTop: `3px solid ${color}`, textAlign: 'center', padding: '12px 8px' }}>
-            <div style={{ fontSize: 18 }}>{icon}</div>
-            <div style={{ fontSize: 20, fontWeight: 800, color }}>{value}</div>
-            <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 2 }}>{label}</div>
-          </div>
-        ))}
-      </div>
+      {/* Stats row — shown after a few reviews */}
+      {(unlocks?.statsRow) && (
+        <div style={{ display: 'flex', gap: 10 }}>
+          {[
+            { label: 'Due Today', value: stats.dueToday, icon: '📋', color: stats.dueToday > 0 ? 'var(--warning)' : 'var(--success)' },
+            { label: 'New Words', value: stats.newAvailable, icon: '✨', color: 'var(--info)' },
+            { label: 'Mastered', value: stats.masteredCards, icon: '⭐', color: 'var(--gold)' },
+          ].map(({ label, value, icon, color }) => (
+            <div key={label} style={{ ...s.card, flex: 1, borderTop: `3px solid ${color}`, textAlign: 'center', padding: '12px 8px' }}>
+              <div style={{ fontSize: 18 }}>{icon}</div>
+              <div style={{ fontSize: 20, fontWeight: 800, color }}>{value}</div>
+              <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 2 }}>{label}</div>
+            </div>
+          ))}
+        </div>
+      )}
 
-      {/* Primary actions */}
+      {/* Primary study action — always visible */}
       <button
         style={{ ...s.studyBtn, background: canStudy ? 'var(--primary)' : 'var(--surface-hi)', color: canStudy ? '#fff' : 'var(--text-muted)' }}
         onClick={onStudy}
@@ -149,16 +153,20 @@ export function Home({ onStudy, onQuiz, onFavQuiz, onHardQuiz, onTone, onMatch, 
         {canStudy && <span style={{ fontSize: 18 }}>→</span>}
       </button>
 
-      <button style={s.quizBtn} onClick={onQuiz}>
-        <span style={{ fontSize: 22 }}>🧠</span>
-        <div style={{ flex: 1, textAlign: 'left' }}>
-          <div style={{ fontWeight: 700 }}>Quick Quiz</div>
-          <div style={{ fontSize: 12, opacity: 0.8, marginTop: 2 }}>10 questions · Test your memory</div>
-        </div>
-        <span style={{ fontSize: 18 }}>→</span>
-      </button>
+      {/* Quiz shortcut — unlocks after 5 words */}
+      {unlocks?.quiz && (
+        <button style={s.quizBtn} onClick={onQuiz}>
+          <span style={{ fontSize: 22 }}>🧠</span>
+          <div style={{ flex: 1, textAlign: 'left' }}>
+            <div style={{ fontWeight: 700 }}>Quick Quiz</div>
+            <div style={{ fontSize: 12, opacity: 0.8, marginTop: 2 }}>10 questions · Test your memory</div>
+          </div>
+          <span style={{ fontSize: 18 }}>→</span>
+        </button>
+      )}
 
-      {favoriteCount > 0 && (
+      {/* Saved words quiz — only shows when user has favorites and quiz is unlocked */}
+      {unlocks?.quiz && favoriteCount > 0 && (
         <button style={{ ...s.quizBtn, border: '1px solid var(--error)', color: 'var(--error)', background: 'rgba(239,68,68,0.05)' }} onClick={onFavQuiz}>
           <span style={{ fontSize: 22 }}>♥</span>
           <div style={{ flex: 1, textAlign: 'left' }}>
@@ -169,8 +177,8 @@ export function Home({ onStudy, onQuiz, onFavQuiz, onHardQuiz, onTone, onMatch, 
         </button>
       )}
 
-      {/* Daily challenge */}
-      {dailyChallenge && (() => {
+      {/* Daily challenge — unlocks after first few words */}
+      {unlocks?.dailyChallenge && dailyChallenge && (() => {
         const challengeColor = dailyChallenge.completed ? 'var(--success)' : 'var(--gold)';
         const challengeNav: Record<string, (() => void) | undefined> = {
           study: onStudy, new_words: onStudy, quiz: onQuiz,
@@ -208,11 +216,11 @@ export function Home({ onStudy, onQuiz, onFavQuiz, onHardQuiz, onTone, onMatch, 
         );
       })()}
 
-      {/* SRS level distribution */}
-      {facade && <SrsLevelChart srsMap={facade.srsMap} />}
+      {/* SRS level distribution — shown after enough data */}
+      {unlocks?.srsCharts && facade && <SrsLevelChart srsMap={facade.srsMap} />}
 
       {/* 7-day review forecast */}
-      {facade && <ReviewForecast srsMap={facade.srsMap} />}
+      {unlocks?.srsCharts && facade && <ReviewForecast srsMap={facade.srsMap} />}
 
       {/* Word of the day */}
       {wordOfDay && (
@@ -250,8 +258,8 @@ export function Home({ onStudy, onQuiz, onFavQuiz, onHardQuiz, onTone, onMatch, 
       {/* Grammar tip of the day */}
       <GrammarTip />
 
-      {/* Struggling words call to action */}
-      {stats.strugglingCards > 0 && (
+      {/* Struggling words call to action — shown after enough reviews */}
+      {unlocks?.strugglingWords && stats.strugglingCards > 0 && (
         <button style={{ ...s.studyBtn, background: 'rgba(249,115,22,0.12)', border: '1px solid var(--warning)', color: 'var(--warning)' }} onClick={onHardQuiz}>
           <span style={{ fontSize: 22 }}>⚠️</span>
           <div style={{ flex: 1, textAlign: 'left' }}>
@@ -262,8 +270,8 @@ export function Home({ onStudy, onQuiz, onFavQuiz, onHardQuiz, onTone, onMatch, 
         </button>
       )}
 
-      {/* Active quests */}
-      {profile.activeQuestIds.length > 0 && (
+      {/* Active quests — shown once quiz unlocked */}
+      {unlocks?.quiz && profile.activeQuestIds.length > 0 && (
         <div>
           <div style={s.sectionTitle}>Active Quests</div>
           {profile.activeQuestIds.slice(0, 3).map(qid => (
@@ -280,14 +288,39 @@ export function Home({ onStudy, onQuiz, onFavQuiz, onHardQuiz, onTone, onMatch, 
         </div>
       )}
 
+      {/* Next unlock hint — shown while features are still gating */}
+      {unlocks && !unlocks.sentenceBuilder && (() => {
+        const w = profile.totalWordsLearned;
+        const next = !unlocks.quiz ? { at: 5, label: 'Quiz mode' }
+          : !unlocks.phrasebook ? { at: 10, label: 'Phrasebook' }
+          : !unlocks.memoryMatch ? { at: 15, label: 'Memory Match' }
+          : !unlocks.toneTrainer ? { at: 20, label: 'Tone Trainer' }
+          : !unlocks.alphabetDrill ? { at: 25, label: 'Alphabet Drill' }
+          : { at: 35, label: 'Sentence Builder' };
+        const pct = Math.min(100, Math.round((w / next.at) * 100));
+        return (
+          <div style={{ background: 'var(--surface)', borderRadius: 12, padding: '12px 16px', border: '1px solid var(--border)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: 'var(--text-muted)', marginBottom: 6 }}>
+              <span>🔓 Next unlock: <span style={{ color: 'var(--primary)', fontWeight: 700 }}>{next.label}</span></span>
+              <span>{w}/{next.at} words</span>
+            </div>
+            <div className="progress-track" style={{ height: 4 }}>
+              <div className="progress-fill" style={{ width: `${pct}%`, background: 'var(--primary)' }} />
+            </div>
+          </div>
+        );
+      })()}
+
       {/* Footer stats */}
-      <div style={{ display: 'flex', justifyContent: 'center', gap: 20, paddingBottom: 4 }}>
-        <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>📚 {stats.totalCards} cards</span>
-        <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>📝 {profile.totalWordsLearned} learned</span>
-        {stats.strugglingCards > 0 && (
-          <span style={{ fontSize: 12, color: 'var(--warning)' }}>⚠️ {stats.strugglingCards} struggling</span>
-        )}
-      </div>
+      {unlocks?.statsRow && (
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 20, paddingBottom: 4 }}>
+          <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>📚 {stats.totalCards} cards</span>
+          <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>📝 {profile.totalWordsLearned} learned</span>
+          {stats.strugglingCards > 0 && (
+            <span style={{ fontSize: 12, color: 'var(--warning)' }}>⚠️ {stats.strugglingCards} struggling</span>
+          )}
+        </div>
+      )}
     </div>
   );
 }
