@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useGame } from '../context/GameContext';
 import { REGIONS, TONE_COLORS } from '@engine/types';
 import { VOCABULARY } from '@engine/data/vocabulary';
-import { getLevelConfig } from '@engine/engine/gameEngine';
+import { getLevelConfig, SPIRIT_COMPANIONS } from '@engine/engine/gameEngine';
 import { speakThai } from '../utils/audio';
 import { getFavorites } from '../utils/favorites';
 
@@ -87,6 +87,23 @@ export function Home({ onStudy, onQuiz, onFavQuiz, onHardQuiz }: { onStudy: () =
           <span>{XP_PER_LEVEL - levelXP} XP → {getLevelConfig(profile.currentLevel + 1).titleThai}</span>
         </div>
       </div>
+
+      {/* Active companions */}
+      {profile.activeCompanionIds.length > 0 && (
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+          {profile.activeCompanionIds.map(cid => {
+            const c = SPIRIT_COMPANIONS.find(x => x.id === cid);
+            if (!c) return null;
+            const icon = cid === 'phi_krasue' ? '👻' : cid === 'nang_tani' ? '🌿' : cid === 'phi_pret' ? '🙏' : cid === 'mae_nak' ? '💀' : cid === 'garuda' ? '🦅' : '👁️';
+            return (
+              <div key={cid} style={{ display: 'flex', alignItems: 'center', gap: 5, background: 'var(--surface)', border: '1px solid var(--primary)', borderRadius: 999, padding: '4px 10px' }}>
+                <span style={{ fontSize: 14 }}>{icon}</span>
+                <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--primary)' }}>{c.nameEnglish}</span>
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       {/* Region banner */}
       <div style={{ ...s.card, borderLeft: `4px solid ${regionColor}`, flexDirection: 'row', alignItems: 'center', gap: 12 }}>

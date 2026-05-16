@@ -3,7 +3,7 @@ import { useGame } from '../context/GameContext';
 import { ACHIEVEMENTS } from '../utils/achievements';
 import { REGIONS } from '@engine/types';
 import { VOCABULARY } from '@engine/data/vocabulary';
-import { getLevelConfig } from '@engine/engine/gameEngine';
+import { getLevelConfig, SPIRIT_COMPANIONS } from '@engine/engine/gameEngine';
 
 const XP_PER_LEVEL = 500;
 
@@ -25,17 +25,14 @@ const REGION_COLOR: Record<string, string> = {
 
 const RARITY_COLOR = { common: 'var(--text-sec)', rare: 'var(--info)', legendary: 'var(--gold)' };
 
-const COMPANION_DATA: Record<string, { icon: string; name: string; desc: string }> = {
-  phi_lok:           { icon: '👻', name: 'Phi Lok',          desc: 'Spirit of the Golden Port' },
-  rice_spirit:       { icon: '🌾', name: 'Rice Spirit',       desc: 'Keeper of the harvest plains' },
-  mountain_eagle:    { icon: '🦅', name: 'Mountain Eagle',    desc: 'Guardian of the northern peaks' },
-  naga_water:        { icon: '🐉', name: 'Naga Water',        desc: 'Serpent lord of the Golden Sea' },
-  stone_guardian:    { icon: '🗿', name: 'Stone Guardian',    desc: 'Ancient warden of the ruins' },
-  phoenix_spirit:    { icon: '🔥', name: 'Phoenix Spirit',    desc: 'Celestial flame of the Sky Palace' },
-  enlightened_spirit:{ icon: '✨', name: 'Enlightened Spirit', desc: 'Sage of the Spirit Realm' },
+const COMPANION_ICON: Record<string, string> = {
+  phi_krasue: '👻', phi_pret: '🙏', nang_tani: '🌿', mae_nak: '💀',
+  garuda: '🦅', phi_lok: '👁️',
+  rice_spirit: '🌾', mountain_eagle: '🦅', naga_water: '🐉',
+  stone_guardian: '🗿', phoenix_spirit: '🔥', enlightened_spirit: '✨',
 };
 
-export function Profile({ onSettings }: { onSettings: () => void }) {
+export function Profile({ onSettings, onShop }: { onSettings: () => void; onShop?: () => void }) {
   const { profile, stats, heatmap, earnedAchievementIds, refreshStats, facade } = useGame();
   const [sessionHistory] = useState(() => facade?.getSessionHistory().slice(-14).reverse() ?? []);
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
@@ -57,6 +54,20 @@ export function Profile({ onSettings }: { onSettings: () => void }) {
     setEditingName(false);
   };
 
+  const toggleCompanion = async (cid: string) => {
+    if (!facade) return;
+    const isActive = profile.activeCompanionIds.includes(cid);
+    let active: string[];
+    if (isActive) {
+      active = profile.activeCompanionIds.filter(id => id !== cid);
+    } else {
+      if (profile.activeCompanionIds.length >= 3) return;
+      active = [...profile.activeCompanionIds, cid];
+    }
+    await facade.saveProfile({ ...profile, activeCompanionIds: active });
+    refreshStats();
+  };
+
   return (
     <div className="scroll" style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 20 }}>
       {/* Hero card */}
@@ -70,9 +81,16 @@ export function Profile({ onSettings }: { onSettings: () => void }) {
             {currentAvatar.icon}
             <span style={{ position: 'absolute', bottom: -2, right: -2, fontSize: 11, background: 'var(--primary)', borderRadius: '50%', width: 16, height: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700 }}>✎</span>
           </button>
-          <button style={{ background: 'var(--surface-hi)', border: '1px solid var(--border)', borderRadius: 10, padding: '8px 14px', fontSize: 13, color: 'var(--text-sec)', fontWeight: 600 }} onClick={onSettings}>
-            ⚙️ Settings
-          </button>
+          <div style={{ display: 'flex', gap: 8 }}>
+            {onShop && (
+              <button style={{ background: 'var(--surface-hi)', border: '1px solid var(--gold)', borderRadius: 10, padding: '8px 14px', fontSize: 13, color: 'var(--gold)', fontWeight: 700 }} onClick={onShop}>
+                🏪 Shop
+              </button>
+            )}
+            <button style={{ background: 'var(--surface-hi)', border: '1px solid var(--border)', borderRadius: 10, padding: '8px 14px', fontSize: 13, color: 'var(--text-sec)', fontWeight: 600 }} onClick={onSettings}>
+              ⚙️ Settings
+            </button>
+          </div>
         </div>
         {editingName ? (
           <div style={{ display: 'flex', gap: 8, alignItems: 'center', width: '100%', justifyContent: 'center' }}>
@@ -212,18 +230,42 @@ export function Profile({ onSettings }: { onSettings: () => void }) {
       {/* Companions */}
       {profile.collectedCompanionIds.length > 0 && (
         <div>
-          <div style={s.sectionTitle}>Companions · {profile.collectedCompanionIds.length} collected</div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 10 }}>
+            <div style={s.sectionTitle as React.CSSProperties}>Companions · {profile.collectedCompanionIds.length} collected</div>
+            <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{profile.activeCompanionIds.length}/3 active</div>
+          </div>
+          <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 10 }}>Tap a companion to activate / deactivate</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {profile.collectedCompanionIds.map((cid: string) => {
-              const c = COMPANION_DATA[cid] ?? { icon: '🐾', name: cid, desc: 'Mysterious companion' };
+              const spirit = SPIRIT_COMPANIONS.find(x => x.id === cid);
+              const icon = COMPANION_ICON[cid] ?? '🐾';
+              const name = spirit ? `${spirit.nameEnglish} (${spirit.nameThai})` : cid;
+              const desc = spirit ? spirit.description : 'Mysterious companion';
+              const isActive = profile.activeCompanionIds.includes(cid);
+              const rarity = spirit?.rarity ?? 'common';
+              const canActivate = !isActive && profile.activeCompanionIds.length < 3;
               return (
-                <div key={cid} style={{ background: 'var(--surface)', border: '1px solid var(--primary)', borderRadius: 14, padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 14 }}>
-                  <span style={{ fontSize: 32 }}>{c.icon}</span>
-                  <div>
-                    <div style={{ fontWeight: 700, fontSize: 15, color: 'var(--primary)' }}>{c.name}</div>
-                    <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{c.desc}</div>
+                <button
+                  key={cid}
+                  style={{ background: isActive ? 'rgba(99,102,241,0.08)' : 'var(--surface)', border: `1px solid ${isActive ? 'var(--primary)' : 'var(--border)'}`, borderRadius: 14, padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 14, textAlign: 'left', opacity: (!isActive && !canActivate) ? 0.5 : 1, cursor: isActive || canActivate ? 'pointer' : 'default' }}
+                  onClick={() => (isActive || canActivate) && toggleCompanion(cid)}
+                  disabled={!isActive && !canActivate}
+                >
+                  <span style={{ fontSize: 32 }}>{icon}</span>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+                      <span style={{ fontWeight: 700, fontSize: 14, color: isActive ? 'var(--primary)' : 'var(--text)' }}>{name}</span>
+                      <span style={{ fontSize: 9, fontWeight: 800, color: RARITY_COLOR[rarity], background: `${RARITY_COLOR[rarity]}22`, borderRadius: 4, padding: '1px 6px', textTransform: 'uppercase' }}>{rarity}</span>
+                    </div>
+                    <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{desc}</div>
                   </div>
-                </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, flexShrink: 0 }}>
+                    <div style={{ width: 20, height: 20, borderRadius: '50%', border: `2px solid ${isActive ? 'var(--primary)' : 'var(--border)'}`, background: isActive ? 'var(--primary)' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      {isActive && <span style={{ fontSize: 10, color: '#fff', fontWeight: 800 }}>✓</span>}
+                    </div>
+                    {isActive && <span style={{ fontSize: 9, color: 'var(--primary)', fontWeight: 800 }}>ON</span>}
+                  </div>
+                </button>
               );
             })}
           </div>

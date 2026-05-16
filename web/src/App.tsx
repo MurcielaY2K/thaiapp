@@ -15,13 +15,14 @@ import { VocabBrowser } from './pages/VocabBrowser';
 import { WorldMap } from './pages/WorldMap';
 import { Settings } from './pages/Settings';
 import { MatchGame } from './pages/MatchGame';
+import { Shop } from './pages/Shop';
 import { TONE_COLORS } from '@engine/types';
 import { SessionSummary } from '@engine/engine/sessionManager';
 import { getLevelConfig } from '@engine/engine/gameEngine';
 import { sfx } from './utils/audio';
 
 type Tab = 'home' | 'learn' | 'map' | 'browse' | 'profile';
-type View = 'onboarding' | 'main' | 'study' | 'quiz' | 'quiz_fav' | 'quiz_hard' | 'tone' | 'sentence' | 'alphabet' | 'phrasebook' | 'match' | 'session_complete' | 'settings';
+type View = 'onboarding' | 'main' | 'study' | 'quiz' | 'quiz_fav' | 'quiz_hard' | 'tone' | 'sentence' | 'alphabet' | 'phrasebook' | 'match' | 'session_complete' | 'settings' | 'shop';
 
 interface CompleteState { summary: SessionSummary; xp: number; questIds: string[] }
 
@@ -78,6 +79,7 @@ export function App() {
 
   if (!hasProfile || view === 'onboarding') return <Onboarding onDone={() => setView('main')} />;
   if (view === 'settings') return <Settings onBack={() => setView('main')} />;
+  if (view === 'shop')     return <Shop     onBack={() => setView('main')} />;
   if (view === 'study') return (
     <Study
       onComplete={(summary, xp, questIds) => { setComplete({ summary, xp, questIds }); setView('session_complete'); }}
@@ -147,7 +149,7 @@ export function App() {
         {tab === 'learn'   && <LearnTab onStudy={() => setView('study')} onQuiz={() => setView('quiz')} onTone={() => setView('tone')} onSentence={() => setView('sentence')} onAlphabet={() => setView('alphabet')} onPhrasebook={() => setView('phrasebook')} onMatch={() => setView('match')} />}
         {tab === 'map'     && <MapTab />}
         {tab === 'browse'  && <VocabBrowser />}
-        {tab === 'profile' && <Profile onSettings={() => setView('settings')} />}
+        {tab === 'profile' && <Profile onSettings={() => setView('settings')} onShop={() => setView('shop')} />}
       </div>
 
       <nav className="bottom-nav">
