@@ -129,17 +129,17 @@ export function AlphabetDrill({ onExit }: { onExit: () => void }) {
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: 'var(--bg)' }}>
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '16px 20px 12px', paddingTop: 'calc(env(safe-area-inset-top, 0px) + 16px)', background: 'var(--surface)', borderBottom: '1px solid var(--border)' }}>
-        <button style={{ width: 32, height: 32, borderRadius: 999, background: 'var(--surface-hi)', color: 'var(--text-sec)', fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={onExit}>✕</button>
-        <span style={{ flex: 1, fontWeight: 700, fontSize: 17, textAlign: 'center' }}>Thai Alphabet</span>
-        <div style={{ width: 32 }} />
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '16px 20px 12px', paddingTop: 'calc(env(safe-area-inset-top, 0px) + 16px)', background: 'rgba(7,3,22,0.92)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+        <button style={{ width: 36, height: 36, borderRadius: 999, background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)', color: 'var(--text-sec)', fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }} onClick={onExit}>✕</button>
+        <span style={{ flex: 1, fontWeight: 800, fontSize: 17, textAlign: 'center' }}>Thai Alphabet</span>
+        <div style={{ width: 36 }} />
       </div>
 
       {/* Tab switcher */}
-      <div style={{ display: 'flex', background: 'var(--surface)', borderBottom: '1px solid var(--border)' }}>
+      <div style={{ display: 'flex', background: 'rgba(7,3,22,0.85)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
         {(['consonants', 'vowels', 'quiz'] as Tab[]).map(t => (
           <button key={t} onClick={() => { setTab(t); setSelected(null); }}
-            style={{ flex: 1, padding: '10px 0', fontSize: 12, fontWeight: 700, color: tab === t ? 'var(--primary)' : 'var(--text-muted)', background: 'transparent', borderBottom: `2px solid ${tab === t ? 'var(--primary)' : 'transparent'}`, borderRadius: 0 }}>
+            style={{ flex: 1, padding: '10px 0', fontSize: 12, fontWeight: 700, color: tab === t ? 'var(--gold)' : 'var(--text-muted)', background: 'transparent', borderBottom: `2px solid ${tab === t ? 'var(--gold)' : 'transparent'}`, borderRadius: 0, transition: 'color 0.2s' }}>
             {t === 'consonants' ? '🔤 Consonants' : t === 'vowels' ? '🗣️ Vowels' : '🎯 Quiz'}
           </button>
         ))}
@@ -151,16 +151,16 @@ export function AlphabetDrill({ onExit }: { onExit: () => void }) {
         <>
           {tab === 'consonants' && (
             <>
-              <div style={{ display: 'flex', gap: 8, padding: '10px 16px', background: 'var(--surface)', borderBottom: '1px solid var(--border)' }}>
+              <div style={{ display: 'flex', gap: 8, padding: '10px 16px', background: 'rgba(7,3,22,0.7)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                 {(['all', 'mid', 'high', 'low'] as const).map(cls => (
                   <button key={cls} onClick={() => setFilterCls(cls)}
-                    style={{ flex: 1, padding: '6px 0', fontSize: 11, fontWeight: 700, borderRadius: 8, border: `1px solid ${filterCls === cls ? CLASS_COLOR[cls as 'mid'|'high'|'low'] ?? 'var(--primary)' : 'var(--border)'}`, background: filterCls === cls ? `${CLASS_COLOR[cls as 'mid'|'high'|'low'] ?? 'var(--primary)'}22` : 'var(--bg)', color: filterCls === cls ? CLASS_COLOR[cls as 'mid'|'high'|'low'] ?? 'var(--primary)' : 'var(--text-muted)' }}>
+                    style={{ flex: 1, padding: '6px 0', fontSize: 11, fontWeight: 700, borderRadius: 8, border: `1px solid ${filterCls === cls ? CLASS_COLOR[cls as 'mid'|'high'|'low'] ?? 'var(--gold)' : 'rgba(255,255,255,0.08)'}`, background: filterCls === cls ? `${CLASS_COLOR[cls as 'mid'|'high'|'low'] ?? 'var(--gold)'}22` : 'rgba(22,12,53,0.7)', color: filterCls === cls ? CLASS_COLOR[cls as 'mid'|'high'|'low'] ?? 'var(--gold)' : 'var(--text-muted)', transition: 'all 0.15s', boxShadow: filterCls === cls ? `0 0 8px ${CLASS_COLOR[cls as 'mid'|'high'|'low'] ?? 'var(--gold)'}33` : 'none' }}>
                     {cls === 'all' ? 'All' : CLASS_LABEL[cls]}
                   </button>
                 ))}
               </div>
               {filterCls !== 'all' && (
-                <div style={{ padding: '8px 16px', background: 'var(--surface-hi)', fontSize: 12, color: 'var(--text-muted)', borderBottom: '1px solid var(--border)' }}>
+                <div style={{ padding: '8px 16px', background: 'rgba(22,12,53,0.5)', fontSize: 12, color: 'var(--text-muted)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                   {CLASS_DESC[filterCls]}
                 </div>
               )}
@@ -176,8 +176,9 @@ export function AlphabetDrill({ onExit }: { onExit: () => void }) {
                       key={c.char}
                       onClick={() => { setSelected(p => p?.char === c.char ? null : c); speakThai(c.char); }}
                       style={{
-                        background: selected?.char === c.char ? `${CLASS_COLOR[c.cls]}22` : 'var(--surface)',
-                        border: `2px solid ${selected?.char === c.char ? CLASS_COLOR[c.cls] : 'var(--border)'}`,
+                        background: selected?.char === c.char ? `${CLASS_COLOR[c.cls]}22` : 'linear-gradient(135deg, rgba(22,12,53,0.9), rgba(14,7,38,0.85))',
+                        border: `2px solid ${selected?.char === c.char ? CLASS_COLOR[c.cls] : 'rgba(255,255,255,0.08)'}`,
+                        boxShadow: selected?.char === c.char ? `0 0 12px ${CLASS_COLOR[c.cls]}44` : '0 2px 6px rgba(0,0,0,0.25)',
                         borderRadius: 12, padding: '10px 4px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, transition: 'all 0.15s',
                       }}
                     >
@@ -189,11 +190,11 @@ export function AlphabetDrill({ onExit }: { onExit: () => void }) {
                 </div>
 
                 {selected && (
-                  <div style={{ marginTop: 16, background: 'var(--surface)', borderRadius: 16, padding: 20, border: `2px solid ${CLASS_COLOR[selected.cls]}` }}>
+                  <div style={{ marginTop: 16, background: 'linear-gradient(135deg, rgba(22,12,53,0.97), rgba(14,7,38,0.95))', borderRadius: 16, padding: 20, border: `2px solid ${CLASS_COLOR[selected.cls]}`, boxShadow: `0 0 24px ${CLASS_COLOR[selected.cls]}22, 0 4px 20px rgba(0,0,0,0.4)` }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 16 }}>
                       <button
                         onClick={() => speakThai(selected.char)}
-                        style={{ fontSize: 64, background: 'var(--surface-hi)', border: `2px solid ${CLASS_COLOR[selected.cls]}`, borderRadius: 16, width: 90, height: 90, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
+                        style={{ fontSize: 64, background: `${CLASS_COLOR[selected.cls]}15`, border: `2px solid ${CLASS_COLOR[selected.cls]}`, borderRadius: 16, width: 90, height: 90, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
                       >{selected.char}</button>
                       <div>
                         <div style={{ fontSize: 22, fontWeight: 700, color: CLASS_COLOR[selected.cls] }}>{selected.rtgs}</div>
@@ -202,7 +203,7 @@ export function AlphabetDrill({ onExit }: { onExit: () => void }) {
                       </div>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                      <button onClick={() => speakThai(selected.example)} style={{ fontSize: 24, fontWeight: 700, background: 'var(--surface-hi)', borderRadius: 10, padding: '8px 14px', border: '1px solid var(--border)' }}>{selected.example} 🔊</button>
+                      <button onClick={() => speakThai(selected.example)} style={{ fontSize: 24, fontWeight: 700, background: 'rgba(255,255,255,0.06)', borderRadius: 10, padding: '8px 14px', border: '1px solid rgba(255,255,255,0.1)' }}>{selected.example} 🔊</button>
                       <div style={{ fontSize: 14, color: 'var(--text-sec)' }}>{selected.exampleMeaning}</div>
                     </div>
                     <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 12, lineHeight: 1.5 }}>
@@ -220,7 +221,7 @@ export function AlphabetDrill({ onExit }: { onExit: () => void }) {
                   <button
                     key={v.symbol}
                     onClick={() => speakThai(v.example)}
-                    style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 16, textAlign: 'left' }}
+                    style={{ background: 'linear-gradient(135deg, rgba(22,12,53,0.94), rgba(14,7,38,0.9))', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 16, textAlign: 'left', boxShadow: '0 2px 8px rgba(0,0,0,0.25)' }}
                   >
                     <span style={{ fontSize: 32, fontWeight: 700, minWidth: 44, textAlign: 'center', color: 'var(--primary)' }}>{v.symbol}</span>
                     <div style={{ flex: 1 }}>
@@ -297,9 +298,9 @@ function AlphabetQuiz() {
           <button
             key={mode}
             onClick={() => startQuiz(mode)}
-            style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 14, padding: 18, display: 'flex', alignItems: 'center', gap: 16, textAlign: 'left', width: '100%' }}
+            style={{ background: 'linear-gradient(135deg, rgba(22,12,53,0.94), rgba(14,7,38,0.9))', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 14, padding: 18, display: 'flex', alignItems: 'center', gap: 16, textAlign: 'left', width: '100%', boxShadow: '0 2px 10px rgba(0,0,0,0.3)' }}
           >
-            <div style={{ background: 'var(--surface-hi)', borderRadius: 10, padding: '8px 12px', fontSize: 18, fontWeight: 700, color: 'var(--primary)', flexShrink: 0, minWidth: 70, textAlign: 'center' }}>
+            <div style={{ background: 'rgba(245,158,66,0.12)', borderRadius: 10, padding: '8px 12px', fontSize: 18, fontWeight: 700, color: 'var(--gold)', flexShrink: 0, minWidth: 70, textAlign: 'center' }}>
               {icon} {arrow} {result}
             </div>
             <div>
@@ -309,7 +310,7 @@ function AlphabetQuiz() {
             </div>
           </button>
         ))}
-        <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 14, padding: 14, fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.6 }}>
+        <div style={{ background: 'linear-gradient(135deg, rgba(22,12,53,0.94), rgba(14,7,38,0.9))', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 14, padding: 14, fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.6 }}>
           <div style={{ fontWeight: 700, color: 'var(--text-sec)', marginBottom: 6 }}>Tip: Consonant classes</div>
           {(['mid', 'high', 'low'] as const).map(cls => (
             <div key={cls} style={{ display: 'flex', gap: 8, marginBottom: 4 }}>
@@ -334,8 +335,8 @@ function AlphabetQuiz() {
           <div style={{ fontSize: 14, color: 'var(--text-muted)', marginTop: 4 }}>{pct}% correct</div>
         </div>
         <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 10 }}>
-          <button style={{ background: 'var(--success)', color: '#fff', borderRadius: 12, padding: 16, fontWeight: 700, fontSize: 15 }} onClick={() => startQuiz(quizMode)}>Try Again</button>
-          <button style={{ background: 'var(--surface)', color: 'var(--text-sec)', border: '1px solid var(--border)', borderRadius: 12, padding: 16 }} onClick={() => setQuizMode(null)}>Change Mode</button>
+          <button style={{ background: 'linear-gradient(135deg, #D4801A 0%, #F59E42 45%, #FFB84D 80%, #F5C060 100%)', color: '#1A0800', borderRadius: 14, padding: 16, fontWeight: 900, fontSize: 15, boxShadow: '0 6px 24px rgba(245,158,66,0.35)' }} onClick={() => startQuiz(quizMode)}>Try Again</button>
+          <button style={{ background: 'linear-gradient(135deg, rgba(22,12,53,0.9), rgba(14,7,38,0.85))', color: 'var(--text-sec)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 14, padding: 16 }} onClick={() => setQuizMode(null)}>Change Mode</button>
         </div>
       </div>
     );
@@ -348,7 +349,7 @@ function AlphabetQuiz() {
     if (quizMode === 'char_to_rtgs' || quizMode === 'char_to_class') {
       return (
         <div style={{ textAlign: 'center' }}>
-          <button onClick={() => speakThai(q.consonant.char)} style={{ fontSize: 80, fontWeight: 700, background: 'var(--surface)', border: '2px solid var(--border)', borderRadius: 20, width: 120, height: 120, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto' }}>
+          <button onClick={() => speakThai(q.consonant.char)} style={{ fontSize: 80, fontWeight: 700, background: 'linear-gradient(135deg, rgba(22,12,53,0.97), rgba(14,7,38,0.95))', border: '2px solid rgba(245,158,66,0.3)', borderRadius: 20, width: 120, height: 120, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto', boxShadow: '0 0 20px rgba(245,158,66,0.1), 0 4px 16px rgba(0,0,0,0.4)' }}>
             {q.consonant.char}
           </button>
           <div style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 10 }}>
@@ -359,7 +360,7 @@ function AlphabetQuiz() {
     }
     return (
       <div style={{ textAlign: 'center' }}>
-        <div style={{ fontSize: 32, fontWeight: 800, color: 'var(--primary)', background: 'var(--surface)', border: '2px solid var(--border)', borderRadius: 20, padding: '20px 32px', display: 'inline-block' }}>
+        <div style={{ fontSize: 32, fontWeight: 800, color: 'var(--gold)', background: 'linear-gradient(135deg, rgba(22,12,53,0.97), rgba(14,7,38,0.95))', border: '2px solid rgba(245,158,66,0.3)', borderRadius: 20, padding: '20px 32px', display: 'inline-block', boxShadow: '0 0 20px rgba(245,158,66,0.1), 0 4px 16px rgba(0,0,0,0.4)' }}>
           {q.consonant.rtgs}
         </div>
         <div style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 10 }}>Which Thai consonant makes this sound?</div>
@@ -369,10 +370,10 @@ function AlphabetQuiz() {
 
   const choiceStyle = (idx: number): React.CSSProperties => {
     if (phase === 'feedback') {
-      if (idx === q.correctIdx) return { background: 'rgba(16,185,129,0.15)', border: '2px solid var(--success)', borderRadius: 12, padding: '14px 10px', fontWeight: 700, color: 'var(--success)', fontSize: quizMode === 'rtgs_to_char' ? 26 : 15 };
-      if (idx === selected && idx !== q.correctIdx) return { background: 'rgba(239,68,68,0.12)', border: '2px solid var(--error)', borderRadius: 12, padding: '14px 10px', fontWeight: 700, color: 'var(--error)', fontSize: quizMode === 'rtgs_to_char' ? 26 : 15 };
+      if (idx === q.correctIdx) return { background: 'rgba(16,185,129,0.12)', border: '2px solid var(--success)', borderRadius: 12, padding: '14px 10px', fontWeight: 700, color: 'var(--success)', fontSize: quizMode === 'rtgs_to_char' ? 26 : 15, boxShadow: '0 0 12px rgba(16,185,129,0.15)' };
+      if (idx === selected && idx !== q.correctIdx) return { background: 'rgba(239,68,68,0.1)', border: '2px solid var(--error)', borderRadius: 12, padding: '14px 10px', fontWeight: 700, color: 'var(--error)', fontSize: quizMode === 'rtgs_to_char' ? 26 : 15, boxShadow: '0 0 12px rgba(239,68,68,0.15)' };
     }
-    return { background: 'var(--surface)', border: '2px solid var(--border)', borderRadius: 12, padding: '14px 10px', fontWeight: 700, color: 'var(--text)', fontSize: quizMode === 'rtgs_to_char' ? 26 : 15 };
+    return { background: 'linear-gradient(135deg, rgba(22,12,53,0.9), rgba(14,7,38,0.85))', border: '2px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: '14px 10px', fontWeight: 700, color: 'var(--text)', fontSize: quizMode === 'rtgs_to_char' ? 26 : 15, boxShadow: '0 2px 8px rgba(0,0,0,0.25)' };
   };
 
   return (
@@ -382,13 +383,13 @@ function AlphabetQuiz() {
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
           <div style={{ display: 'flex', gap: 4 }}>
             {questions.map((_, i) => (
-              <div key={i} style={{ width: 8, height: 8, borderRadius: '50%', background: i < results.length ? (results[i] ? 'var(--success)' : 'var(--error)') : i === current ? 'var(--primary)' : 'var(--border)', transition: 'background 0.3s' }} />
+              <div key={i} style={{ width: 8, height: 8, borderRadius: '50%', background: i < results.length ? (results[i] ? 'var(--success)' : 'var(--error)') : i === current ? 'var(--gold)' : 'rgba(255,255,255,0.1)', transition: 'background 0.3s', boxShadow: i === current ? '0 0 6px rgba(245,158,66,0.6)' : 'none' }} />
             ))}
           </div>
           <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{current + 1}/{questions.length}</span>
         </div>
-        <div className="progress-track" style={{ height: 5 }}>
-          <div className="progress-fill" style={{ width: `${progress * 100}%`, background: 'var(--primary)' }} />
+        <div style={{ height: 5, background: 'rgba(255,255,255,0.06)', borderRadius: 999, overflow: 'hidden' }}>
+          <div style={{ height: '100%', width: `${progress * 100}%`, background: 'linear-gradient(90deg, var(--primary), var(--gold))', boxShadow: '0 0 8px rgba(245,158,66,0.5)', borderRadius: 999, transition: 'width 0.4s ease' }} />
         </div>
       </div>
 
@@ -413,7 +414,7 @@ function AlphabetQuiz() {
         </div>
 
         {phase === 'feedback' && (
-          <div style={{ background: results[results.length - 1] ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.08)', border: `1px solid ${results[results.length - 1] ? 'var(--success)' : 'var(--error)'}`, borderRadius: 12, padding: '12px 16px' }}>
+          <div style={{ background: results[results.length - 1] ? 'rgba(16,185,129,0.08)' : 'rgba(239,68,68,0.08)', border: `1px solid ${results[results.length - 1] ? 'var(--success)' : 'var(--error)'}`, borderRadius: 12, padding: '12px 16px', boxShadow: results[results.length - 1] ? '0 0 12px rgba(16,185,129,0.12)' : '0 0 12px rgba(239,68,68,0.12)' }}>
             {results[results.length - 1] ? (
               <div style={{ color: 'var(--success)', fontWeight: 700 }}>Correct! ✓</div>
             ) : (

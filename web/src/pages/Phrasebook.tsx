@@ -222,17 +222,17 @@ export function Phrasebook({ onExit }: { onExit: () => void }) {
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: 'var(--bg)' }}>
       {/* Header */}
-      <div style={{ padding: '16px 20px 12px', paddingTop: 'calc(env(safe-area-inset-top, 0px) + 16px)', background: 'var(--surface)', borderBottom: '1px solid var(--border)' }}>
+      <div style={{ padding: '16px 20px 12px', paddingTop: 'calc(env(safe-area-inset-top, 0px) + 16px)', background: 'rgba(7,3,22,0.92)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.06)', flexShrink: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-          <button style={{ width: 32, height: 32, borderRadius: 999, background: 'var(--surface-hi)', color: 'var(--text-sec)', fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={onExit}>✕</button>
-          <span style={{ flex: 1, fontWeight: 700, fontSize: 17, textAlign: 'center' }}>Phrasebook</span>
+          <button style={{ width: 36, height: 36, borderRadius: 999, background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)', color: 'var(--text-sec)', fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }} onClick={onExit}>✕</button>
+          <span style={{ flex: 1, fontWeight: 800, fontSize: 17, textAlign: 'center' }}>Phrasebook</span>
           <span style={{ fontSize: 11, color: 'var(--text-muted)', minWidth: 32, textAlign: 'right' }}>{totalPhrases}</span>
         </div>
         {/* Search */}
         <div style={{ position: 'relative' }}>
           <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', fontSize: 15, color: 'var(--text-muted)' }}>🔍</span>
           <input
-            style={{ width: '100%', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 10, padding: '9px 12px 9px 36px', color: 'var(--text)', fontSize: 14, outline: 'none' }}
+            style={{ width: '100%', background: 'rgba(22,12,53,0.8)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, padding: '9px 12px 9px 36px', color: 'var(--text)', fontSize: 14, outline: 'none', boxSizing: 'border-box' }}
             placeholder="Search Thai, romanization, or English…"
             value={search}
             onChange={e => setSearch(e.target.value)}
@@ -243,14 +243,23 @@ export function Phrasebook({ onExit }: { onExit: () => void }) {
         </div>
       </div>
 
-      {/* Category chips — hidden while searching */}
+      {/* Category chips */}
       {!isSearching && (
-        <div style={{ display: 'flex', gap: 8, padding: '10px 16px', overflowX: 'auto', scrollbarWidth: 'none', background: 'var(--surface)', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
+        <div style={{ display: 'flex', gap: 8, padding: '10px 16px', overflowX: 'auto', scrollbarWidth: 'none', background: 'rgba(7,3,22,0.85)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', borderBottom: '1px solid rgba(255,255,255,0.05)', flexShrink: 0 }}>
           {PHRASEBOOK.map(cat => (
             <button
               key={cat.id}
               onClick={() => setActiveCat(cat.id)}
-              style={{ flexShrink: 0, padding: '6px 14px', borderRadius: 999, fontSize: 12, fontWeight: 700, background: activeCat === cat.id ? 'var(--primary)' : 'var(--bg)', border: `1px solid ${activeCat === cat.id ? 'var(--primary)' : 'var(--border)'}`, color: activeCat === cat.id ? '#fff' : 'var(--text-sec)', transition: 'all 0.15s' }}
+              style={{
+                flexShrink: 0, padding: '6px 14px', borderRadius: 999, fontSize: 12, fontWeight: 700,
+                background: activeCat === cat.id
+                  ? 'linear-gradient(135deg, rgba(212,128,26,0.25), rgba(245,158,66,0.2))'
+                  : 'rgba(22,12,53,0.7)',
+                border: `1px solid ${activeCat === cat.id ? 'rgba(245,158,66,0.5)' : 'rgba(255,255,255,0.08)'}`,
+                color: activeCat === cat.id ? 'var(--gold)' : 'var(--text-sec)',
+                boxShadow: activeCat === cat.id ? '0 0 10px rgba(245,158,66,0.15)' : 'none',
+                transition: 'all 0.15s',
+              }}
             >
               {cat.icon} {cat.label}
             </button>
@@ -292,7 +301,7 @@ function PhraseCard({ phrase, catLabel }: { phrase: Phrase; catLabel?: string })
   const [showRoman, setShowRoman] = useState(true);
 
   return (
-    <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 14, padding: 16 }}>
+    <div style={{ background: 'linear-gradient(135deg, rgba(22,12,53,0.94), rgba(14,7,38,0.9))', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16, padding: 16, boxShadow: '0 2px 10px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.04)' }}>
       {catLabel && (
         <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 8 }}>{catLabel}</div>
       )}
@@ -307,18 +316,18 @@ function PhraseCard({ phrase, catLabel }: { phrase: Phrase; catLabel?: string })
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6, flexShrink: 0 }}>
           <button
             onClick={() => speakThai(phrase.thai.split(' / ')[0])}
-            style={{ fontSize: 18, background: 'var(--surface-hi)', border: '1px solid var(--border)', borderRadius: 10, width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            style={{ fontSize: 18, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
           >🔊</button>
           <button
             onClick={() => setShowRoman(r => !r)}
             title={showRoman ? 'Hide romanization' : 'Show romanization'}
-            style={{ fontSize: 12, background: showRoman ? 'var(--surface-hi)' : 'var(--warning)', border: `1px solid ${showRoman ? 'var(--border)' : 'var(--warning)'}`, borderRadius: 10, width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', color: showRoman ? 'var(--text-muted)' : '#fff' }}
+            style={{ fontSize: 12, background: showRoman ? 'rgba(255,255,255,0.06)' : 'rgba(245,158,66,0.2)', border: `1px solid ${showRoman ? 'rgba(255,255,255,0.1)' : 'rgba(245,158,66,0.4)'}`, borderRadius: 10, width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', color: showRoman ? 'var(--text-muted)' : 'var(--gold)' }}
           >あ</button>
         </div>
       </div>
-      <div style={{ fontSize: 14, color: 'var(--text-sec)', marginTop: 8, paddingTop: 8, borderTop: '1px solid var(--border)' }}>{phrase.english}</div>
+      <div style={{ fontSize: 14, color: 'var(--text-sec)', marginTop: 8, paddingTop: 8, borderTop: '1px solid rgba(255,255,255,0.06)' }}>{phrase.english}</div>
       {phrase.note && (
-        <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 6, fontStyle: 'italic' }}>💡 {phrase.note}</div>
+        <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 6, fontStyle: 'italic', background: 'rgba(245,158,66,0.05)', borderRadius: 8, padding: '6px 10px', borderLeft: '2px solid rgba(245,158,66,0.3)' }}>💡 {phrase.note}</div>
       )}
     </div>
   );

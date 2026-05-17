@@ -49,7 +49,6 @@ export function ToneTrainer({ onExit }: { onExit: () => void }) {
 
   useEffect(() => () => { if (timerRef.current) clearTimeout(timerRef.current); }, []);
 
-  // Auto-speak when new question appears
   useEffect(() => {
     if (phase === 'question' && cards[current]) {
       const t = setTimeout(() => speakThai(cards[current].thai), 400);
@@ -98,26 +97,27 @@ export function ToneTrainer({ onExit }: { onExit: () => void }) {
 
   const card = cards[current];
   const correctTone = TONES.find(t => t.tone === card.tone)!;
+  const diffColor = DIFFICULTIES.find(d => d.id === difficulty)?.color ?? 'var(--info)';
 
   return (
     <div style={s.root}>
       <div style={s.topBar}>
         <button style={s.exitBtn} onClick={onExit}>✕</button>
         <div style={{ flex: 1 }}>
-          <div className="progress-track" style={{ height: 6 }}>
-            <div className="progress-fill" style={{ width: `${(current / cards.length) * 100}%`, background: DIFFICULTIES.find(d => d.id === difficulty)?.color ?? 'var(--info)' }} />
+          <div style={{ height: 5, background: 'rgba(255,255,255,0.06)', borderRadius: 999, overflow: 'hidden' }}>
+            <div style={{ height: '100%', width: `${(current / cards.length) * 100}%`, background: `linear-gradient(90deg, ${diffColor}, ${diffColor}cc)`, boxShadow: `0 0 8px ${diffColor}88`, borderRadius: 999, transition: 'width 0.4s ease' }} />
           </div>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 1 }}>
           <span style={s.counter}>{current + 1}/{cards.length}</span>
-          <span style={{ fontSize: 9, color: DIFFICULTIES.find(d => d.id === difficulty)?.color ?? 'var(--info)', fontWeight: 700, textTransform: 'uppercase' }}>{difficulty}</span>
+          <span style={{ fontSize: 9, color: diffColor, fontWeight: 700, textTransform: 'uppercase' }}>{difficulty}</span>
         </div>
       </div>
 
       {/* Score dots */}
       <div style={{ display: 'flex', gap: 6, padding: '0 20px 12px', justifyContent: 'center' }}>
         {cards.map((_, i) => (
-          <div key={i} style={{ width: 8, height: 8, borderRadius: '50%', background: i < results.length ? (results[i] ? 'var(--success)' : 'var(--error)') : i === current ? 'var(--info)' : 'var(--border)', transition: 'background 0.3s' }} />
+          <div key={i} style={{ width: 8, height: 8, borderRadius: '50%', background: i < results.length ? (results[i] ? 'var(--success)' : 'var(--error)') : i === current ? 'var(--info)' : 'rgba(255,255,255,0.1)', transition: 'background 0.3s', boxShadow: i === current ? '0 0 6px rgba(96,165,250,0.6)' : 'none' }} />
         ))}
       </div>
 
@@ -125,9 +125,13 @@ export function ToneTrainer({ onExit }: { onExit: () => void }) {
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '0 24px 20px', gap: 8 }}>
         <div style={{ fontSize: 13, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 1 }}>What tone is this word?</div>
         <div style={{ fontSize: 11, color: 'var(--text-muted)', fontStyle: 'italic' }}>Word is auto-spoken · tap 🔊 to replay</div>
-        <div style={{ fontSize: 72, fontWeight: 700, lineHeight: 1.1, textAlign: 'center' }}>{card.thai}</div>
+
+        <div style={{ background: 'linear-gradient(135deg, rgba(22,12,53,0.97), rgba(14,7,38,0.95))', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 20, padding: '24px 32px', textAlign: 'center', boxShadow: '0 4px 20px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05)', marginTop: 4 }}>
+          <div style={{ fontSize: 72, fontWeight: 700, lineHeight: 1.1 }}>{card.thai}</div>
+        </div>
+
         <button
-          style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 999, padding: '6px 16px', fontSize: 13, color: 'var(--text-sec)', display: 'flex', alignItems: 'center', gap: 6 }}
+          style={{ background: 'linear-gradient(135deg, rgba(22,12,53,0.9), rgba(14,7,38,0.85))', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 999, padding: '7px 18px', fontSize: 13, color: 'var(--text-sec)', display: 'flex', alignItems: 'center', gap: 6, marginTop: 4, boxShadow: '0 2px 8px rgba(0,0,0,0.3)' }}
           onClick={() => speakThai(card.thai)}
         >
           {difficulty === 'easy' ? <>🔊 <span>{card.romanization}</span></> : <span>🔊 Replay</span>}
@@ -138,7 +142,7 @@ export function ToneTrainer({ onExit }: { onExit: () => void }) {
 
         {/* Feedback overlay */}
         {phase === 'feedback' && (
-          <div style={{ marginTop: 12, background: 'var(--surface)', borderRadius: 12, padding: '12px 20px', textAlign: 'center', border: `2px solid ${results[results.length - 1] ? 'var(--success)' : 'var(--error)'}` }}>
+          <div style={{ marginTop: 12, background: 'linear-gradient(135deg, rgba(22,12,53,0.97), rgba(14,7,38,0.95))', borderRadius: 14, padding: '14px 20px', textAlign: 'center', border: `2px solid ${results[results.length - 1] ? 'var(--success)' : 'var(--error)'}`, boxShadow: results[results.length - 1] ? '0 0 16px rgba(16,185,129,0.2)' : '0 0 16px rgba(239,68,68,0.2)' }}>
             {results[results.length - 1] ? (
               <div style={{ color: 'var(--success)', fontWeight: 700 }}>Correct! — {correctTone.label} tone</div>
             ) : (
@@ -159,23 +163,24 @@ export function ToneTrainer({ onExit }: { onExit: () => void }) {
           const color = TONE_COLORS[tone];
           const isChosen = chosen === tone;
           const isCorrect = tone === card.tone;
-          let bg = 'var(--surface)';
-          let border = `1px solid var(--border)`;
-          const feedbackColor = isCorrect ? 'var(--success)' : 'var(--error)';
+          let bg = 'linear-gradient(135deg, rgba(22,12,53,0.9), rgba(14,7,38,0.85))';
+          let border = '1px solid rgba(255,255,255,0.07)';
+          let shadow = '0 2px 8px rgba(0,0,0,0.3)';
           if (phase === 'feedback') {
-            if (isCorrect) { bg = 'rgba(16,185,129,0.1)'; border = `2px solid var(--success)`; }
-            else if (isChosen) { bg = 'rgba(239,68,68,0.1)'; border = `2px solid var(--error)`; }
+            if (isCorrect) { bg = 'rgba(16,185,129,0.08)'; border = '2px solid var(--success)'; shadow = '0 0 12px rgba(16,185,129,0.15)'; }
+            else if (isChosen) { bg = 'rgba(239,68,68,0.08)'; border = '2px solid var(--error)'; shadow = '0 0 12px rgba(239,68,68,0.15)'; }
           }
+          const feedbackColor = isCorrect ? 'var(--success)' : 'var(--error)';
           return (
             <button
               key={tone}
               className={phase === 'feedback' && isChosen && !isCorrect ? 'shake' : ''}
-              style={{ background: bg, border, borderRadius: 14, padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 14, transition: 'all 0.2s' }}
+              style={{ background: bg, border, borderRadius: 14, padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 14, transition: 'all 0.2s', boxShadow: shadow }}
               onClick={() => answer(tone)}
               disabled={phase === 'feedback'}
             >
               <svg width="40" height="40" viewBox="0 0 40 40" style={{ flexShrink: 0 }}>
-                <line x1="0" y1="20" x2="40" y2="20" stroke="var(--border)" strokeWidth="1" strokeDasharray="2,2" />
+                <line x1="0" y1="20" x2="40" y2="20" stroke="rgba(255,255,255,0.08)" strokeWidth="1" strokeDasharray="2,2" />
                 <path d={svgPath} stroke={phase === 'feedback' && (isCorrect || isChosen) ? feedbackColor : color} strokeWidth="2.5" fill="none" strokeLinecap="round" />
               </svg>
               <div style={{ flex: 1, textAlign: 'left' }}>
@@ -210,11 +215,12 @@ function IntroScreen({ onStart, onExit }: { onStart: (d: ToneDifficulty) => void
             Thai has 5 distinct tones. The same syllable with a different tone is a completely different word.
           </div>
         </div>
-        <div style={{ background: 'var(--surface)', borderRadius: 16, padding: 20, display: 'flex', flexDirection: 'column', gap: 12 }}>
+
+        <div style={{ background: 'linear-gradient(135deg, rgba(22,12,53,0.97), rgba(14,7,38,0.95))', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 18, padding: 20, display: 'flex', flexDirection: 'column', gap: 12, boxShadow: '0 4px 20px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.04)' }}>
           {TONES.map(({ tone, label, hint, svgPath }) => (
             <div key={tone} style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
               <svg width="40" height="28" viewBox="0 0 40 40" style={{ flexShrink: 0 }}>
-                <line x1="0" y1="20" x2="40" y2="20" stroke="var(--border)" strokeWidth="1" strokeDasharray="2,2" />
+                <line x1="0" y1="20" x2="40" y2="20" stroke="rgba(255,255,255,0.08)" strokeWidth="1" strokeDasharray="2,2" />
                 <path d={svgPath} stroke={TONE_COLORS[tone]} strokeWidth="2.5" fill="none" strokeLinecap="round" />
               </svg>
               <div>
@@ -233,10 +239,11 @@ function IntroScreen({ onStart, onExit }: { onStart: (d: ToneDifficulty) => void
                 key={d.id}
                 onClick={() => setSelectedDiff(d.id)}
                 style={{
-                  flex: 1, borderRadius: 12, padding: '10px 6px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
-                  background: selectedDiff === d.id ? d.color : 'var(--surface)',
-                  border: `2px solid ${selectedDiff === d.id ? d.color : 'var(--border)'}`,
-                  color: selectedDiff === d.id ? '#fff' : 'var(--text)',
+                  flex: 1, borderRadius: 12, padding: '12px 6px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
+                  background: selectedDiff === d.id ? `${d.color}22` : 'linear-gradient(135deg, rgba(22,12,53,0.9), rgba(14,7,38,0.85))',
+                  border: `2px solid ${selectedDiff === d.id ? d.color : 'rgba(255,255,255,0.07)'}`,
+                  color: selectedDiff === d.id ? d.color : 'var(--text-sec)',
+                  boxShadow: selectedDiff === d.id ? `0 0 12px ${d.color}33` : '0 2px 8px rgba(0,0,0,0.3)',
                   transition: 'all 0.2s',
                 }}
               >
@@ -248,7 +255,10 @@ function IntroScreen({ onStart, onExit }: { onStart: (d: ToneDifficulty) => void
           <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 8, textAlign: 'center' }}>{diffCfg.desc}</div>
         </div>
 
-        <button style={{ background: diffCfg.color, color: '#fff', borderRadius: 14, padding: 18, fontWeight: 700, fontSize: 16 }} onClick={() => onStart(selectedDiff)}>
+        <button
+          style={{ background: 'linear-gradient(135deg, #D4801A 0%, #F59E42 45%, #FFB84D 80%, #F5C060 100%)', color: '#1A0800', borderRadius: 14, padding: 18, fontWeight: 900, fontSize: 16, boxShadow: '0 6px 24px rgba(245,158,66,0.4)' }}
+          onClick={() => onStart(selectedDiff)}
+        >
           Start Training · 10 questions
         </button>
       </div>
@@ -270,11 +280,11 @@ function ToneScoreScreen({ score, total, cards, results, onRetry, onExit }: {
           <div style={{ fontSize: 26, fontWeight: 800, marginTop: 8 }}>Tone Score</div>
           <div style={{ fontSize: 48, fontWeight: 800, color: pct >= 70 ? 'var(--success)' : 'var(--warning)', marginTop: 6 }}>{score}/{total}</div>
         </div>
-        {/* Tone breakdown */}
-        <div style={{ width: '100%', background: 'var(--surface)', borderRadius: 14, padding: 16 }}>
+
+        <div style={{ width: '100%', background: 'linear-gradient(135deg, rgba(22,12,53,0.97), rgba(14,7,38,0.95))', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16, padding: 16, boxShadow: '0 4px 20px rgba(0,0,0,0.35)' }}>
           <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: 12 }}>Missed words</div>
           {cards.map((c, i) => results[i] ? null : (
-            <div key={c.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: 10, marginBottom: 10, borderBottom: '1px solid var(--border)' }}>
+            <div key={c.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: 10, marginBottom: 10, borderBottom: '1px solid rgba(255,255,255,0.07)', borderLeft: '3px solid var(--error)', paddingLeft: 10 }}>
               <div>
                 <div style={{ fontSize: 20, fontWeight: 700 }}>{c.thai}</div>
                 <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{c.englishMeaning}</div>
@@ -287,9 +297,10 @@ function ToneScoreScreen({ score, total, cards, results, onRetry, onExit }: {
           ))}
           {results.every(Boolean) && <div style={{ color: 'var(--success)', fontWeight: 600, textAlign: 'center' }}>Perfect — no mistakes! 🎉</div>}
         </div>
+
         <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 10 }}>
-          <button style={{ background: 'var(--info)', color: '#fff', borderRadius: 12, padding: 16, fontWeight: 700 }} onClick={onRetry}>Try Again</button>
-          <button style={{ background: 'var(--surface)', color: 'var(--text-sec)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, fontWeight: 600 }} onClick={onExit}>Back</button>
+          <button style={{ background: 'linear-gradient(135deg, #D4801A 0%, #F59E42 45%, #FFB84D 80%, #F5C060 100%)', color: '#1A0800', borderRadius: 14, padding: 16, fontWeight: 900, fontSize: 15, boxShadow: '0 6px 24px rgba(245,158,66,0.35)' }} onClick={onRetry}>Try Again</button>
+          <button style={{ background: 'linear-gradient(135deg, rgba(22,12,53,0.9), rgba(14,7,38,0.85))', color: 'var(--text-sec)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 14, padding: 16, fontWeight: 600 }} onClick={onExit}>Back</button>
         </div>
       </div>
     </div>
@@ -298,7 +309,7 @@ function ToneScoreScreen({ score, total, cards, results, onRetry, onExit }: {
 
 const s: Record<string, React.CSSProperties> = {
   root: { height: '100%', display: 'flex', flexDirection: 'column', background: 'var(--bg)' },
-  topBar: { display: 'flex', alignItems: 'center', gap: 10, padding: '16px 20px 12px', paddingTop: 'calc(env(safe-area-inset-top, 0px) + 16px)' },
-  exitBtn: { width: 32, height: 32, borderRadius: 999, background: 'var(--surface)', color: 'var(--text-sec)', fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center' },
+  topBar: { display: 'flex', alignItems: 'center', gap: 10, padding: '16px 20px 12px', paddingTop: 'calc(env(safe-area-inset-top, 0px) + 16px)', background: 'rgba(7,3,22,0.85)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' as React.CSSProperties['WebkitBackdropFilter'], borderBottom: '1px solid rgba(255,255,255,0.06)' },
+  exitBtn: { width: 32, height: 32, borderRadius: 999, background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)', color: 'var(--text-sec)', fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
   counter: { fontSize: 12, color: 'var(--text-muted)', minWidth: 36, textAlign: 'right' },
 };
