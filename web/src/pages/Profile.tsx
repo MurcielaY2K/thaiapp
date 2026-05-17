@@ -71,6 +71,7 @@ export function Profile({ onSettings, onShop }: { onSettings: () => void; onShop
   };
 
   return (
+    <>
     <div className="scroll" style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 20 }}>
       {/* Hero card */}
       <div style={s.heroCard}>
@@ -299,6 +300,7 @@ export function Profile({ onSettings, onShop }: { onSettings: () => void; onShop
     </div>
 
     {/* Avatar picker modal */}
+
     {showAvatarPicker && (
       <div
         style={{ position: 'fixed', inset: 0, zIndex: 500, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}
@@ -335,6 +337,7 @@ export function Profile({ onSettings, onShop }: { onSettings: () => void; onShop
         </div>
       </div>
     )}
+    </>
   );
 }
 
