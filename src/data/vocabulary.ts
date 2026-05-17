@@ -9300,6 +9300,181 @@ export const WANG_LOI_FAA_CARDS: VocabCard[] = [
     difficultyRating: 3, tags: ['culture', 'history', 'folklore'],
   },
 
+  // ── PERFORMING ARTS & CLASSICAL CULTURE ─────────────────────────────────────
+
+  {
+    id: 'wl_art_001', region: 'wang_loi_faa', category: 'culture', type: 'vocabulary',
+    thai: 'ดนตรี', romanization: 'don-trii', ipa: '/don.tríː/', tone: 'rising',
+    englishMeaning: 'music',
+    exampleSentence: { thai: 'ดนตรีไทยมีเอกลักษณ์เฉพาะตัวที่ไม่เหมือนใคร', romanization: 'don-trii thai mii ek-lak cha-phoe tua thi mai muean khrai', englishLiteral: 'music Thai has identity unique that not like anyone', englishNatural: 'Thai music has a unique identity unlike any other.' },
+    culturalNote: 'Traditional Thai music (ดนตรีไทย) uses a pentatonic scale. The piphat ensemble, featuring xylophones and gongs, accompanies classical dance and royal ceremonies.',
+    difficultyRating: 2, tags: ['arts', 'culture', 'thai-identity'],
+  },
+  {
+    id: 'wl_art_002', region: 'wang_loi_faa', category: 'culture', type: 'vocabulary',
+    thai: 'นาฏศิลป์', romanization: 'naat-sa-lin', ipa: '/nâːt.sà.lǐn/', tone: 'rising',
+    englishMeaning: 'classical dance / performing arts',
+    exampleSentence: { thai: 'นาฏศิลป์ไทยถูกยกย่องว่าเป็นศิลปะชั้นสูง', romanization: 'naat-sa-lin thai thuuk yok-yong waa pen sin-la-pa chan sung', englishLiteral: 'performing arts Thai was praised that is art level high', englishNatural: 'Thai classical dance is regarded as a high art form.' },
+    culturalNote: 'นาฏศิลป์ encompasses Khon masked drama, Lakhon dance theater, and Fon Leb fingernail dance. Performers train from childhood at institutions like the College of Dramatic Arts.',
+    difficultyRating: 4, tags: ['arts', 'culture', 'heritage'],
+  },
+  {
+    id: 'wl_art_003', region: 'wang_loi_faa', category: 'culture', type: 'vocabulary',
+    thai: 'วรรณคดี', romanization: 'wan-na-kha-dii', ipa: '/wan.nā.kʰā.diː/', tone: 'mid',
+    englishMeaning: 'classical literature',
+    exampleSentence: { thai: 'รามเกียรติ์เป็นวรรณคดีชิ้นเอกของไทย', romanization: 'raam-kiat pen wan-na-kha-dii chin ek khong thai', englishLiteral: 'Ramakien is literature masterpiece of Thailand', englishNatural: 'The Ramakien is Thailand\'s literary masterpiece.' },
+    culturalNote: 'Thai classical literature includes the Ramakien (adaptation of the Ramayana), Khun Chang Khun Phaen, and the works of court poets. Many are still performed as dance-dramas today.',
+    difficultyRating: 4, tags: ['literature', 'culture', 'heritage'],
+  },
+  {
+    id: 'wl_art_004', region: 'wang_loi_faa', category: 'culture', type: 'vocabulary',
+    thai: 'กวี', romanization: 'ka-wii', ipa: '/kā.wīː/', tone: 'mid',
+    englishMeaning: 'poet / bard',
+    exampleSentence: { thai: 'สุนทรภู่เป็นกวีเอกของไทยในสมัยรัชกาลที่สอง', romanization: 'sun-thon-phuu pen ka-wii ek khong thai nai sa-mai rat-cha-kaan thi song', englishLiteral: 'Sunthorn Phu is poet great of Thailand in era reign second', englishNatural: 'Sunthorn Phu was Thailand\'s great poet during the reign of Rama II.' },
+    culturalNote: 'Sunthorn Phu (สุนทรภู่, 1786–1855) is Thailand\'s most celebrated poet, known for the epic Phra Aphai Mani. His birthday, June 26, is celebrated as Thai Poet Day.',
+    difficultyRating: 3, tags: ['literature', 'culture', 'history'],
+  },
+
+  // ── SKY & WEATHER PHENOMENA ──────────────────────────────────────────────────
+
+  {
+    id: 'wl_sky_008', region: 'wang_loi_faa', category: 'nature', type: 'vocabulary',
+    thai: 'รุ้ง', romanization: 'rung', ipa: '/rûŋ/', tone: 'falling',
+    englishMeaning: 'rainbow',
+    exampleSentence: { thai: 'หลังฝนตกมักจะมีรุ้งปรากฏบนท้องฟ้า', romanization: 'lang fon tok mak ja mii rung pra-kot bon thong faa', englishLiteral: 'after rain fall often will have rainbow appear on sky', englishNatural: 'A rainbow often appears in the sky after rain.' },
+    difficultyRating: 2, tags: ['nature', 'weather', 'sky'],
+  },
+  {
+    id: 'wl_sky_009', region: 'wang_loi_faa', category: 'weather', type: 'vocabulary',
+    thai: 'พายุ', romanization: 'pha-yu', ipa: '/pʰāː.jú/', tone: 'rising',
+    englishMeaning: 'storm / typhoon',
+    exampleSentence: { thai: 'พายุฤดูร้อนพัดต้นไม้ล้มหลายต้น', romanization: 'pha-yu rue-duu ron phat ton-mai lom laai ton', englishLiteral: 'storm season hot blew trees fell many trees', englishNatural: 'The summer storm blew down many trees.' },
+    difficultyRating: 2, tags: ['weather', 'nature', 'sky'],
+  },
+  {
+    id: 'wl_sky_010', region: 'wang_loi_faa', category: 'weather', type: 'vocabulary',
+    thai: 'ฟ้าแลบ', romanization: 'faa-laep', ipa: '/fáː.lɛ̂ːp/', tone: 'falling',
+    englishMeaning: 'lightning (flash)',
+    exampleSentence: { thai: 'ฟ้าแลบสว่างขึ้นบนท้องฟ้าในคืนพายุ', romanization: 'faa-laep sa-waang khuern bon thong faa nai khuern pha-yu', englishLiteral: 'lightning flashed bright on sky in night storm', englishNatural: 'Lightning flashed across the sky on the stormy night.' },
+    difficultyRating: 2, tags: ['weather', 'sky', 'nature'],
+  },
+  {
+    id: 'wl_nat_001', region: 'wang_loi_faa', category: 'nature', type: 'vocabulary',
+    thai: 'หมอก', romanization: 'mok', ipa: '/mòːk/', tone: 'low',
+    englishMeaning: 'mist / fog',
+    exampleSentence: { thai: 'หมอกปกคลุมภูเขาในตอนเช้าตรู่', romanization: 'mok pok-khlum phuu-khao nai ton chao truu', englishLiteral: 'fog covered mountain in time morning early', englishNatural: 'Mist covered the mountains in the early morning.' },
+    difficultyRating: 1, tags: ['nature', 'weather', 'sky'],
+  },
+  {
+    id: 'wl_nat_002', region: 'wang_loi_faa', category: 'nature', type: 'vocabulary',
+    thai: 'สายลม', romanization: 'saai-lom', ipa: '/sǎːj.lom/', tone: 'rising',
+    englishMeaning: 'breeze / current of wind',
+    exampleSentence: { thai: 'สายลมเย็นพัดผ่านมาอย่างนุ่มนวล', romanization: 'saai-lom yen phat phaan maa yaang num-nuan', englishLiteral: 'breeze cool blew through came gently', englishNatural: 'A cool breeze blew through gently.' },
+    difficultyRating: 2, tags: ['nature', 'weather', 'poetic'],
+  },
+
+  // ── ADVANCED ADJECTIVES ──────────────────────────────────────────────────────
+
+  {
+    id: 'wl_adj_008', region: 'wang_loi_faa', category: 'adjectives_core', type: 'vocabulary',
+    thai: 'สง่างาม', romanization: 'sa-ngaa-ngaam', ipa: '/sà.ŋàː.ŋāːm/', tone: 'mid',
+    englishMeaning: 'graceful / stately / dignified',
+    exampleSentence: { thai: 'นักเต้นรำเคลื่อนไหวอย่างสง่างาม', romanization: 'nak ten ram khluean-wai yaang sa-ngaa-ngaam', englishLiteral: 'dancer moved in manner graceful', englishNatural: 'The dancer moved with graceful dignity.' },
+    difficultyRating: 3, tags: ['adjective', 'beauty', 'movement'],
+  },
+  {
+    id: 'wl_adj_009', region: 'wang_loi_faa', category: 'adjectives_adv', type: 'vocabulary',
+    thai: 'วิจิตร', romanization: 'wi-jit', ipa: '/wí.jìt/', tone: 'low',
+    englishMeaning: 'exquisite / elaborate / intricate',
+    exampleSentence: { thai: 'ลวดลายวิจิตรบนผนังวัดงดงามมาก', romanization: 'luat-laai wi-jit bon pha-nang wat ngot-ngaam mak', englishLiteral: 'patterns intricate on wall temple beautiful very', englishNatural: 'The intricate patterns on the temple wall are very beautiful.' },
+    culturalNote: 'วิจิตร describes the elaborate, ornate decorative arts of Thai temples — gilded woodwork, lacquerware, and mother-of-pearl inlay.',
+    difficultyRating: 4, tags: ['adjective', 'arts', 'beauty'],
+  },
+  {
+    id: 'wl_adj_010', region: 'wang_loi_faa', category: 'adjectives_core', type: 'vocabulary',
+    thai: 'ยิ่งใหญ่', romanization: 'ying-yai', ipa: '/jîŋ.jàj/', tone: 'low',
+    englishMeaning: 'grand / magnificent / great',
+    exampleSentence: { thai: 'วัดพระแก้วเป็นสถาปัตยกรรมที่ยิ่งใหญ่ที่สุดของไทย', romanization: 'wat phra kaeo pen sa-thaa-pat-ya-kam thi ying-yai thi-sut khong thai', englishLiteral: 'Wat Phra Kaew is architecture that most grand of Thailand', englishNatural: 'Wat Phra Kaew is Thailand\'s most magnificent piece of architecture.' },
+    difficultyRating: 2, tags: ['adjective', 'grandeur', 'culture'],
+  },
+  {
+    id: 'wl_adj_011', region: 'wang_loi_faa', category: 'adjectives_adv', type: 'vocabulary',
+    thai: 'ศักดิ์สิทธิ์', romanization: 'sak-sit', ipa: '/sàk.sìt/', tone: 'low',
+    englishMeaning: 'sacred / holy / divine',
+    exampleSentence: { thai: 'สถานที่ศักดิ์สิทธิ์ต้องปฏิบัติตัวด้วยความเคารพ', romanization: 'sa-thaan-thi sak-sit tong pa-ti-bat tua duai khwaam khao-rop', englishLiteral: 'place sacred must behave oneself with respect', englishNatural: 'At sacred places, one must conduct oneself with respect.' },
+    difficultyRating: 3, tags: ['adjective', 'religion', 'culture'],
+  },
+
+  // ── VERBS OF MOVEMENT & GOVERNANCE ──────────────────────────────────────────
+
+  {
+    id: 'wl_vrb_001', region: 'wang_loi_faa', category: 'verbs_core', type: 'vocabulary',
+    thai: 'ล่องลอย', romanization: 'long-loi', ipa: '/lɔ̂ŋ.lɔːj/', tone: 'falling',
+    englishMeaning: 'to float / to drift',
+    exampleSentence: { thai: 'โคมไฟล่องลอยขึ้นสู่ท้องฟ้าในคืนลอยกระทง', romanization: 'khoom-fai long-loi khuern suu thong faa nai khuern loi kra-thong', englishLiteral: 'lanterns float up to sky in night Loy Krathong', englishNatural: 'Lanterns float up into the sky on Loy Krathong night.' },
+    difficultyRating: 2, tags: ['verb', 'movement', 'sky'],
+  },
+  {
+    id: 'wl_vrb_002', region: 'wang_loi_faa', category: 'verbs_core', type: 'vocabulary',
+    thai: 'โบยบิน', romanization: 'booi-bin', ipa: '/bōːj.bin/', tone: 'mid',
+    englishMeaning: 'to soar / to fly freely',
+    exampleSentence: { thai: 'นกอินทรีโบยบินสูงเหนือยอดเขา', romanization: 'nok in-sii booi-bin sung nuea yot khao', englishLiteral: 'eagle soared high above peak mountain', englishNatural: 'The eagle soared high above the mountain peaks.' },
+    difficultyRating: 3, tags: ['verb', 'movement', 'sky', 'poetic'],
+  },
+  {
+    id: 'wl_vrb_003', region: 'wang_loi_faa', category: 'verbs_core', type: 'vocabulary',
+    thai: 'ปกครอง', romanization: 'pok-khrong', ipa: '/pòk.kʰrɔːŋ/', tone: 'low',
+    englishMeaning: 'to rule / to govern',
+    exampleSentence: { thai: 'พระมหากษัตริย์ปกครองประเทศด้วยความเมตตา', romanization: 'phra-ma-haa-ga-sat pok-khrong pra-thet duai khwaam met-taa', englishLiteral: 'king ruled country with compassion', englishNatural: 'The king governed the country with compassion.' },
+    difficultyRating: 3, tags: ['verb', 'governance', 'royalty'],
+  },
+
+  // ── TIME & CIVILISATION ──────────────────────────────────────────────────────
+
+  {
+    id: 'wl_tim_001', region: 'wang_loi_faa', category: 'time', type: 'vocabulary',
+    thai: 'ยุค', romanization: 'yuk', ipa: '/jûk/', tone: 'falling',
+    englishMeaning: 'era / epoch / age',
+    exampleSentence: { thai: 'เราอาศัยอยู่ในยุคดิจิทัล', romanization: 'rao aa-sai yuu nai yuk di-ji-than', englishLiteral: 'we live in era digital', englishNatural: 'We live in the digital age.' },
+    difficultyRating: 2, tags: ['time', 'history', 'concept'],
+  },
+  {
+    id: 'wl_tim_002', region: 'wang_loi_faa', category: 'time', type: 'vocabulary',
+    thai: 'ศตวรรษ', romanization: 'sot-ta-wat', ipa: '/sòt.tā.wát/', tone: 'low',
+    englishMeaning: 'century (100 years)',
+    exampleSentence: { thai: 'กรุงเทพได้รับการสถาปนาเมื่อสองศตวรรษที่แล้ว', romanization: 'krung-thep dai rap kaan sa-thaa-pa-naa muea song sot-ta-wat thi laeo', englishLiteral: 'Bangkok received founding two centuries ago', englishNatural: 'Bangkok was founded two centuries ago.' },
+    difficultyRating: 3, tags: ['time', 'history', 'academic'],
+  },
+  {
+    id: 'wl_soc_001', region: 'wang_loi_faa', category: 'culture', type: 'vocabulary',
+    thai: 'อารยธรรม', romanization: 'aa-ra-ya-tham', ipa: '/ʔāː.rā.jā.tʰam/', tone: 'mid',
+    englishMeaning: 'civilization',
+    exampleSentence: { thai: 'อารยธรรมไทยมีรากฐานมาจากอาณาจักรสุโขทัย', romanization: 'aa-ra-ya-tham thai mii raak-thaan maa jaak aa-naa-jak su-kho-thai', englishLiteral: 'civilization Thai has roots from kingdom Sukhothai', englishNatural: 'Thai civilization has its roots in the Sukhothai kingdom.' },
+    difficultyRating: 4, tags: ['culture', 'history', 'society'],
+  },
+  {
+    id: 'wl_soc_002', region: 'wang_loi_faa', category: 'culture', type: 'vocabulary',
+    thai: 'มรดก', romanization: 'mo-ra-dok', ipa: '/mō.rā.dòk/', tone: 'low',
+    englishMeaning: 'heritage / inheritance / legacy',
+    exampleSentence: { thai: 'วัฒนธรรมไทยเป็นมรดกที่ล้ำค่าของชาติ', romanization: 'wat-tha-na-tham thai pen mo-ra-dok thi lam-khaa khong chaat', englishLiteral: 'culture Thai is heritage that invaluable of nation', englishNatural: 'Thai culture is an invaluable heritage of the nation.' },
+    difficultyRating: 3, tags: ['culture', 'history', 'society'],
+  },
+  {
+    id: 'wl_soc_003', region: 'wang_loi_faa', category: 'culture', type: 'vocabulary',
+    thai: 'อุดมการณ์', romanization: 'u-dom-kaan', ipa: '/ʔù.dom.kāːn/', tone: 'mid',
+    englishMeaning: 'ideology / ideals / principles',
+    exampleSentence: { thai: 'อุดมการณ์ประชาธิปไตยเน้นความเท่าเทียมของประชาชน', romanization: 'u-dom-kaan pra-chaa-thip-pa-tai nen khwaam-thao-thiam khong pra-chaa-chon', englishLiteral: 'ideology democracy emphasizes equality of people', englishNatural: 'Democratic ideology emphasizes the equality of the people.' },
+    difficultyRating: 5, tags: ['culture', 'politics', 'abstract'],
+  },
+  {
+    id: 'wl_soc_004', region: 'wang_loi_faa', category: 'culture', type: 'vocabulary',
+    thai: 'ปรัชญา', romanization: 'pa-rat-cha-yaa', ipa: '/pā.rāt.tɕʰā.jāː/', tone: 'mid',
+    englishMeaning: 'philosophy',
+    exampleSentence: { thai: 'ปรัชญาพุทธสอนให้รู้จักปล่อยวาง', romanization: 'pa-rat-cha-yaa phut-tha son hai ruu-jak ploi waang', englishLiteral: 'philosophy Buddhist teaches to know let go', englishNatural: 'Buddhist philosophy teaches us to know how to let go.' },
+    culturalNote: 'Thai Buddhism is deeply influenced by Theravada philosophy. The concept of letting go (ปล่อยวาง) is central to everyday Thai spiritual life.',
+    difficultyRating: 4, tags: ['culture', 'religion', 'philosophy'],
+  },
+
 ];
 
 // Merge wang_loi_faa cards into the main VOCABULARY array
