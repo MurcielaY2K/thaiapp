@@ -74,7 +74,7 @@ export function VocabBrowser() {
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       {/* Search */}
-      <div style={{ padding: '14px 16px 10px', background: 'var(--surface)', borderBottom: '1px solid var(--border)' }}>
+      <div style={{ padding: '14px 16px 10px', background: 'rgba(7,3,22,0.92)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
           <div style={{ fontSize: 20, fontWeight: 800 }}>Vocabulary</div>
           <button
@@ -234,7 +234,7 @@ function CardRow({ card, isOpen, toggle, srsState, isFav, onFavorite, hideRoman 
 
           {/* Example sentence */}
           {card.exampleSentence && (
-            <div style={{ background: 'var(--surface-hi)', borderRadius: 10, padding: 12 }}>
+            <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10, padding: 12 }}>
               <div style={{ fontSize: 14, fontWeight: 500 }}>{card.exampleSentence.thai}</div>
               <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>{card.exampleSentence.romanization}</div>
               <div style={{ fontSize: 12, color: 'var(--text-sec)', fontStyle: 'italic', marginTop: 4 }}>"{card.exampleSentence.englishNatural}"</div>
@@ -251,7 +251,7 @@ function CardRow({ card, isOpen, toggle, srsState, isFav, onFavorite, hideRoman 
 
           {/* SRS state */}
           {srsState && (
-            <div style={{ background: 'var(--surface)', borderRadius: 10, padding: '10px 12px', display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+            <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 10, padding: '10px 12px', display: 'flex', flexWrap: 'wrap', gap: 10 }}>
               <SRSPill label="Reviews" value={`${srsState.correctReviews}/${srsState.totalReviews}`} color="var(--info)" />
               <SRSPill label="Interval" value={srsState.interval > 0 ? `${srsState.interval}d` : 'New'} color="var(--primary)" />
               <SRSPill label="Ease" value={srsState.easeFactor.toFixed(1)} color="var(--gold)" />

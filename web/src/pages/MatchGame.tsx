@@ -182,20 +182,24 @@ function CardTile({ card, isFirstSelected, onFlip }: { card: MatchCard; isFirstS
   const isThai = card.faceType === 'thai';
   const isVisible = card.isFlipped || card.isMatched;
 
-  let bg = 'var(--surface-hi)';
-  let border = '1px solid var(--border)';
+  let bg = 'linear-gradient(135deg, rgba(22,12,53,0.9), rgba(14,7,38,0.85))';
+  let border = '1px solid rgba(255,255,255,0.07)';
   let textColor = 'var(--text)';
+  let shadow = '0 2px 8px rgba(0,0,0,0.3)';
 
   if (card.isMatched) {
     bg = 'rgba(16,185,129,0.12)';
-    border = '2px solid var(--success)';
+    border = '2px solid rgba(16,185,129,0.6)';
     textColor = 'var(--success)';
+    shadow = '0 0 12px rgba(16,185,129,0.2)';
   } else if (isFirstSelected) {
-    bg = 'rgba(59,130,246,0.15)';
-    border = '2px solid var(--info)';
+    bg = 'rgba(96,165,250,0.12)';
+    border = '2px solid rgba(96,165,250,0.6)';
+    shadow = '0 0 12px rgba(96,165,250,0.25)';
   } else if (card.isFlipped) {
-    bg = 'var(--surface)';
-    border = '1px solid var(--primary)';
+    bg = 'linear-gradient(135deg, rgba(30,18,72,0.95), rgba(22,12,53,0.9))';
+    border = '1px solid rgba(245,158,66,0.4)';
+    shadow = '0 0 10px rgba(245,158,66,0.15)';
   }
 
   return (
@@ -205,7 +209,7 @@ function CardTile({ card, isFirstSelected, onFlip }: { card: MatchCard; isFirstS
       style={{
         background: bg,
         border,
-        borderRadius: 10,
+        borderRadius: 12,
         padding: 6,
         minHeight: 70,
         display: 'flex',
@@ -216,6 +220,7 @@ function CardTile({ card, isFirstSelected, onFlip }: { card: MatchCard; isFirstS
         transition: 'all 0.2s',
         overflow: 'hidden',
         gap: 2,
+        boxShadow: shadow,
       }}
     >
       {isVisible ? (
@@ -271,8 +276,9 @@ function SetupScreen({ pool, onStart, onExit }: { pool: VocabCard[]; onStart: (d
             onClick={() => onStart(key)}
             disabled={pool.length < cfg.pairs}
             style={{
-              background: 'var(--surface)', border: `1px solid var(--border)`, borderLeft: `4px solid ${cfg.color}`,
+              background: 'linear-gradient(135deg, rgba(22,12,53,0.94), rgba(14,7,38,0.9))', border: `1px solid rgba(255,255,255,0.07)`, borderLeft: `4px solid ${cfg.color}`,
               borderRadius: 14, padding: '16px 20px', display: 'flex', alignItems: 'center', gap: 14, textAlign: 'left',
+              boxShadow: '0 2px 10px rgba(0,0,0,0.3)',
               opacity: pool.length < cfg.pairs ? 0.4 : 1,
             }}
           >
@@ -329,5 +335,5 @@ function ScoreScreen({ score, pairs, attempts, timeStr, difficulty, onPlayAgain,
 const s: Record<string, React.CSSProperties> = {
   root: { height: '100%', display: 'flex', flexDirection: 'column', background: 'var(--bg)' },
   topBar: { display: 'flex', alignItems: 'center', gap: 10, padding: '16px 20px 12px', paddingTop: 'calc(env(safe-area-inset-top, 0px) + 16px)' },
-  exitBtn: { width: 32, height: 32, borderRadius: 999, background: 'var(--surface)', color: 'var(--text-sec)', fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center' },
+  exitBtn: { width: 34, height: 34, borderRadius: 999, background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)', color: 'var(--text-sec)', fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center' },
 };
