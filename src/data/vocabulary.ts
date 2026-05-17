@@ -5353,6 +5353,155 @@ const DOI_NUEA_CARDS: VocabCard[] = [
     tags: ['culture', 'lanna', 'social'],
   },
 
+  // ── NORTHERN THAI NATURE ─────────────────────────────────────────────────────
+
+  {
+    id: 'dn_nat_001', region: 'doi_nuea', category: 'nature', type: 'vocabulary',
+    thai: 'น้ำตก', romanization: 'naam-tok', ipa: '/nâːm.tòk/', tone: 'low',
+    englishMeaning: 'waterfall',
+    exampleSentence: { thai: 'น้ำตกในภาคเหนือสวยงามมากในฤดูฝน', romanization: 'naam-tok nai phaak-nuea suai-ngaam maak nai rue-duu-fon', englishLiteral: 'waterfall in north beautiful very in rainy season', englishNatural: 'Waterfalls in the north are very beautiful in the rainy season.' },
+    difficultyRating: 1, tags: ['nature', 'north', 'landscape'],
+  },
+  {
+    id: 'dn_nat_002', region: 'doi_nuea', category: 'nature', type: 'vocabulary',
+    thai: 'ป่าดิบชื้น', romanization: 'paa-dip-chueun', ipa: '/pàː.dìp.tɕʰɯːn/', tone: 'falling',
+    englishMeaning: 'tropical rainforest',
+    exampleSentence: { thai: 'ป่าดิบชื้นในภาคเหนือเต็มไปด้วยพืชหายาก', romanization: 'paa-dip-chueun nai phaak-nuea tem pai duai phuet haa-yaak', englishLiteral: 'rainforest in north full with rare plants', englishNatural: 'The rainforests of the north are full of rare plants.' },
+    difficultyRating: 3, tags: ['nature', 'north', 'forest'],
+  },
+  {
+    id: 'dn_nat_003', region: 'doi_nuea', category: 'nature', type: 'vocabulary',
+    thai: 'ดอย', romanization: 'doi', ipa: '/dɔːj/', tone: 'mid',
+    englishMeaning: 'mountain peak (Northern Thai word)',
+    exampleSentence: { thai: 'ดอยอินทนนท์เป็นยอดเขาที่สูงที่สุดในประเทศไทย', romanization: 'doi-in-tha-non pen yot-khao thi sung thi-sut nai pra-thet-thai', englishLiteral: 'Doi Inthanon is peak mountain that highest in Thailand', englishNatural: 'Doi Inthanon is the highest mountain peak in Thailand.' },
+    culturalNote: 'ดอย is the Lanna (Northern Thai) word for mountain or peak. It appears in many place names: Doi Suthep, Doi Inthanon, Doi Pui. The equivalent Central Thai word is ยอดดอย.',
+    difficultyRating: 2, tags: ['nature', 'lanna', 'north', 'geography'],
+  },
+  {
+    id: 'dn_nat_004', region: 'doi_nuea', category: 'nature', type: 'vocabulary',
+    thai: 'ดอกไม้ป่า', romanization: 'dok-mai-paa', ipa: '/dòːk.máj.pàː/', tone: 'falling',
+    englishMeaning: 'wildflower',
+    exampleSentence: { thai: 'ดอกไม้ป่าบนดอยบานสวยงามในช่วงฤดูหนาว', romanization: 'dok-mai-paa bon doi baan suai-ngaam nai chuang rue-duu-naao', englishLiteral: 'wildflowers on mountain bloom beautiful in period winter', englishNatural: 'Wildflowers on the mountain bloom beautifully in winter.' },
+    difficultyRating: 2, tags: ['nature', 'north', 'flower'],
+  },
+  {
+    id: 'dn_nat_005', region: 'doi_nuea', category: 'nature', type: 'vocabulary',
+    thai: 'หมอกควัน', romanization: 'mok-khwan', ipa: '/mòːk.kʰwān/', tone: 'low',
+    englishMeaning: 'haze / smog (mountain smoke)',
+    exampleSentence: { thai: 'หมอกควันปกคลุมเชียงใหม่ในช่วงมีนาคม', romanization: 'mok-khwan pok-khlum chiang-mai nai chuang mii-naa-khom', englishLiteral: 'haze covered Chiang Mai in period March', englishNatural: 'Haze covers Chiang Mai in March.' },
+    culturalNote: 'Seasonal haze (หมอกควัน) in Northern Thailand is caused by agricultural burning in March-April. It is a serious seasonal air quality issue for Chiang Mai and surrounding provinces.',
+    difficultyRating: 3, tags: ['nature', 'north', 'environment'],
+  },
+
+  // ── LANNA CULTURE & FESTIVALS ────────────────────────────────────────────────
+
+  {
+    id: 'dn_lan_003', region: 'doi_nuea', category: 'lanna', type: 'vocabulary',
+    thai: 'ยี่เป็ง', romanization: 'yii-peng', ipa: '/jîː.peŋ/', tone: 'falling',
+    englishMeaning: 'Yi Peng (Northern lantern festival)',
+    exampleSentence: { thai: 'เทศกาลยี่เป็งจัดขึ้นในเดือนพฤศจิกายนที่เชียงใหม่', romanization: 'thet-sa-gaan yii-peng jat khuern nai duean phruet-sa-ji-kaa-yon thi chiang-mai', englishLiteral: 'festival Yi Peng held in month November at Chiang Mai', englishNatural: 'The Yi Peng festival is held in November in Chiang Mai.' },
+    culturalNote: 'Yi Peng (ยี่เป็ง) is the Lanna lantern festival, held on the full moon of the second month of the Lanna lunar calendar (usually November). Thousands of sky lanterns (โคมลอย) are released, lighting the night sky.',
+    difficultyRating: 3, tags: ['lanna', 'festival', 'culture', 'north'],
+  },
+  {
+    id: 'dn_lan_004', region: 'doi_nuea', category: 'lanna', type: 'vocabulary',
+    thai: 'หัตถกรรม', romanization: 'hat-tha-kam', ipa: '/hàt.tʰā.kam/', tone: 'low',
+    englishMeaning: 'handicraft / artisanship',
+    exampleSentence: { thai: 'หัตถกรรมเชียงรายเป็นที่รู้จักในระดับนานาชาติ', romanization: 'hat-tha-kam chiang-rai pen thi ruu-jak nai ra-dap naa-naa-chaat', englishLiteral: 'handicraft Chiang Rai is known at level international', englishNatural: 'Chiang Rai\'s handicrafts are internationally recognized.' },
+    difficultyRating: 3, tags: ['lanna', 'arts', 'culture'],
+  },
+  {
+    id: 'dn_lan_005', region: 'doi_nuea', category: 'lanna', type: 'vocabulary',
+    thai: 'ผ้าทอ', romanization: 'phaa-tho', ipa: '/pʰâː.tʰɔː/', tone: 'falling',
+    englishMeaning: 'woven cloth / hand-woven fabric',
+    exampleSentence: { thai: 'ผ้าทอของชาวเขามีลวดลายที่สวยงามและมีความหมายลึกซึ้ง', romanization: 'phaa-tho khong chaao-khao mii luat-laai thi suai-ngaam lae mii khwaam-maai luek-sueng', englishLiteral: 'woven cloth of hill tribe has patterns that beautiful and have meaning deep', englishNatural: 'Hill tribe woven cloth has beautiful patterns with deep meaning.' },
+    culturalNote: 'Each hill tribe (ชาวเขา) in Northern Thailand — Karen, Hmong, Akha, Lisu — has distinct weaving patterns. These textiles are sold at night bazaars and are becoming recognized as fine art.',
+    difficultyRating: 2, tags: ['lanna', 'arts', 'culture', 'north'],
+  },
+  {
+    id: 'dn_lan_006', region: 'doi_nuea', category: 'lanna', type: 'vocabulary',
+    thai: 'วัดบนดอย', romanization: 'wat-bon-doi', ipa: '/wát.bon.dɔːj/', tone: 'low',
+    englishMeaning: 'hilltop temple',
+    exampleSentence: { thai: 'วัดพระธาตุดอยสุเทพเป็นวัดบนดอยที่โด่งดังที่สุด', romanization: 'wat-phra-thaat-doi-su-thep pen wat-bon-doi thi dong-daang thi-sut', englishLiteral: 'Wat Phra That Doi Suthep is temple on mountain that most famous', englishNatural: 'Wat Phra That Doi Suthep is the most famous hilltop temple.' },
+    culturalNote: 'Doi Suthep temple, sitting at 1,073m above Chiang Mai, is one of Thailand\'s most sacred sites. Legend says a white elephant chose the hilltop by trumpeting three times and dying — the temple was built there.',
+    difficultyRating: 2, tags: ['lanna', 'religion', 'temple', 'north'],
+  },
+
+  // ── NORTHERN FOOD & DRINK ────────────────────────────────────────────────────
+
+  {
+    id: 'dn_fod_004', region: 'doi_nuea', category: 'food', type: 'vocabulary',
+    thai: 'ข้าวซอย', romanization: 'khaao-soi', ipa: '/kʰâːw.sɔ̌j/', tone: 'rising',
+    englishMeaning: 'Khao Soi (Northern Thai curry noodle soup)',
+    exampleSentence: { thai: 'ข้าวซอยเป็นอาหารเหนือที่อร่อยและเป็นที่นิยม', romanization: 'khaao-soi pen aa-haan nuea thi a-roi lae pen thi ni-yom', englishLiteral: 'Khao Soi is food northern that delicious and popular', englishNatural: 'Khao Soi is a delicious and popular Northern Thai dish.' },
+    culturalNote: 'Khao Soi is the signature dish of Chiang Mai — a rich coconut curry broth with egg noodles, topped with crispy fried noodles, served with shallots, pickled cabbage, and lime. It has Yunnan-Chinese roots.',
+    difficultyRating: 2, tags: ['food', 'north', 'lanna'],
+  },
+  {
+    id: 'dn_fod_005', region: 'doi_nuea', category: 'food', type: 'vocabulary',
+    thai: 'แกงฮังเล', romanization: 'kaeng-hang-le', ipa: '/kɛːŋ.hāŋ.le/', tone: 'mid',
+    englishMeaning: 'Hang Le curry (Northern Thai pork curry)',
+    exampleSentence: { thai: 'แกงฮังเลมีรสชาติเข้มข้นและหอมเครื่องเทศ', romanization: 'kaeng-hang-le mii rot-chaat khem-khon lae hom khrueng-thet', englishLiteral: 'Hang Le curry has taste rich and fragrant spices', englishNatural: 'Hang Le curry has a rich, fragrant spice flavour.' },
+    culturalNote: 'แกงฮังเล is a slow-cooked pork belly curry unique to Lanna. It uses a blend of spices including ginger, tumeric, and tamarind, reflecting the Burmese influence on Northern Thai cuisine.',
+    difficultyRating: 3, tags: ['food', 'north', 'lanna', 'curry'],
+  },
+  {
+    id: 'dn_fod_006', region: 'doi_nuea', category: 'food', type: 'vocabulary',
+    thai: 'ชาดอย', romanization: 'chaa-doi', ipa: '/tɕʰāː.dɔːj/', tone: 'mid',
+    englishMeaning: 'mountain tea / hill-grown tea',
+    exampleSentence: { thai: 'ชาดอยจากดอยแม่สลองมีรสชาติละเอียดอ่อน', romanization: 'chaa-doi jaak doi mae-sa-long mii rot-chaat la-iat-on', englishLiteral: 'mountain tea from Doi Mae Salong has taste delicate', englishNatural: 'Mountain tea from Doi Mae Salong has a delicate flavour.' },
+    culturalNote: 'Doi Mae Salong in Chiang Rai is home to tea gardens planted by former Chinese Nationalist (KMT) soldiers. Today it produces oolong and green teas rivalling Taiwan\'s finest.',
+    difficultyRating: 2, tags: ['food', 'north', 'drink', 'lanna'],
+  },
+
+  // ── VERBS (TRAVEL & EXPLORATION) ────────────────────────────────────────────
+
+  {
+    id: 'dn_vrb_001', region: 'doi_nuea', category: 'verbs_core', type: 'vocabulary',
+    thai: 'ปีนเขา', romanization: 'piin-khao', ipa: '/pîːn.kʰǎo/', tone: 'rising',
+    englishMeaning: 'to climb a mountain',
+    exampleSentence: { thai: 'นักท่องเที่ยวหลายคนชอบปีนเขาที่ดอยอินทนนท์', romanization: 'nak-thong-thiiao laai khon chob piin-khao thi doi-in-tha-non', englishLiteral: 'tourists many people like climb mountain at Doi Inthanon', englishNatural: 'Many tourists enjoy climbing mountains at Doi Inthanon.' },
+    difficultyRating: 2, tags: ['verb', 'travel', 'north', 'outdoor'],
+  },
+  {
+    id: 'dn_vrb_002', region: 'doi_nuea', category: 'verbs_core', type: 'vocabulary',
+    thai: 'ท่องเที่ยว', romanization: 'thong-thiiao', ipa: '/tʰɔ̂ŋ.tʰîːaw/', tone: 'falling',
+    englishMeaning: 'to travel / to go sightseeing',
+    exampleSentence: { thai: 'ฉันอยากท่องเที่ยวทางภาคเหนือของไทย', romanization: 'chan yaak thong-thiiao thaang phaak-nuea khong thai', englishLiteral: 'I want travel through north of Thailand', englishNatural: 'I want to travel through the North of Thailand.' },
+    difficultyRating: 1, tags: ['verb', 'travel', 'tourism'],
+  },
+  {
+    id: 'dn_vrb_003', region: 'doi_nuea', category: 'verbs_core', type: 'vocabulary',
+    thai: 'สำรวจ', romanization: 'sam-ruaat', ipa: '/sǎm.rûːat/', tone: 'falling',
+    englishMeaning: 'to explore / to survey',
+    exampleSentence: { thai: 'นักวิทยาศาสตร์สำรวจถ้ำในป่าเหนือ', romanization: 'nak-wit-tha-yaa-saat sam-ruaat thaam nai paa-nuea', englishLiteral: 'scientist explore cave in forest north', englishNatural: 'Scientists explored caves in the northern forest.' },
+    difficultyRating: 2, tags: ['verb', 'exploration', 'nature'],
+  },
+
+  // ── ADJECTIVES ───────────────────────────────────────────────────────────────
+
+  {
+    id: 'dn_adj_001', region: 'doi_nuea', category: 'adjectives_core', type: 'vocabulary',
+    thai: 'เย็นสบาย', romanization: 'yen-sa-baai', ipa: '/jen.sā.bāːj/', tone: 'mid',
+    englishMeaning: 'pleasantly cool / refreshingly cool',
+    exampleSentence: { thai: 'อากาศบนดอยเย็นสบายในตอนเช้า', romanization: 'aa-gaat bon doi yen-sa-baai nai ton chao', englishLiteral: 'weather on mountain cool pleasant in morning', englishNatural: 'The mountain air is pleasantly cool in the morning.' },
+    difficultyRating: 1, tags: ['adjective', 'weather', 'north'],
+  },
+  {
+    id: 'dn_adj_002', region: 'doi_nuea', category: 'adjectives_core', type: 'vocabulary',
+    thai: 'เขียวขจี', romanization: 'khiao-kha-jii', ipa: '/kʰǐːaw.kʰā.dʑiː/', tone: 'mid',
+    englishMeaning: 'lush green / verdant',
+    exampleSentence: { thai: 'ป่าบนเขาเขียวขจีตลอดทั้งปี', romanization: 'paa bon khao khiao-kha-jii ta-lot thang pii', englishLiteral: 'forest on mountain lush green throughout whole year', englishNatural: 'The forest on the mountains is lush green all year round.' },
+    difficultyRating: 3, tags: ['adjective', 'nature', 'color', 'poetic'],
+  },
+  {
+    id: 'dn_adj_003', region: 'doi_nuea', category: 'adjectives_core', type: 'vocabulary',
+    thai: 'เงียบสงบ', romanization: 'ngiap-sa-ngop', ipa: '/ŋîːap.sā.ŋòp/', tone: 'low',
+    englishMeaning: 'quiet and peaceful / tranquil',
+    exampleSentence: { thai: 'บรรยากาศในหมู่บ้านเล็กๆ เงียบสงบและน่าอยู่', romanization: 'ban-ya-gaat nai muu-baan lek-lek ngiap-sa-ngop lae naa-yuu', englishLiteral: 'atmosphere in village small quiet peaceful and nice to live', englishNatural: 'The atmosphere in the small village is quiet, peaceful, and pleasant to live in.' },
+    difficultyRating: 2, tags: ['adjective', 'peaceful', 'nature'],
+  },
+
 ];
 
 // Merge doi_nuea cards into the main VOCABULARY array
