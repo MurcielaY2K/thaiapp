@@ -209,7 +209,7 @@ export function Quiz({ onExit, favoritesOnly, hardOnly }: { onExit: () => void; 
         <button style={s.exitBtn} onClick={onExit}>✕</button>
         <div style={{ flex: 1 }}>
           <div className="progress-track" style={{ height: 6 }}>
-            <div className="progress-fill" style={{ width: `${progress * 100}%`, background: 'var(--primary)' }} />
+            <div className="progress-fill" style={{ width: `${progress * 100}%`, background: 'linear-gradient(90deg, var(--primary), var(--gold))', boxShadow: '0 0 8px rgba(245,158,66,0.5)' }} />
           </div>
         </div>
         <span style={s.counter}>{current + 1}/{questions.length}</span>
@@ -288,16 +288,16 @@ export function Quiz({ onExit, favoritesOnly, hardOnly }: { onExit: () => void; 
       ) : (
         <div style={{ padding: '0 20px 20px', display: 'flex', flexDirection: 'column', gap: 10 }}>
           {q.options!.map((opt, i) => {
-            let bg = 'var(--surface)', border = '1px solid var(--border)', color = 'var(--text)';
+            let bg = 'linear-gradient(135deg, rgba(22,12,53,0.92), rgba(14,7,38,0.88))', border = '1px solid rgba(255,255,255,0.08)', color = 'var(--text)';
             if (phase === 'feedback' && selectedIdx !== null) {
               if (i === q.correctIndex) { bg = 'rgba(16,185,129,0.15)'; border = '2px solid var(--success)'; color = 'var(--success)'; }
               else if (i === selectedIdx) { bg = 'rgba(239,68,68,0.15)'; border = '2px solid var(--error)'; color = 'var(--error)'; }
             }
             return (
               <button key={i} className={phase === 'feedback' && selectedIdx === i && i !== q.correctIndex ? 'shake' : ''}
-                style={{ background: bg, border, borderRadius: 14, padding: '14px 18px', color, fontWeight: 600, fontSize: q.mode === 'english_to_thai' ? 22 : 15, textAlign: 'left', display: 'flex', alignItems: 'center', gap: 12, transition: 'all 0.2s' }}
+                style={{ background: bg, border, borderRadius: 14, padding: '14px 18px', color, fontWeight: 600, fontSize: q.mode === 'english_to_thai' ? 22 : 15, textAlign: 'left', display: 'flex', alignItems: 'center', gap: 12, transition: 'all 0.2s', boxShadow: '0 2px 8px rgba(0,0,0,0.25)' }}
                 onClick={() => answerMC(i)} disabled={phase === 'feedback'}>
-                <span style={{ fontSize: 12, color: phase === 'feedback' && (i === q.correctIndex || i === selectedIdx) ? 'inherit' : 'var(--border)', fontWeight: 700, minWidth: 20, background: 'var(--surface-hi)', borderRadius: 4, padding: '1px 5px', flexShrink: 0 }}>{['A', 'B', 'C', 'D'][i]}</span>
+                <span style={{ fontSize: 12, color: phase === 'feedback' && (i === q.correctIndex || i === selectedIdx) ? 'inherit' : 'var(--text-muted)', fontWeight: 800, minWidth: 20, background: 'rgba(255,255,255,0.07)', borderRadius: 4, padding: '1px 5px', flexShrink: 0 }}>{['A', 'B', 'C', 'D'][i]}</span>
                 <span style={{ flex: 1 }}>{opt}</span>
                 {phase === 'feedback' && i === q.correctIndex && <span>✓</span>}
                 {phase === 'feedback' && i === selectedIdx && i !== q.correctIndex && <span>✗</span>}
@@ -308,7 +308,7 @@ export function Quiz({ onExit, favoritesOnly, hardOnly }: { onExit: () => void; 
       )}
 
       {phase === 'feedback' && selectedIdx !== null && selectedIdx !== q.correctIndex && (
-        <div style={{ margin: '0 20px 16px', background: 'var(--surface-hi)', borderRadius: 12, padding: 14, borderLeft: '3px solid var(--info)' }}>
+        <div style={{ margin: '0 20px 16px', background: 'rgba(96,165,250,0.07)', border: '1px solid rgba(96,165,250,0.2)', borderLeft: '3px solid var(--info)', borderRadius: 12, padding: 14 }}>
           {q.card.exampleSentence && <div style={{ fontSize: 12, color: 'var(--text-sec)', fontStyle: 'italic' }}>"{q.card.exampleSentence.englishNatural}"</div>}
           {q.card.culturalNote && <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 6 }}>💡 {q.card.culturalNote}</div>}
         </div>
@@ -414,7 +414,7 @@ function ScoreScreen({ score, total, questions, results, onRetry, onExit }: {
           <div style={{ width: '100%' }}>
             <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 10 }}>Review Missed Words · tap for details</div>
             {questions.map((q, i) => results[i] ? null : (
-              <div key={i} style={{ background: 'var(--surface)', border: '1px solid var(--error)', borderRadius: 12, padding: 14, marginBottom: 8, cursor: 'pointer' }}
+              <div key={i} style={{ background: 'linear-gradient(135deg, rgba(22,12,53,0.94), rgba(14,7,38,0.9))', border: '1px solid rgba(239,68,68,0.45)', borderLeft: '3px solid var(--error)', borderRadius: 12, padding: 14, marginBottom: 8, cursor: 'pointer' }}
                 onClick={() => setExpandedIdx(p => p === i ? null : i)}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                   <div>
@@ -430,9 +430,9 @@ function ScoreScreen({ score, total, questions, results, onRetry, onExit }: {
                   </div>
                 </div>
                 {expandedIdx === i && (
-                  <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid rgba(255,255,255,0.07)', display: 'flex', flexDirection: 'column', gap: 8 }}>
                     {q.card.exampleSentence && (
-                      <div style={{ background: 'var(--surface-hi)', borderRadius: 8, padding: 10 }}>
+                      <div style={{ background: 'rgba(255,255,255,0.04)', borderRadius: 8, padding: 10 }}>
                         <div style={{ fontSize: 13, fontWeight: 500 }}>{q.card.exampleSentence.thai}</div>
                         <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>{q.card.exampleSentence.romanization}</div>
                         <div style={{ fontSize: 11, color: 'var(--text-sec)', fontStyle: 'italic', marginTop: 2 }}>"{q.card.exampleSentence.englishNatural}"</div>
@@ -446,8 +446,8 @@ function ScoreScreen({ score, total, questions, results, onRetry, onExit }: {
           </div>
         )}
         <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 10 }}>
-          <button style={{ background: 'var(--primary)', color: '#fff', borderRadius: 12, padding: 16, fontWeight: 700, fontSize: 15 }} onClick={onRetry}>Try Again</button>
-          <button style={{ background: 'var(--surface)', color: 'var(--text-sec)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, fontWeight: 600 }} onClick={onExit}>Back to Home</button>
+          <button style={{ background: 'linear-gradient(135deg, #D4801A, #F59E42, #FFB84D)', color: '#1A0800', borderRadius: 14, padding: 16, fontWeight: 900, fontSize: 15, boxShadow: '0 6px 24px rgba(245,158,66,0.4)' }} onClick={onRetry}>Try Again</button>
+          <button style={{ background: 'rgba(255,255,255,0.04)', color: 'var(--text-sec)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 14, padding: 16, fontWeight: 700 }} onClick={onExit}>Back to Home</button>
         </div>
       </div>
     </div>
@@ -569,8 +569,13 @@ function RapidFireSession({ pool, onExit }: { pool: VocabCard[]; onExit: () => v
 const s: Record<string, React.CSSProperties> = {
   root: { height: '100%', display: 'flex', flexDirection: 'column', background: 'var(--bg)' },
   topBar: { display: 'flex', alignItems: 'center', gap: 10, padding: '16px 20px 12px', paddingTop: 'calc(env(safe-area-inset-top, 0px) + 16px)' },
-  exitBtn: { width: 32, height: 32, borderRadius: 999, background: 'var(--surface)', color: 'var(--text-sec)', fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center' },
-  counter: { fontSize: 12, color: 'var(--text-muted)', minWidth: 36, textAlign: 'right' },
+  exitBtn: { width: 34, height: 34, borderRadius: 999, background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)', color: 'var(--text-sec)', fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center' },
+  counter: { fontSize: 12, color: 'var(--text-muted)', minWidth: 36, textAlign: 'right' as const, fontWeight: 700 },
   promptArea: { flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '0 24px 16px' },
-  modeCard: { background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 16, padding: '16px 18px', display: 'flex', alignItems: 'center', gap: 14, width: '100%' },
+  modeCard: {
+    background: 'linear-gradient(135deg, rgba(22,12,53,0.94), rgba(14,7,38,0.9))',
+    border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, padding: '16px 18px',
+    display: 'flex', alignItems: 'center', gap: 14, width: '100%',
+    boxShadow: '0 2px 10px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.04)',
+  },
 };

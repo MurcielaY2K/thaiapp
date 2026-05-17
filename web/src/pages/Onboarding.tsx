@@ -60,7 +60,7 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
         </p>
       </div>
 
-      <div style={{ background: 'var(--surface)', borderRadius: 20, padding: 24, border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <div style={{ background: 'linear-gradient(135deg, rgba(22,12,53,0.97), rgba(14,7,38,0.95))', borderRadius: 20, padding: 24, border: '1px solid rgba(245,158,66,0.2)', boxShadow: '0 0 24px rgba(245,158,66,0.08), 0 4px 20px rgba(0,0,0,0.4)', display: 'flex', flexDirection: 'column', gap: 12 }}>
         <label style={{ fontSize: 13, color: 'var(--text-sec)', fontWeight: 600 }}>Your traveler name</label>
         <input
           style={s.input}
@@ -88,7 +88,7 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
       {/* Progress dots */}
       <div style={{ display: 'flex', gap: 6, justifyContent: 'center' }}>
         {STEPS.map((_, i) => (
-          <div key={i} style={{ width: i === step ? 20 : 8, height: 8, borderRadius: 999, background: i === step ? 'var(--primary)' : i < step ? 'var(--primary)' : 'var(--border)', transition: 'all 0.3s' }} />
+          <div key={i} style={{ width: i === step ? 24 : 8, height: 8, borderRadius: 999, background: i === step ? 'linear-gradient(90deg, var(--primary), var(--gold))' : i < step ? 'var(--primary)' : 'rgba(255,255,255,0.1)', transition: 'all 0.3s', boxShadow: i === step ? '0 0 8px rgba(245,158,66,0.5)' : 'none' }} />
         ))}
         <div style={{ width: 8, height: 8, borderRadius: 999, background: 'var(--border)' }} />
       </div>
@@ -105,7 +105,7 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
         {current.features && (
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, justifyContent: 'center' }}>
             {current.features.map(f => (
-              <div key={f} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 999, padding: '8px 16px', fontSize: 13, fontWeight: 600 }}>{f}</div>
+              <div key={f} style={{ background: 'linear-gradient(135deg, rgba(22,12,53,0.94), rgba(14,7,38,0.9))', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 999, padding: '8px 16px', fontSize: 13, fontWeight: 600 }}>{f}</div>
             ))}
           </div>
         )}
@@ -118,8 +118,8 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
 
 const s: Record<string, React.CSSProperties> = {
   root: { flex: 1, display: 'flex', flexDirection: 'column', padding: 28, gap: 24, overflowY: 'auto', minHeight: '100%', justifyContent: 'space-between' },
-  title: { fontSize: 26, fontWeight: 800, color: 'var(--gold)' },
+  title: { fontSize: 28, fontWeight: 900, color: 'var(--gold)', letterSpacing: -0.5 },
   sub: { fontSize: 14, color: 'var(--text-sec)', marginTop: 4 },
-  input: { background: 'var(--surface-hi)', border: '1px solid var(--border)', borderRadius: 12, padding: '12px 16px', color: 'var(--text)', fontSize: 15, outline: 'none', width: '100%' },
-  btn: { background: 'var(--primary)', color: '#fff', borderRadius: 14, padding: '16px 0', fontWeight: 700, fontSize: 16, textAlign: 'center', width: '100%' },
+  input: { background: 'rgba(22,12,53,0.8)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 12, padding: '12px 16px', color: 'var(--text)', fontSize: 15, outline: 'none', width: '100%' },
+  btn: { background: 'linear-gradient(135deg, #D4801A 0%, #F59E42 45%, #FFB84D 80%, #F5C060 100%)', color: '#1A0800', borderRadius: 14, padding: '16px 0', fontWeight: 900, fontSize: 16, textAlign: 'center' as const, width: '100%', boxShadow: '0 6px 24px rgba(245,158,66,0.4)' },
 };
