@@ -86,11 +86,11 @@ export function Profile({ onSettings, onShop }: { onSettings: () => void; onShop
           </button>
           <div style={{ display: 'flex', gap: 8 }}>
             {onShop && unlocks.shop && (
-              <button style={{ background: 'var(--surface-hi)', border: '1px solid var(--gold)', borderRadius: 10, padding: '8px 14px', fontSize: 13, color: 'var(--gold)', fontWeight: 700 }} onClick={onShop}>
+              <button style={{ background: 'rgba(245,158,66,0.12)', border: '1px solid rgba(245,158,66,0.45)', borderRadius: 10, padding: '8px 14px', fontSize: 13, color: 'var(--gold)', fontWeight: 700 }} onClick={onShop}>
                 🏪 Shop
               </button>
             )}
-            <button style={{ background: 'var(--surface-hi)', border: '1px solid var(--border)', borderRadius: 10, padding: '8px 14px', fontSize: 13, color: 'var(--text-sec)', fontWeight: 600 }} onClick={onSettings}>
+            <button style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, padding: '8px 14px', fontSize: 13, color: 'var(--text-sec)', fontWeight: 600 }} onClick={onSettings}>
               ⚙️ Settings
             </button>
           </div>
@@ -125,7 +125,7 @@ export function Profile({ onSettings, onShop }: { onSettings: () => void; onShop
             <span>XP to next level</span><span>{levelXP} / {XP_PER_LEVEL}</span>
           </div>
           <div className="progress-track" style={{ height: 8 }}>
-            <div className="progress-fill" style={{ width: `${(levelXP / XP_PER_LEVEL) * 100}%`, background: 'linear-gradient(90deg, var(--primary), var(--gold))' }} />
+            <div className="progress-fill" style={{ width: `${(levelXP / XP_PER_LEVEL) * 100}%`, background: 'linear-gradient(90deg, var(--primary), var(--gold))', boxShadow: '0 0 10px rgba(245,158,66,0.6)' }} />
           </div>
         </div>
       </div>
@@ -168,7 +168,7 @@ export function Profile({ onSettings, onShop }: { onSettings: () => void; onShop
               const pct = Math.round(rec.summary.accuracy * 100);
               const accColor = pct >= 80 ? 'var(--success)' : pct >= 60 ? 'var(--gold)' : 'var(--error)';
               return (
-                <div key={rec.id ?? i} style={{ background: 'var(--surface)', borderRadius: 12, padding: '10px 14px', display: 'flex', alignItems: 'center', gap: 12, border: '1px solid var(--border)' }}>
+                <div key={rec.id ?? i} style={{ background: 'linear-gradient(135deg, rgba(22,12,53,0.92), rgba(14,7,38,0.88))', borderRadius: 12, padding: '10px 14px', display: 'flex', alignItems: 'center', gap: 12, border: '1px solid rgba(255,255,255,0.07)' }}>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: 13, fontWeight: 600 }}>{rec.date}</div>
                     <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
@@ -208,7 +208,7 @@ export function Profile({ onSettings, onShop }: { onSettings: () => void; onShop
             const progPct = prog ? Math.round((prog[0] / prog[1]) * 100) : 0;
             const rarityColor = RARITY_COLOR[a.rarity];
             return (
-              <div key={a.id} style={{ background: 'var(--surface)', border: `1px solid ${earned ? rarityColor : prog && progPct > 0 ? 'var(--border)' : 'var(--border)'}`, borderRadius: 12, padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 12, opacity: earned ? 1 : prog && progPct > 0 ? 0.75 : 0.4 }}>
+              <div key={a.id} style={{ background: 'linear-gradient(135deg, rgba(22,12,53,0.94), rgba(14,7,38,0.9))', border: `1px solid ${earned ? rarityColor + '66' : 'rgba(255,255,255,0.07)'}`, borderRadius: 12, padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 12, opacity: earned ? 1 : prog && progPct > 0 ? 0.75 : 0.38 }}>
                 <span style={{ fontSize: 26, filter: earned ? 'none' : 'grayscale(1)' }}>{a.icon}</span>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontWeight: 700, fontSize: 14, color: earned ? 'var(--text)' : 'var(--text-muted)' }}>{a.title}</div>
@@ -271,7 +271,7 @@ export function Profile({ onSettings, onShop }: { onSettings: () => void; onShop
               return (
                 <button
                   key={cid}
-                  style={{ background: isActive ? 'rgba(99,102,241,0.08)' : 'var(--surface)', border: `1px solid ${isActive ? 'var(--primary)' : 'var(--border)'}`, borderRadius: 14, padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 14, textAlign: 'left', opacity: (!isActive && !canActivate) ? 0.5 : 1, cursor: isActive || canActivate ? 'pointer' : 'default' }}
+                  style={{ background: isActive ? 'rgba(139,92,246,0.1)' : 'linear-gradient(135deg, rgba(22,12,53,0.94), rgba(14,7,38,0.9))', border: `1px solid ${isActive ? 'rgba(139,92,246,0.4)' : 'rgba(255,255,255,0.07)'}`, borderRadius: 14, padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 14, textAlign: 'left', opacity: (!isActive && !canActivate) ? 0.45 : 1, cursor: isActive || canActivate ? 'pointer' : 'default' }}
                   onClick={() => (isActive || canActivate) && toggleCompanion(cid)}
                   disabled={!isActive && !canActivate}
                 >
@@ -490,12 +490,12 @@ function Heatmap({ data }: { data: Record<string, number> }) {
   const maxCount = Math.max(1, ...Object.values(data));
 
   const cellColor = (count: number) => {
-    if (count <= 0) return 'var(--border)';
+    if (count <= 0) return 'rgba(255,255,255,0.06)';
     const intensity = Math.min(1, count / Math.max(maxCount, 5));
-    if (intensity < 0.25) return '#1e3a5f';
-    if (intensity < 0.5)  return '#1d5fa8';
-    if (intensity < 0.75) return '#2070cc';
-    return 'var(--primary)';
+    if (intensity < 0.25) return 'rgba(180,80,10,0.45)';
+    if (intensity < 0.5)  return 'rgba(213,110,20,0.65)';
+    if (intensity < 0.75) return 'rgba(245,158,66,0.8)';
+    return '#F59E42';
   };
 
   const DAY_LABELS = ['M', '', 'W', '', 'F', '', 'S'];
@@ -525,9 +525,27 @@ function Heatmap({ data }: { data: Record<string, number> }) {
 }
 
 const s: Record<string, React.CSSProperties> = {
-  heroCard: { background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 20, padding: 20, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 },
-  avatar: { width: 64, height: 64, borderRadius: '50%', background: 'var(--surface-hi)', border: '2px solid var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 32, marginBottom: 2 },
+  heroCard: {
+    background: 'linear-gradient(135deg, rgba(22,12,53,0.97), rgba(14,7,38,0.95))',
+    border: '1px solid rgba(245,158,66,0.3)',
+    borderTop: '3px solid rgba(245,158,66,0.55)',
+    borderRadius: 20, padding: 20, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
+    boxShadow: '0 0 32px rgba(245,158,66,0.1), 0 4px 24px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06)',
+  },
+  avatar: {
+    width: 72, height: 72, borderRadius: '50%',
+    background: 'rgba(245,158,66,0.12)',
+    border: '2px solid rgba(245,158,66,0.55)',
+    display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 36, marginBottom: 2,
+    boxShadow: '0 0 20px rgba(245,158,66,0.25)',
+  },
   grid: { display: 'flex', flexWrap: 'wrap', gap: 10 },
-  stat: { width: 'calc(33.33% - 7px)', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 12, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 },
-  sectionTitle: { fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 10 },
+  stat: {
+    width: 'calc(33.33% - 7px)',
+    background: 'linear-gradient(135deg, rgba(22,12,53,0.95), rgba(14,7,38,0.9))',
+    border: '1px solid rgba(255,255,255,0.08)', borderRadius: 14, padding: '12px 8px',
+    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
+    boxShadow: '0 2px 10px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)',
+  },
+  sectionTitle: { fontSize: 11, fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase' as const, letterSpacing: 0.8, marginBottom: 10 },
 };

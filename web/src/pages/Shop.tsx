@@ -166,7 +166,7 @@ export function Shop({ onBack }: { onBack: () => void }) {
       <div className="scroll" style={{ flex: 1, padding: '0 16px 32px' }}>
         {/* Shields callout */}
         {profile.streakShields > 0 && (
-          <div style={{ background: 'rgba(99,179,237,0.1)', border: '1px solid var(--info)', borderRadius: 12, padding: '10px 14px', marginBottom: 20, display: 'flex', alignItems: 'center', gap: 10, marginTop: 12 }}>
+          <div style={{ background: 'rgba(96,165,250,0.08)', border: '1px solid rgba(96,165,250,0.35)', borderRadius: 12, padding: '10px 14px', marginBottom: 20, display: 'flex', alignItems: 'center', gap: 10, marginTop: 12 }}>
             <span style={{ fontSize: 22 }}>🛡️</span>
             <div>
               <div style={{ fontWeight: 700, fontSize: 13 }}>You have {profile.streakShields} streak {profile.streakShields === 1 ? 'shield' : 'shields'}</div>
@@ -185,7 +185,7 @@ export function Shop({ onBack }: { onBack: () => void }) {
                 const canBuy = item.canBuy(profile) && !buying;
                 const isBuying = buying === item.id;
                 return (
-                  <div key={item.id} style={{ background: 'var(--surface)', border: `1px solid ${isOwned ? 'var(--success)' : 'var(--border)'}`, borderRadius: 14, padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 14, opacity: isOwned ? 0.75 : 1 }}>
+                  <div key={item.id} style={{ background: 'linear-gradient(135deg, rgba(22,12,53,0.94), rgba(14,7,38,0.9))', border: `1px solid ${isOwned ? 'rgba(16,185,129,0.45)' : 'rgba(255,255,255,0.08)'}`, borderRadius: 14, padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 14, opacity: isOwned ? 0.7 : 1, boxShadow: '0 2px 10px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.04)' }}>
                     <span style={{ fontSize: 32, flexShrink: 0 }}>{item.icon}</span>
                     <div style={{ flex: 1 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
@@ -233,6 +233,6 @@ function CurrencyChip({ icon, amount, color }: { icon: string; amount: number; c
 
 const s: Record<string, React.CSSProperties> = {
   root: { height: '100%', display: 'flex', flexDirection: 'column', background: 'var(--bg)' },
-  header: { display: 'flex', alignItems: 'center', gap: 12, padding: '16px 20px 12px', paddingTop: 'calc(env(safe-area-inset-top, 0px) + 16px)', borderBottom: '1px solid var(--border)', flexShrink: 0 },
-  back: { width: 36, height: 36, borderRadius: 999, background: 'var(--surface)', color: 'var(--text)', fontSize: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
+  header: { display: 'flex', alignItems: 'center', gap: 12, padding: '16px 20px 12px', paddingTop: 'calc(env(safe-area-inset-top, 0px) + 16px)', background: 'rgba(7,3,22,0.92)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' as React.CSSProperties['WebkitBackdropFilter'], borderBottom: '1px solid rgba(255,255,255,0.06)', flexShrink: 0 },
+  back: { width: 36, height: 36, borderRadius: 999, background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)', color: 'var(--text)', fontSize: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
 };
