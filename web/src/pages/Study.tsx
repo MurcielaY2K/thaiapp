@@ -189,8 +189,6 @@ function StudySession({
   const [sessionTotal, setSessionTotal] = useState(0);
   const [combo, setCombo] = useState(0);
   const startTime = useRef(Date.now());
-  const scrollRef = useRef<HTMLDivElement>(null);
-
   useEffect(() => {
     if (!facade) return;
     try {
@@ -221,11 +219,6 @@ function StudySession({
       if (card) speakThai(card.thai);
     }
   }, [flipped]);
-
-  // Scroll to top whenever the card changes or answer is revealed
-  useEffect(() => {
-    scrollRef.current?.scrollTo({ top: 0 });
-  }, [session?.currentIndex, flipped]);
 
   const answerRef = useRef<(q: Quality) => void>(() => {});
 
@@ -282,7 +275,7 @@ function StudySession({
 
   return (
     <div style={s.root}>
-      {/* Top bar */}
+      {/* ── TOP BAR ── */}
       <div style={s.topBar}>
         <button style={s.exitBtn} onClick={onExit}>✕</button>
         <div style={{ flex: 1 }}>
@@ -290,107 +283,91 @@ function StudySession({
             <div className="progress-fill" style={{ width: `${progress * 100}%`, background: regionColor }} />
           </div>
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', minWidth: 52 }}>
-          <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{session.currentIndex + 1}/{session.cards.length}</span>
-          {combo >= 3 && <span style={{ fontSize: 10, color: 'var(--gold)', fontWeight: 800 }}>🔥{combo}</span>}
+        <div style={{ textAlign: 'right', minWidth: 48 }}>
+          <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{session.currentIndex + 1}/{session.cards.length}</div>
+          {combo >= 3 && <div style={{ fontSize: 10, color: 'var(--gold)', fontWeight: 800 }}>🔥{combo}</div>}
           {combo < 3 && sessionTotal > 0 && (
-            <span style={{ fontSize: 10, fontWeight: 700, color: sessionCorrect / sessionTotal >= 0.8 ? 'var(--success)' : sessionCorrect / sessionTotal >= 0.6 ? 'var(--gold)' : 'var(--error)' }}>
+            <div style={{ fontSize: 10, fontWeight: 700, color: sessionCorrect / sessionTotal >= 0.8 ? 'var(--success)' : sessionCorrect / sessionTotal >= 0.6 ? 'var(--gold)' : 'var(--error)' }}>
               {Math.round((sessionCorrect / sessionTotal) * 100)}%
-            </span>
+            </div>
           )}
         </div>
       </div>
 
-      {/* Scrollable card area — min-height:0 is critical for iOS flex scroll */}
-      <div
-        ref={scrollRef}
-        style={{ flex: 1, minHeight: 0, overflowY: 'auto', WebkitOverflowScrolling: 'touch' as any, padding: '12px 18px', paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 28px)' }}
-      >
-        {/* Card header: category + tone */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8, fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 0.8 }}>
+      {/* ── CARD AREA (fills middle, never scrolls) ── */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '0 18px 8px', overflow: 'hidden' }}>
+        {/* Category + tone */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10, fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 0.8 }}>
           <span>
             {CATEGORY_ICONS[card.category] ?? '📖'} {card.category.replace(/_/g, ' ')}
-            {currentCard.isNew && <span style={{ color: 'var(--success)', fontWeight: 700, marginLeft: 6, fontSize: 9 }}>NEW</span>}
+            {currentCard.isNew && <span style={{ color: 'var(--success)', fontWeight: 700, marginLeft: 6 }}>NEW</span>}
           </span>
           <span>{card.tone} tone</span>
         </div>
 
-        {/* Thai word card */}
-        <div style={{ background: 'var(--surface)', borderRadius: 18, borderTop: `4px solid ${regionColor}`, padding: '20px 20px 16px', textAlign: 'center', marginBottom: 12 }}>
-          <div style={{ fontSize: 54, fontWeight: 700, lineHeight: 1.1 }}>{card.thai}</div>
-          <div style={{ fontSize: 16, color: 'var(--text-muted)', marginTop: 6 }}>{card.romanization}</div>
+        {/* Card face */}
+        <div style={{ background: 'var(--surface)', borderRadius: 20, borderTop: `4px solid ${regionColor}`, padding: '24px 22px', textAlign: 'center', boxShadow: '0 8px 32px rgba(0,0,0,0.35)' }}>
+          <div style={{ fontSize: 56, fontWeight: 700, lineHeight: 1.1, marginBottom: 6 }}>{card.thai}</div>
+          <div style={{ fontSize: 15, color: 'var(--text-muted)', marginBottom: 12 }}>{card.romanization}</div>
           <button
-            style={{ marginTop: 10, background: 'var(--surface-hi)', border: '1px solid var(--border)', borderRadius: 999, padding: '5px 14px', fontSize: 13, color: 'var(--text-sec)' }}
+            style={{ background: 'var(--surface-hi)', border: '1px solid var(--border)', borderRadius: 999, padding: '5px 16px', fontSize: 13, color: 'var(--text-sec)' }}
             onClick={() => speakThai(card.thai)}
           >🔊 Listen</button>
-        </div>
 
+          {/* Answer revealed inline inside the card */}
+          {flipped && (
+            <div style={{ marginTop: 18, paddingTop: 16, borderTop: '1px solid var(--border)' }}>
+              <div style={{ fontSize: 26, fontWeight: 800, color: 'var(--gold)', marginBottom: 4 }}>{card.englishMeaning}</div>
+              {card.englishAlternatives?.length ? (
+                <div style={{ fontSize: 12, color: 'var(--text-muted)', fontStyle: 'italic', marginBottom: 10 }}>
+                  also: {card.englishAlternatives.join(', ')}
+                </div>
+              ) : null}
+              {card.exampleSentence && (
+                <div style={{ background: 'var(--surface-hi)', borderRadius: 10, padding: '8px 12px', textAlign: 'left', marginTop: 8 }}>
+                  <div style={{ fontSize: 13, fontWeight: 600 }}>{card.exampleSentence.thai}</div>
+                  <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 2 }}>{card.exampleSentence.romanization}</div>
+                  <div style={{ fontSize: 11, color: 'var(--text-sec)', fontStyle: 'italic', marginTop: 3 }}>"{card.exampleSentence.englishNatural}"</div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ── BUTTON BAR (always pinned at bottom) ── */}
+      <div style={{ flexShrink: 0, padding: '0 18px', paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 72px)' }}>
         {!flipped ? (
-          /* ── UNREVEALED ── */
           <button
-            style={{ width: '100%', background: 'var(--primary)', color: '#fff', borderRadius: 14, padding: '18px 0', fontWeight: 800, fontSize: 19 }}
+            style={{ width: '100%', background: 'linear-gradient(135deg, #E8961C, #F5A623)', color: '#fff', borderRadius: 16, padding: '20px 0', fontWeight: 800, fontSize: 20, boxShadow: '0 4px 20px rgba(232,150,28,0.4)' }}
             onClick={() => { sfx.flip(); setFlipped(true); }}
           >
             Show Answer
           </button>
         ) : (
-          /* ── REVEALED ── */
           <>
-            {/* Meaning */}
-            <div style={{ background: 'var(--surface)', borderRadius: 18, borderTop: `4px solid ${regionColor}`, padding: '16px 20px', marginBottom: 10, textAlign: 'center' }}>
-              <div style={{ fontSize: 26, fontWeight: 800, color: 'var(--gold)' }}>{card.englishMeaning}</div>
-              {card.englishAlternatives?.length ? (
-                <div style={{ fontSize: 12, color: 'var(--text-muted)', fontStyle: 'italic', marginTop: 3 }}>
-                  also: {card.englishAlternatives.join(', ')}
-                </div>
-              ) : null}
-            </div>
-
-            {/* Primary rating buttons */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 8 }}>
               <button
-                style={{ background: 'rgba(239,68,68,0.12)', border: '2px solid var(--error)', borderRadius: 14, padding: '16px 0', fontWeight: 800, fontSize: 17, color: 'var(--error)' }}
+                style={{ background: 'rgba(239,68,68,0.12)', border: '2px solid var(--error)', borderRadius: 14, padding: '16px 0', fontWeight: 800, fontSize: 18, color: 'var(--error)' }}
                 onClick={() => answer(0)}
               >✗ Again</button>
               <button
-                style={{ background: 'rgba(16,185,129,0.12)', border: '2px solid var(--success)', borderRadius: 14, padding: '16px 0', fontWeight: 800, fontSize: 17, color: 'var(--success)' }}
+                style={{ background: 'rgba(16,185,129,0.12)', border: '2px solid var(--success)', borderRadius: 14, padding: '16px 0', fontWeight: 800, fontSize: 18, color: 'var(--success)' }}
                 onClick={() => answer(3)}
               >✓ Got it</button>
             </div>
-
-            {/* SRS detail row */}
             <div style={{ display: 'flex', gap: 6 }}>
               {QUALITY.map(({ q, label, color }) => (
-                <button
-                  key={q}
-                  style={{ flex: 1, background: 'var(--surface)', border: `1px solid ${color}`, borderRadius: 10, padding: '9px 2px', fontSize: 11, fontWeight: 700, color }}
+                <button key={q}
+                  style={{ flex: 1, background: 'var(--surface)', border: `1px solid ${color}`, borderRadius: 10, padding: '10px 2px', fontSize: 12, fontWeight: 700, color }}
                   onClick={() => answer(q)}
                 >{label}</button>
               ))}
               <button
-                style={{ flex: 1.4, background: 'var(--surface-hi)', border: '1px solid var(--border)', borderRadius: 10, padding: '9px 2px', fontSize: 11, fontWeight: 700, color: 'var(--text-sec)' }}
+                style={{ flex: 1.3, background: 'var(--surface-hi)', border: '1px solid var(--border)', borderRadius: 10, padding: '10px 2px', fontSize: 12, fontWeight: 700, color: 'var(--text-sec)' }}
                 onClick={() => answer(3)}
               >Next →</button>
             </div>
-
-            {/* Extra info (scrollable if needed) */}
-            {(card.exampleSentence || card.culturalNote) && (
-              <div style={{ marginTop: 14 }}>
-                {card.exampleSentence && (
-                  <div style={{ background: 'var(--surface-hi)', borderRadius: 12, padding: '10px 14px', marginBottom: 8 }}>
-                    <div style={{ fontSize: 14, fontWeight: 600 }}>{card.exampleSentence.thai}</div>
-                    <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 2 }}>{card.exampleSentence.romanization}</div>
-                    <div style={{ fontSize: 11, color: 'var(--text-sec)', fontStyle: 'italic', marginTop: 4 }}>"{card.exampleSentence.englishNatural}"</div>
-                  </div>
-                )}
-                {card.culturalNote && (
-                  <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start', background: 'var(--surface-hi)', borderRadius: 12, padding: '8px 12px' }}>
-                    <span style={{ fontSize: 13, flexShrink: 0 }}>💡</span>
-                    <span style={{ fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.5 }}>{card.culturalNote}</span>
-                  </div>
-                )}
-              </div>
-            )}
           </>
         )}
       </div>
