@@ -305,8 +305,8 @@ function LearnTab({ onStudy, onQuiz, onTone, onSentence, onAlphabet, onPhraseboo
   ];
 
   return (
-    <div className="scroll" style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 14 }}>
-      <div style={{ fontSize: 26, fontWeight: 800 }}>Practice</div>
+    <div className="scroll" style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <div style={{ fontSize: 26, fontWeight: 900, letterSpacing: -0.5, marginBottom: 2 }}>Practice</div>
 
       {activities.map(a => {
         const locked = !a.unlocked;
@@ -314,33 +314,38 @@ function LearnTab({ onStudy, onQuiz, onTone, onSentence, onAlphabet, onPhraseboo
           <button
             key={a.title}
             style={{
-              background: 'var(--surface)',
-              border: `1px solid var(--border)`,
-              borderLeft: `4px solid ${locked ? 'var(--border)' : a.color}`,
+              background: locked
+                ? 'rgba(22,12,53,0.6)'
+                : 'linear-gradient(135deg, rgba(22,12,53,0.95), rgba(14,7,38,0.9))',
+              border: `1px solid ${locked ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.08)'}`,
+              borderLeft: `4px solid ${locked ? 'rgba(255,255,255,0.1)' : a.color}`,
               borderRadius: 14, padding: '16px 18px', display: 'flex', alignItems: 'center', gap: 16,
               textAlign: 'left', width: '100%',
-              opacity: locked ? 0.55 : 1,
+              opacity: locked ? 0.5 : 1,
               cursor: locked ? 'default' : 'pointer',
+              boxShadow: locked ? 'none' : `0 2px 12px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)`,
             }}
             onClick={locked ? undefined : a.onClick}
             disabled={locked}
           >
-            <span style={{ fontSize: 30, flexShrink: 0, filter: locked ? 'grayscale(1)' : 'none' }}>{locked ? '🔒' : a.icon}</span>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 3, color: locked ? 'var(--text-muted)' : 'var(--text)' }}>{a.title}</div>
+            <span style={{ fontSize: 28, flexShrink: 0, filter: locked ? 'grayscale(1) brightness(0.6)' : 'none' }}>{locked ? '🔒' : a.icon}</span>
+            <div style={{ flex: 1, textAlign: 'left' }}>
+              <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 3, color: locked ? 'var(--text-muted)' : 'var(--text)', letterSpacing: -0.1 }}>{a.title}</div>
               {locked
                 ? <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Learn {a.unlockAt} words to unlock</div>
-                : <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.4 }}>{a.desc}</div>
+                : <div style={{ fontSize: 12, color: 'var(--text-sec)', lineHeight: 1.4 }}>{a.desc}</div>
               }
-              {!locked && a.badge && <span style={{ fontSize: 10, color: a.color, background: `${a.color}22`, borderRadius: 6, padding: '2px 8px', fontWeight: 700, display: 'inline-block', marginTop: 4 }}>{a.badge}</span>}
+              {!locked && a.badge && (
+                <span style={{ fontSize: 10, color: a.color, background: `${a.color}18`, border: `1px solid ${a.color}33`, borderRadius: 6, padding: '2px 8px', fontWeight: 700, display: 'inline-block', marginTop: 5, letterSpacing: 0.3 }}>{a.badge}</span>
+              )}
             </div>
-            {!locked && <span style={{ color: 'var(--text-muted)', fontSize: 18 }}>→</span>}
+            {!locked && <span style={{ color: 'var(--text-muted)', fontSize: 16, flexShrink: 0 }}>›</span>}
           </button>
         );
       })}
 
       {/* Quick tone reference */}
-      <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 14, padding: 16 }}>
+      <div style={{ background: 'linear-gradient(135deg, rgba(22,12,53,0.92), rgba(14,7,38,0.88))', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 14, padding: 16, boxShadow: '0 2px 10px rgba(0,0,0,0.3)' }}>
         <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 12 }}>Thai Tone Quick Reference</div>
         {toneRef.map(({ tone, color, contour }) => (
           <div key={tone} style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>

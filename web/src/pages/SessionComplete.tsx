@@ -56,13 +56,16 @@ export function SessionComplete({
     <div className="scroll" style={s.root}>
       {/* Trophy + grade */}
       <div className="anim-scale" style={s.trophy}>
-        <div style={{ fontSize: 80 }}>{trophyEmoji}</div>
+        <div style={{ position: 'relative', display: 'inline-block' }}>
+          <div style={{ position: 'absolute', inset: -20, borderRadius: '50%', background: isPerfect ? 'radial-gradient(circle, rgba(245,158,66,0.25) 0%, transparent 70%)' : 'radial-gradient(circle, rgba(139,92,246,0.2) 0%, transparent 70%)' }} />
+          <div style={{ fontSize: 80, position: 'relative' }}>{trophyEmoji}</div>
+        </div>
         <div style={s.trophyLabel}>
           {isPerfect ? 'Perfect Session!' : accuracyPct >= 80 ? 'Great Work!' : accuracyPct >= 60 ? 'Session Complete' : 'Keep Going!'}
         </div>
         <div style={{ fontSize: 14, color: 'var(--gold)', fontStyle: 'italic', marginTop: 6 }}>{motivation}</div>
         {isPerfect && (
-          <div style={{ fontSize: 11, color: 'var(--gold)', marginTop: 4, fontWeight: 700, letterSpacing: 1, background: 'rgba(245,158,11,0.15)', borderRadius: 999, padding: '3px 12px' }}>
+          <div style={{ fontSize: 11, color: '#1A0800', marginTop: 8, fontWeight: 800, letterSpacing: 1, background: 'linear-gradient(90deg, var(--primary), var(--gold))', borderRadius: 999, padding: '4px 16px', display: 'inline-block' }}>
             FLAWLESS · +100 BONUS XP
           </div>
         )}
@@ -70,22 +73,22 @@ export function SessionComplete({
 
       {/* XP banner */}
       <div className="anim-fade" style={s.xpBanner}>
-        <div style={{ fontSize: 42, fontWeight: 800, color: 'var(--gold)' }}>+{xpGained} XP</div>
+        <div style={{ fontSize: 46, fontWeight: 900, color: 'var(--gold)', letterSpacing: -1 }}>+{xpGained} XP</div>
         {summary.goldEarned > 0 && (
-          <div style={{ fontSize: 18, color: 'var(--gold)', marginTop: 4 }}>🪙 +{summary.goldEarned}</div>
+          <div style={{ fontSize: 18, color: 'var(--gold-lt)', marginTop: 4 }}>🪙 +{summary.goldEarned} gold</div>
         )}
-        <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>Experience gained this session</div>
+        <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 6 }}>Experience gained this session</div>
       </div>
 
       {/* Level progress */}
       {levelInfo && (
-        <div style={{ width: '100%', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 14, padding: '12px 16px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6, fontSize: 13, fontWeight: 600 }}>
-            <span>⚡ Level {levelInfo.level} · {levelInfo.cfg.titleThai}</span>
-            <span style={{ color: 'var(--text-muted)' }}>{levelInfo.levelXP}/{XP_PER_LEVEL} XP</span>
+        <div style={{ width: '100%', background: 'linear-gradient(135deg, rgba(22,12,53,0.95), rgba(14,7,38,0.9))', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, padding: '14px 18px', boxShadow: '0 4px 16px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8, fontSize: 13, fontWeight: 700 }}>
+            <span style={{ color: 'var(--gold)' }}>⚡ Level {levelInfo.level} <span style={{ color: 'var(--text-sec)', fontWeight: 600 }}>· {levelInfo.cfg.titleThai}</span></span>
+            <span style={{ color: 'var(--text-muted)', fontWeight: 600 }}>{levelInfo.levelXP}/{XP_PER_LEVEL} XP</span>
           </div>
           <div className="progress-track" style={{ height: 8 }}>
-            <div className="progress-fill" style={{ width: `${(levelInfo.levelXP / XP_PER_LEVEL) * 100}%`, background: 'linear-gradient(90deg, var(--primary), var(--gold))', transition: 'width 0.8s ease' }} />
+            <div className="progress-fill" style={{ width: `${(levelInfo.levelXP / XP_PER_LEVEL) * 100}%`, background: 'linear-gradient(90deg, var(--primary), var(--gold))', boxShadow: '0 0 10px rgba(245,158,66,0.6)', transition: 'width 0.9s cubic-bezier(0.34,1.2,0.64,1)' }} />
           </div>
         </div>
       )}
@@ -110,7 +113,7 @@ export function SessionComplete({
 
       {/* Accuracy bar */}
       {summary.cardsReviewed > 0 && (
-        <div style={{ width: '100%', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 14, padding: 16 }}>
+        <div style={{ width: '100%', background: 'linear-gradient(135deg, rgba(22,12,53,0.95), rgba(14,7,38,0.9))', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, padding: 16, boxShadow: '0 4px 16px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)' }}>
           <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 10 }}>Session Accuracy</div>
           <div style={{ height: 10, borderRadius: 999, overflow: 'hidden', display: 'flex' }}>
             <div style={{ width: `${accuracyPct}%`, background: 'var(--success)', transition: 'width 0.6s ease' }} />
@@ -158,7 +161,7 @@ export function SessionComplete({
 
       {/* What's next */}
       {stats && (
-        <div style={{ width: '100%', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 14, padding: 16 }}>
+        <div style={{ width: '100%', background: 'linear-gradient(135deg, rgba(22,12,53,0.95), rgba(14,7,38,0.9))', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, padding: 16, boxShadow: '0 4px 16px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)' }}>
           <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 12 }}>What's Next</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {stats.dueToday > 0 && (
@@ -201,14 +204,43 @@ export function SessionComplete({
 }
 
 const s: Record<string, React.CSSProperties> = {
-  root: { padding: 24, paddingTop: 48, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 18 },
-  trophy: { textAlign: 'center' },
-  trophyLabel: { fontSize: 26, fontWeight: 800, marginTop: 8 },
-  xpBanner: { background: 'var(--surface)', border: '1px solid var(--gold)', borderRadius: 20, padding: '18px 40px', textAlign: 'center', width: '100%' },
+  root: {
+    padding: 24,
+    paddingTop: 'calc(env(safe-area-inset-top, 0px) + 40px)',
+    paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 40px)',
+    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 18,
+  },
+  trophy: { textAlign: 'center', paddingBottom: 8 },
+  trophyLabel: { fontSize: 28, fontWeight: 900, marginTop: 8, letterSpacing: -0.5 },
+  xpBanner: {
+    background: 'linear-gradient(135deg, rgba(22,12,53,0.97), rgba(30,18,72,0.92))',
+    border: '1px solid rgba(245,158,66,0.45)',
+    borderRadius: 20, padding: '22px 40px', textAlign: 'center', width: '100%',
+    boxShadow: '0 0 32px rgba(245,158,66,0.18), inset 0 1px 0 rgba(255,255,255,0.07)',
+  },
   grid: { display: 'flex', flexWrap: 'wrap', gap: 10, width: '100%' },
-  statItem: { width: 'calc(33.33% - 7px)', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 14, padding: '12px 8px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' },
+  statItem: {
+    width: 'calc(33.33% - 7px)',
+    background: 'linear-gradient(135deg, rgba(22,12,53,0.95), rgba(14,7,38,0.9))',
+    border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, padding: '14px 8px',
+    textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)',
+  },
   sectionLabel: { fontWeight: 700, color: 'var(--text-sec)', marginBottom: 10, fontSize: 13, width: '100%' },
-  questComplete: { background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 12, width: '100%' },
-  primary: { background: 'var(--primary)', color: '#fff', borderRadius: 12, padding: 16, fontWeight: 700, fontSize: 15, width: '100%' },
-  secondary: { background: 'var(--surface)', color: 'var(--text-sec)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, fontWeight: 600, fontSize: 15, width: '100%' },
+  questComplete: {
+    background: 'linear-gradient(135deg, rgba(22,12,53,0.95), rgba(14,7,38,0.9))',
+    border: '1px solid rgba(255,255,255,0.08)', borderRadius: 14,
+    padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 12, width: '100%',
+  },
+  primary: {
+    background: 'linear-gradient(135deg, #D4801A 0%, #F59E42 45%, #FFB84D 80%, #F5C060 100%)',
+    color: '#1A0800', borderRadius: 14, padding: 18, fontWeight: 900, fontSize: 16, width: '100%',
+    boxShadow: '0 6px 32px rgba(245,158,66,0.45), 0 2px 8px rgba(0,0,0,0.3)',
+    letterSpacing: -0.2,
+  },
+  secondary: {
+    background: 'rgba(255,255,255,0.04)', color: 'var(--text-sec)',
+    border: '1px solid rgba(255,255,255,0.1)',
+    borderRadius: 14, padding: 16, fontWeight: 700, fontSize: 15, width: '100%',
+  },
 };

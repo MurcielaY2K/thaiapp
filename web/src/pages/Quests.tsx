@@ -29,21 +29,32 @@ export function Quests() {
 
   return (
     <div className="scroll" style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 20 }}>
-      <div style={{ fontSize: 26, fontWeight: 800 }}>Quest Board</div>
+      <div style={{ fontSize: 26, fontWeight: 900, letterSpacing: -0.5 }}>Quest Board</div>
 
       {ORDER.filter(r => profile.unlockedRegions.includes(r)).map(r => {
         const entries = boards[r] ?? [];
         const cfg = REGIONS[r];
         const color = REGION_COLOR[r];
         const done = entries.filter(e => e.status === 'completed').length;
+        const pct = entries.length > 0 ? Math.round((done / entries.length) * 100) : 0;
         return (
           <div key={r}>
-            <div style={{ borderLeft: `4px solid ${color}`, paddingLeft: 12, marginBottom: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{
+              background: `${color}10`,
+              border: `1px solid ${color}33`,
+              borderLeft: `4px solid ${color}`,
+              borderRadius: '0 12px 12px 0',
+              paddingLeft: 14, paddingRight: 14, paddingTop: 10, paddingBottom: 10,
+              marginBottom: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+            }}>
               <div>
-                <div style={{ fontWeight: 700, fontSize: 16 }}>{cfg.nameThai}</div>
-                <div style={{ fontSize: 12, color, fontWeight: 600 }}>{cfg.nameEnglish}</div>
+                <div style={{ fontWeight: 800, fontSize: 16, letterSpacing: -0.2 }}>{cfg.nameThai}</div>
+                <div style={{ fontSize: 12, color, fontWeight: 700, marginTop: 1 }}>{cfg.nameEnglish}</div>
               </div>
-              <div style={{ color: 'var(--text-muted)', fontSize: 14, fontWeight: 600 }}>{done}/{entries.length}</div>
+              <div style={{ textAlign: 'right' }}>
+                <div style={{ color, fontSize: 15, fontWeight: 800 }}>{done}/{entries.length}</div>
+                <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 1 }}>{pct}% done</div>
+              </div>
             </div>
             {entries.map(e => (
               <QuestRow key={e.quest.id} entry={e} color={color} isOpen={open === e.quest.id} toggle={() => setOpen(p => p === e.quest.id ? null : e.quest.id)} />
@@ -53,10 +64,10 @@ export function Quests() {
       })}
 
       {ORDER.filter(r => !profile.unlockedRegions.includes(r)).slice(0, 3).map(r => (
-        <div key={r} style={{ background: 'var(--surface)', borderRadius: 12, padding: 16, display: 'flex', alignItems: 'center', gap: 12, opacity: 0.45, border: '1px solid var(--border)' }}>
+        <div key={r} style={{ background: 'linear-gradient(135deg, rgba(22,12,53,0.8), rgba(14,7,38,0.7))', borderRadius: 12, padding: 16, display: 'flex', alignItems: 'center', gap: 12, opacity: 0.45, border: '1px solid rgba(255,255,255,0.06)' }}>
           <span style={{ fontSize: 22 }}>🔒</span>
           <div>
-            <div style={{ fontWeight: 600, fontSize: 14 }}>{REGIONS[r].nameEnglish}</div>
+            <div style={{ fontWeight: 700, fontSize: 14 }}>{REGIONS[r].nameEnglish}</div>
             <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>Level {REGIONS[r].minLevelRequired} required</div>
           </div>
         </div>
@@ -72,7 +83,14 @@ function QuestRow({ entry, color, isOpen, toggle }: { entry: QuestBoardEntry; co
   const expandable = status === 'active' || status === 'available';
 
   return (
-    <div style={{ background: 'var(--surface)', borderRadius: 12, padding: 14, border: `1px solid ${status === 'active' ? color : 'var(--border)'}`, marginBottom: 8, opacity: status === 'locked' ? 0.4 : 1 }}>
+    <div style={{
+      background: 'linear-gradient(135deg, rgba(22,12,53,0.94), rgba(14,7,38,0.9))',
+      borderRadius: 14, padding: 14,
+      border: `1px solid ${status === 'active' ? `${color}55` : 'rgba(255,255,255,0.07)'}`,
+      borderTop: status === 'active' ? `2px solid ${color}` : '1px solid rgba(255,255,255,0.07)',
+      marginBottom: 8, opacity: status === 'locked' ? 0.4 : 1,
+      boxShadow: status === 'active' ? `0 0 12px ${color}22, 0 2px 8px rgba(0,0,0,0.3)` : '0 2px 6px rgba(0,0,0,0.2)',
+    }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: expandable ? 'pointer' : 'default' }} onClick={expandable ? toggle : undefined}>
         <span style={{ fontSize: 18, width: 24, textAlign: 'center' }}>{icon}</span>
         <div style={{ flex: 1 }}>
@@ -94,7 +112,7 @@ function QuestRow({ entry, color, isOpen, toggle }: { entry: QuestBoardEntry; co
       )}
 
       {isOpen && (
-        <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid rgba(255,255,255,0.07)', display: 'flex', flexDirection: 'column', gap: 10 }}>
           <div style={{ fontSize: 13, color: 'var(--text-sec)', lineHeight: 1.5 }}>{quest.description}</div>
           <div style={{ fontSize: 12, color: 'var(--text-muted)', fontStyle: 'italic' }}>{quest.flavorText}</div>
           {quest.objectives.map((obj, i) => {
