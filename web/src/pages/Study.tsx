@@ -306,25 +306,25 @@ function StudySession({
         </div>
 
         {/* Card face */}
-        <div style={{ background: 'var(--surface)', borderRadius: 20, borderTop: `4px solid ${regionColor}`, padding: '24px 22px', textAlign: 'center', boxShadow: '0 8px 32px rgba(0,0,0,0.35)' }}>
+        <div style={{ background: 'linear-gradient(160deg, rgba(22,12,53,0.97) 0%, rgba(14,7,38,0.98) 100%)', borderRadius: 24, borderTop: `4px solid ${regionColor}`, padding: '28px 24px', textAlign: 'center', boxShadow: '0 12px 48px rgba(0,0,0,0.5), 0 4px 12px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.07)' }}>
           <div style={{ fontSize: 56, fontWeight: 700, lineHeight: 1.1, marginBottom: 6 }}>{card.thai}</div>
-          <div style={{ fontSize: 15, color: 'var(--text-muted)', marginBottom: 12 }}>{card.romanization}</div>
+          <div style={{ fontSize: 15, color: 'var(--text-sec)', marginBottom: 14, letterSpacing: 0.3 }}>{card.romanization}</div>
           <button
-            style={{ background: 'var(--surface-hi)', border: '1px solid var(--border)', borderRadius: 999, padding: '5px 16px', fontSize: 13, color: 'var(--text-sec)' }}
+            style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 999, padding: '6px 18px', fontSize: 13, color: 'var(--text-sec)', backdropFilter: 'blur(10px)' }}
             onClick={() => speakThai(card.thai)}
           >🔊 Listen</button>
 
           {/* Answer revealed inline inside the card */}
           {flipped && (
-            <div style={{ marginTop: 18, paddingTop: 16, borderTop: '1px solid var(--border)' }}>
-              <div style={{ fontSize: 26, fontWeight: 800, color: 'var(--gold)', marginBottom: 4 }}>{card.englishMeaning}</div>
+            <div style={{ marginTop: 20, paddingTop: 18, borderTop: '1px solid rgba(255,255,255,0.07)' }}>
+              <div style={{ fontSize: 28, fontWeight: 900, color: 'var(--gold)', marginBottom: 4, letterSpacing: -0.5 }}>{card.englishMeaning}</div>
               {card.englishAlternatives?.length ? (
                 <div style={{ fontSize: 12, color: 'var(--text-muted)', fontStyle: 'italic', marginBottom: 10 }}>
                   also: {card.englishAlternatives.join(', ')}
                 </div>
               ) : null}
               {card.exampleSentence && (
-                <div style={{ background: 'var(--surface-hi)', borderRadius: 10, padding: '8px 12px', textAlign: 'left', marginTop: 8 }}>
+                <div style={{ background: 'rgba(255,255,255,0.05)', borderRadius: 12, padding: '10px 14px', textAlign: 'left', marginTop: 10, border: '1px solid rgba(255,255,255,0.07)' }}>
                   <div style={{ fontSize: 13, fontWeight: 600 }}>{card.exampleSentence.thai}</div>
                   <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 2 }}>{card.exampleSentence.romanization}</div>
                   <div style={{ fontSize: 11, color: 'var(--text-sec)', fontStyle: 'italic', marginTop: 3 }}>"{card.exampleSentence.englishNatural}"</div>
@@ -339,7 +339,7 @@ function StudySession({
       <div style={{ flexShrink: 0, padding: '0 18px', paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 72px)' }}>
         {!flipped ? (
           <button
-            style={{ width: '100%', background: 'linear-gradient(135deg, #E8961C, #F5A623)', color: '#fff', borderRadius: 16, padding: '20px 0', fontWeight: 800, fontSize: 20, boxShadow: '0 4px 20px rgba(232,150,28,0.4)' }}
+            style={{ width: '100%', background: 'linear-gradient(135deg, #D4801A 0%, #F59E42 45%, #FFB84D 80%, #F5C060 100%)', color: '#1A0800', borderRadius: 18, padding: '20px 0', fontWeight: 900, fontSize: 20, letterSpacing: -0.3, boxShadow: '0 6px 32px rgba(245,158,66,0.5), 0 2px 8px rgba(0,0,0,0.3)' }}
             onClick={() => { sfx.flip(); setFlipped(true); }}
           >
             Show Answer
@@ -348,23 +348,23 @@ function StudySession({
           <>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 8 }}>
               <button
-                style={{ background: 'rgba(239,68,68,0.12)', border: '2px solid var(--error)', borderRadius: 14, padding: '16px 0', fontWeight: 800, fontSize: 18, color: 'var(--error)' }}
+                style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.5)', borderRadius: 16, padding: '17px 0', fontWeight: 800, fontSize: 17, color: 'var(--error)', boxShadow: '0 2px 12px rgba(239,68,68,0.15)' }}
                 onClick={() => answer(0)}
               >✗ Again</button>
               <button
-                style={{ background: 'rgba(16,185,129,0.12)', border: '2px solid var(--success)', borderRadius: 14, padding: '16px 0', fontWeight: 800, fontSize: 18, color: 'var(--success)' }}
+                style={{ background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.5)', borderRadius: 16, padding: '17px 0', fontWeight: 800, fontSize: 17, color: 'var(--success)', boxShadow: '0 2px 12px rgba(16,185,129,0.15)' }}
                 onClick={() => answer(3)}
               >✓ Got it</button>
             </div>
             <div style={{ display: 'flex', gap: 6 }}>
               {QUALITY.map(({ q, label, color }) => (
                 <button key={q}
-                  style={{ flex: 1, background: 'var(--surface)', border: `1px solid ${color}`, borderRadius: 10, padding: '10px 2px', fontSize: 12, fontWeight: 700, color }}
+                  style={{ flex: 1, background: 'rgba(255,255,255,0.04)', border: `1px solid ${color}44`, borderRadius: 12, padding: '10px 2px', fontSize: 11, fontWeight: 700, color }}
                   onClick={() => answer(q)}
                 >{label}</button>
               ))}
               <button
-                style={{ flex: 1.3, background: 'var(--surface-hi)', border: '1px solid var(--border)', borderRadius: 10, padding: '10px 2px', fontSize: 12, fontWeight: 700, color: 'var(--text-sec)' }}
+                style={{ flex: 1.3, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, padding: '10px 2px', fontSize: 11, fontWeight: 700, color: 'var(--text-sec)' }}
                 onClick={() => answer(3)}
               >Next →</button>
             </div>
@@ -377,6 +377,6 @@ function StudySession({
 
 const s: Record<string, React.CSSProperties> = {
   root: { position: 'fixed', inset: 0, display: 'flex', flexDirection: 'column', background: 'var(--bg)' },
-  topBar: { display: 'flex', alignItems: 'center', gap: 10, padding: '12px 18px 10px', paddingTop: 'calc(env(safe-area-inset-top, 0px) + 12px)', flexShrink: 0 },
-  exitBtn: { width: 32, height: 32, borderRadius: 999, background: 'var(--surface)', color: 'var(--text-sec)', fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center' },
+  topBar: { display: 'flex', alignItems: 'center', gap: 10, padding: '12px 18px 10px', paddingTop: 'calc(env(safe-area-inset-top,0px) + 12px)', flexShrink: 0 },
+  exitBtn: { width: 34, height: 34, borderRadius: 999, background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)', color: 'var(--text-sec)', fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center' },
 };
