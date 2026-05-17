@@ -1,24 +1,26 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg:          #0A0A1B;
-  --surface:     #13132E;
-  --surface-hi:  #1C1C42;
-  --border:      #2D2D6B;
-  --primary:     #8B5CF6;
-  --primary-dk:  #6D28D9;
-  --gold:        #F59E0B;
+  --bg:          #0D0920;
+  --surface:     #160D30;
+  --surface-hi:  #201548;
+  --border:      #31196A;
+  --primary:     #E8961C;
+  --primary-dk:  #C97B10;
+  --purple:      #8B5CF6;
+  --purple-dk:   #6D28D9;
+  --gold:        #F5A623;
   --gold-lt:     #FCD34D;
   --success:     #10B981;
   --error:       #EF4444;
   --warning:     #F97316;
   --info:        #60A5FA;
-  --text:        #F1F5F9;
-  --text-sec:    #94A3B8;
-  --text-muted:  #475569;
+  --text:        #F0EAF8;
+  --text-sec:    #9B90C2;
+  --text-muted:  #574E80;
   --again:       #EF4444;
   --hard:        #F97316;
-  --good:        #6366F1;
+  --good:        #8B5CF6;
   --easy:        #10B981;
   --r-kt:        #F59E0B;
   --r-pi:        #10B981;
@@ -31,16 +33,18 @@
 
 /* Light theme */
 [data-theme="light"] {
-  --bg:         #F8F9FB;
+  --bg:         #F4F0FF;
   --surface:    #FFFFFF;
-  --surface-hi: #F1F5F9;
-  --border:     #E2E8F0;
-  --text:       #0F172A;
-  --text-sec:   #475569;
-  --text-muted: #94A3B8;
-  --primary:    #7C3AED;
-  --primary-dk: #6D28D9;
-  --good:       #4F46E5;
+  --surface-hi: #F1EEF9;
+  --border:     #D8CEEE;
+  --text:       #1A1040;
+  --text-sec:   #5B4E8A;
+  --text-muted: #9B90C2;
+  --primary:    #C87A10;
+  --primary-dk: #A86208;
+  --purple:     #7C3AED;
+  --purple-dk:  #6D28D9;
+  --good:       #7C3AED;
 }
 
 html, body, #root {
@@ -63,6 +67,7 @@ html, body, #root {
 /* scrollable content areas */
 .scroll {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
@@ -115,9 +120,10 @@ input {
 /* bottom nav */
 .bottom-nav {
   display: flex;
-  background: var(--surface);
-  border-top: 1px solid var(--border);
+  background: linear-gradient(180deg, #160D30 0%, #0F0820 100%);
+  border-top: 1px solid rgba(49,25,106,0.7);
   padding-bottom: env(safe-area-inset-bottom, 8px);
+  position: relative;
 }
 .nav-tab {
   flex: 1;
@@ -128,14 +134,30 @@ input {
   padding: 10px 0;
   background: transparent;
   color: var(--text-muted);
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 600;
   gap: 3px;
-  transition: color 0.15s;
+  transition: color 0.2s;
+  position: relative;
 }
 .nav-tab.active { color: var(--primary); }
-.nav-tab.active .icon { transform: scale(1.1); }
-.nav-tab .icon { font-size: 20px; transition: transform 0.15s cubic-bezier(0.34,1.56,0.64,1); }
+.nav-tab.active::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 28px;
+  height: 2px;
+  background: var(--primary);
+  border-radius: 0 0 3px 3px;
+  box-shadow: 0 0 8px var(--primary);
+}
+.nav-tab.active .icon {
+  transform: scale(1.18);
+  filter: drop-shadow(0 0 6px var(--primary));
+}
+.nav-tab .icon { font-size: 20px; transition: transform 0.15s cubic-bezier(0.34,1.56,0.64,1), filter 0.2s; }
 
 /* animations */
 @keyframes scaleIn {
@@ -147,8 +169,8 @@ input {
   to   { opacity: 1; }
 }
 @keyframes slideUp {
-  from { transform: translateY(24px); opacity: 0; }
-  to   { transform: translateY(0);    opacity: 1; }
+  from { transform: translate(-50%, 20px); opacity: 0; }
+  to   { transform: translate(-50%, 0);    opacity: 1; }
 }
 @keyframes shake {
   0%, 100% { transform: translateX(0); }
@@ -163,8 +185,13 @@ input {
   40%  { transform: scale(1.04); }
   100% { transform: scale(1); }
 }
+@keyframes goldPulse {
+  0%, 100% { box-shadow: 0 4px 20px rgba(232,150,28,0.3); }
+  50%       { box-shadow: 0 4px 28px rgba(232,150,28,0.55); }
+}
 .anim-scale   { animation: scaleIn    0.4s cubic-bezier(0.34,1.56,0.64,1) forwards; }
 .anim-fade    { animation: fadeIn     0.35s ease forwards; }
 .anim-slideup { animation: slideUp    0.35s ease forwards; }
 .shake        { animation: shake      0.45s ease forwards; }
 .correct-pop  { animation: correctPop 0.3s ease forwards; }
+.gold-pulse   { animation: goldPulse  2s ease-in-out infinite; }

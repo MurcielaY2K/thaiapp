@@ -76,20 +76,28 @@ export function Home({ onStudy, onQuiz, onFavQuiz, onHardQuiz, onTone, onMatch, 
       )}
 
       {/* Level bar */}
-      <div style={s.card}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+      <div style={{ ...s.card, background: 'linear-gradient(135deg, #160D30 0%, #1E1248 100%)', borderColor: 'rgba(49,25,106,0.8)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ fontSize: 16 }}>⚡</span>
-            <span style={{ fontWeight: 700 }}>Level {profile.currentLevel} · {levelCfg.titleThai}</span>
+            <div style={{ background: 'linear-gradient(135deg, #E8961C, #F5A623)', borderRadius: 8, width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 800, color: '#fff', flexShrink: 0 }}>
+              {profile.currentLevel}
+            </div>
+            <div>
+              <div style={{ fontWeight: 800, fontSize: 14, lineHeight: 1.2 }}>{levelCfg.titleThai}</div>
+              <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>{levelCfg.titleEnglish}</div>
+            </div>
           </div>
-          <span style={{ color: 'var(--text-sec)', fontSize: 13 }}>{levelXP} / {XP_PER_LEVEL} XP</span>
+          <div style={{ textAlign: 'right' }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--primary)' }}>{levelXP}<span style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 400 }}> / {XP_PER_LEVEL}</span></div>
+            <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>XP</div>
+          </div>
         </div>
-        <div className="progress-track" style={{ height: 10 }}>
-          <div className="progress-fill" style={{ width: `${(levelXP / XP_PER_LEVEL) * 100}%`, background: 'linear-gradient(90deg, var(--primary), var(--gold))' }} />
+        <div className="progress-track" style={{ height: 8, background: 'rgba(49,25,106,0.5)' }}>
+          <div className="progress-fill" style={{ width: `${(levelXP / XP_PER_LEVEL) * 100}%`, background: 'linear-gradient(90deg, #E8961C, #F5A623, #FBBF24)', boxShadow: '0 0 8px rgba(245,166,35,0.5)' }} />
         </div>
-        <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 6, display: 'flex', justifyContent: 'space-between' }}>
-          <span>{profile.totalXP.toLocaleString()} total XP</span>
-          <span>{XP_PER_LEVEL - levelXP} XP → {getLevelConfig(profile.currentLevel + 1).titleThai}</span>
+        <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 6, display: 'flex', justifyContent: 'space-between' }}>
+          <span>✨ {profile.totalXP.toLocaleString()} total XP</span>
+          <span>{XP_PER_LEVEL - levelXP} XP to next level</span>
         </div>
       </div>
 
@@ -101,9 +109,9 @@ export function Home({ onStudy, onQuiz, onFavQuiz, onHardQuiz, onTone, onMatch, 
             if (!c) return null;
             const icon = cid === 'phi_krasue' ? '👻' : cid === 'nang_tani' ? '🌿' : cid === 'phi_pret' ? '🙏' : cid === 'mae_nak' ? '💀' : cid === 'garuda' ? '🦅' : '👁️';
             return (
-              <div key={cid} style={{ display: 'flex', alignItems: 'center', gap: 5, background: 'var(--surface)', border: '1px solid var(--primary)', borderRadius: 999, padding: '4px 10px' }}>
+              <div key={cid} style={{ display: 'flex', alignItems: 'center', gap: 5, background: 'rgba(139,92,246,0.1)', border: '1px solid rgba(139,92,246,0.4)', borderRadius: 999, padding: '4px 10px' }}>
                 <span style={{ fontSize: 14 }}>{icon}</span>
-                <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--primary)' }}>{c.nameEnglish}</span>
+                <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--purple)' }}>{c.nameEnglish}</span>
               </div>
             );
           })}
@@ -111,13 +119,15 @@ export function Home({ onStudy, onQuiz, onFavQuiz, onHardQuiz, onTone, onMatch, 
       )}
 
       {/* Region banner */}
-      <div style={{ ...s.card, borderLeft: `4px solid ${regionColor}`, flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-        <div style={{ flex: 1 }}>
-          <div style={{ fontWeight: 700, fontSize: 17 }}>{regionCfg.nameThai}</div>
+      <div style={{ ...s.card, background: `linear-gradient(135deg, rgba(0,0,0,0.1), rgba(0,0,0,0))`, borderLeft: `4px solid ${regionColor}`, flexDirection: 'row', alignItems: 'center', gap: 12, position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', right: -10, top: -10, fontSize: 80, opacity: 0.06, pointerEvents: 'none' }}>🗺️</div>
+        <div style={{ flex: 1, position: 'relative' }}>
+          <div style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 3 }}>Current Region</div>
+          <div style={{ fontWeight: 800, fontSize: 18 }}>{regionCfg.nameThai}</div>
           <div style={{ fontSize: 13, color: regionColor, fontWeight: 600 }}>{regionCfg.nameEnglish}</div>
           <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>{regionCfg.description}</div>
         </div>
-        <div style={{ fontSize: 32 }}>🗺️</div>
+        <div style={{ fontSize: 36 }}>🗺️</div>
       </div>
 
       {/* Stats row — shown after a few reviews */}
@@ -139,18 +149,26 @@ export function Home({ onStudy, onQuiz, onFavQuiz, onHardQuiz, onTone, onMatch, 
 
       {/* Primary study action — always visible */}
       <button
-        style={{ ...s.studyBtn, background: canStudy ? 'var(--primary)' : 'var(--surface-hi)', color: canStudy ? '#fff' : 'var(--text-muted)' }}
+        className={canStudy ? 'gold-pulse' : ''}
+        style={{
+          ...s.studyBtn,
+          background: canStudy
+            ? 'linear-gradient(135deg, #E8961C 0%, #F5A623 60%, #FBBF24 100%)'
+            : 'var(--surface-hi)',
+          color: canStudy ? '#fff' : 'var(--text-muted)',
+          boxShadow: canStudy ? '0 4px 24px rgba(232,150,28,0.35)' : 'none',
+        }}
         onClick={onStudy}
         disabled={!canStudy}
       >
-        <span style={{ fontSize: 22 }}>{canStudy ? '📖' : '🎉'}</span>
+        <span style={{ fontSize: 24 }}>{canStudy ? '⚔️' : '🎉'}</span>
         <div style={{ flex: 1, textAlign: 'left' }}>
-          <div style={{ fontWeight: 700 }}>{canStudy ? 'Study Now' : 'All caught up!'}</div>
-          <div style={{ fontSize: 12, opacity: 0.8, marginTop: 2 }}>
-            {canStudy ? `~${stats.estimatedMinutes} min · Flashcard review` : 'Come back tomorrow'}
+          <div style={{ fontWeight: 800, fontSize: 16 }}>{canStudy ? 'Study Now' : 'All caught up!'}</div>
+          <div style={{ fontSize: 12, opacity: 0.85, marginTop: 2, fontWeight: 500 }}>
+            {canStudy ? `${stats.dueToday} due · ${stats.newAvailable} new · ~${stats.estimatedMinutes} min` : 'Come back tomorrow'}
           </div>
         </div>
-        {canStudy && <span style={{ fontSize: 18 }}>→</span>}
+        {canStudy && <span style={{ fontSize: 20 }}>›</span>}
       </button>
 
       {/* Quiz shortcut — unlocks after 5 words */}
@@ -161,19 +179,19 @@ export function Home({ onStudy, onQuiz, onFavQuiz, onHardQuiz, onTone, onMatch, 
             <div style={{ fontWeight: 700 }}>Quick Quiz</div>
             <div style={{ fontSize: 12, opacity: 0.8, marginTop: 2 }}>10 questions · Test your memory</div>
           </div>
-          <span style={{ fontSize: 18 }}>→</span>
+          <span style={{ fontSize: 18, color: 'var(--text-muted)' }}>›</span>
         </button>
       )}
 
       {/* Saved words quiz — only shows when user has favorites and quiz is unlocked */}
       {unlocks?.quiz && favoriteCount > 0 && (
-        <button style={{ ...s.quizBtn, border: '1px solid var(--error)', color: 'var(--error)', background: 'rgba(239,68,68,0.05)' }} onClick={onFavQuiz}>
+        <button style={{ ...s.quizBtn, border: '1px solid rgba(239,68,68,0.4)', color: 'var(--error)', background: 'rgba(239,68,68,0.06)' }} onClick={onFavQuiz}>
           <span style={{ fontSize: 22 }}>♥</span>
           <div style={{ flex: 1, textAlign: 'left' }}>
             <div style={{ fontWeight: 700 }}>Quiz Saved Words</div>
             <div style={{ fontSize: 12, opacity: 0.8, marginTop: 2 }}>{favoriteCount} saved · Practice your bookmarks</div>
           </div>
-          <span style={{ fontSize: 18 }}>→</span>
+          <span style={{ fontSize: 18, color: 'var(--text-muted)' }}>›</span>
         </button>
       )}
 
@@ -301,11 +319,11 @@ export function Home({ onStudy, onQuiz, onFavQuiz, onHardQuiz, onTone, onMatch, 
         return (
           <div style={{ background: 'var(--surface)', borderRadius: 12, padding: '12px 16px', border: '1px solid var(--border)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: 'var(--text-muted)', marginBottom: 6 }}>
-              <span>🔓 Next unlock: <span style={{ color: 'var(--primary)', fontWeight: 700 }}>{next.label}</span></span>
+              <span>🔓 Next unlock: <span style={{ color: 'var(--purple)', fontWeight: 700 }}>{next.label}</span></span>
               <span>{w}/{next.at} words</span>
             </div>
             <div className="progress-track" style={{ height: 4 }}>
-              <div className="progress-fill" style={{ width: `${pct}%`, background: 'var(--primary)' }} />
+              <div className="progress-fill" style={{ width: `${pct}%`, background: 'var(--purple)' }} />
             </div>
           </div>
         );
@@ -473,11 +491,11 @@ function ReviewForecast({ srsMap }: { srsMap: Map<string, { nextReviewDate: stri
 
 const s: Record<string, React.CSSProperties> = {
   header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
-  greeting: { fontSize: 20, fontWeight: 700 },
-  sub: { fontSize: 13, color: 'var(--text-muted)', marginTop: 2 },
-  streak: { background: 'var(--surface)', border: '1px solid var(--gold)', borderRadius: 999, padding: '6px 14px', display: 'flex', alignItems: 'center', gap: 6 },
-  card: { background: 'var(--surface)', borderRadius: 14, padding: 16, border: '1px solid var(--border)', display: 'flex', flexDirection: 'column' },
-  sectionTitle: { fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 8 },
-  studyBtn: { borderRadius: 14, padding: '16px 20px', fontWeight: 700, fontSize: 15, width: '100%', display: 'flex', alignItems: 'center', gap: 14 },
-  quizBtn: { borderRadius: 14, padding: '16px 20px', fontWeight: 700, fontSize: 15, width: '100%', display: 'flex', alignItems: 'center', gap: 14, background: 'var(--surface-hi)', border: '1px solid var(--primary)', color: 'var(--primary)' },
+  greeting: { fontSize: 22, fontWeight: 800, letterSpacing: -0.3 },
+  sub: { fontSize: 12, color: 'var(--text-muted)', marginTop: 3 },
+  streak: { background: 'rgba(245,166,35,0.12)', border: '1px solid rgba(245,166,35,0.4)', borderRadius: 999, padding: '6px 14px', display: 'flex', alignItems: 'center', gap: 6 },
+  card: { background: 'var(--surface)', borderRadius: 16, padding: 16, border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', boxShadow: '0 2px 16px rgba(0,0,0,0.3)' },
+  sectionTitle: { fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8 },
+  studyBtn: { borderRadius: 16, padding: '18px 22px', fontWeight: 800, fontSize: 16, width: '100%', display: 'flex', alignItems: 'center', gap: 14, boxShadow: '0 4px 24px rgba(232,150,28,0.35)' },
+  quizBtn: { borderRadius: 16, padding: '15px 20px', fontWeight: 700, fontSize: 15, width: '100%', display: 'flex', alignItems: 'center', gap: 14, background: 'rgba(139,92,246,0.08)', border: '1px solid rgba(139,92,246,0.4)', color: 'var(--purple)' },
 };

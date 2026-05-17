@@ -29,11 +29,11 @@ interface CompleteState { summary: SessionSummary; xp: number; questIds: string[
 interface StudyState { region?: string }
 
 const TABS: { id: Tab; icon: string; label: string }[] = [
-  { id: 'home',    icon: '🏠', label: 'Home' },
-  { id: 'learn',   icon: '🧠', label: 'Practice' },
-  { id: 'map',     icon: '🗺️', label: 'Map' },
-  { id: 'browse',  icon: '📚', label: 'Vocab' },
-  { id: 'profile', icon: '🧭', label: 'Profile' },
+  { id: 'home',    icon: '⚔️', label: 'Home' },
+  { id: 'learn',   icon: '🎯', label: 'Practice' },
+  { id: 'map',     icon: '🗺️', label: 'Regions' },
+  { id: 'browse',  icon: '📜', label: 'Vocab' },
+  { id: 'profile', icon: '👤', label: 'Profile' },
 ];
 
 export function App() {
