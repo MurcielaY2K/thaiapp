@@ -18,7 +18,7 @@ interface GameContextValue {
   stats: DashboardStats | null;
   isLoading: boolean;
   hasProfile: boolean;
-  createProfile: (name: string) => Promise<void>;
+  createProfile: (name: string, avatarId?: string) => Promise<void>;
   refreshStats: () => void;
   refreshDailyChallenge: () => void;
   resetProgress: () => Promise<void>;
@@ -144,9 +144,9 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     boot();
   }, []);
 
-  const createProfile = useCallback(async (name: string) => {
+  const createProfile = useCallback(async (name: string, avatarId?: string) => {
     if (!facadeRef.current) return;
-    await facadeRef.current.init(name);
+    await facadeRef.current.init(name, avatarId);
     const currentProfile = facadeRef.current.profile;
     const currentStats = facadeRef.current.getDashboardStats();
     setProfile(currentProfile);

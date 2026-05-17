@@ -1,149 +1,130 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useGame } from '../context/GameContext';
-import { REGIONS, TONE_COLORS } from '@engine/types';
-import { VOCABULARY } from '@engine/data/vocabulary';
-import { getLevelConfig, SPIRIT_COMPANIONS } from '@engine/engine/gameEngine';
-import { speakThai } from '../utils/audio';
-import { getFavorites } from '../utils/favorites';
+import { getLevelConfig } from '@engine/engine/gameEngine';
+import { getCharacter } from '../data/characters';
 import { FeatureUnlocks } from '../utils/featureUnlocks';
 
 const XP_PER_LEVEL = 500;
-const REGION_COLOR: Record<string, string> = {
-  krung_thon: 'var(--r-kt)', paa_isaan: 'var(--r-pi)', doi_nuea: 'var(--r-dn)',
-  talee_tong: 'var(--r-tt)', mueang_hin: 'var(--r-mh)', wang_loi_faa: 'var(--r-wl)', daen_winyaan: 'var(--r-dw)',
-};
 
-export function Home({ onStudy, onQuiz, onFavQuiz, onHardQuiz, onTone, onMatch, onSentence, unlocks }: {
-  onStudy: () => void; onQuiz: () => void; onFavQuiz: () => void; onHardQuiz: () => void;
-  onTone: () => void; onMatch: () => void; onSentence: () => void;
+export function Home({ onStudy, onTone, onMatch, onSentence, unlocks }: {
+  onStudy: () => void;
+  onTone: () => void;
+  onMatch: () => void;
+  onSentence: () => void;
   unlocks: FeatureUnlocks | null;
 }) {
-  const { profile, stats, refreshStats, wordOfDay, dailyChallenge, facade } = useGame();
-  useEffect(() => { refreshStats(); }, []);
+  const { profile, stats, refreshStats, dailyChallenge } = useGame();
+  React.useEffect(() => { refreshStats(); }, []);
 
   if (!profile || !stats) return null;
 
-  const favoriteCount = getFavorites().size;
+  const character = getCharacter(profile.avatarId ?? 'byte');
   const levelXP = profile.totalXP % XP_PER_LEVEL;
   const levelCfg = getLevelConfig(profile.currentLevel);
-  const region = profile.unlockedRegions[profile.unlockedRegions.length - 1] ?? 'krung_thon';
-  const regionCfg = REGIONS[region as keyof typeof REGIONS];
-  const regionColor = REGION_COLOR[region] ?? 'var(--primary)';
   const canStudy = stats.dueToday > 0 || stats.newAvailable > 0;
 
-  const hour = new Date().getHours();
-  const thaiGreeting = hour < 6 ? 'สวัสดีตอนดึก' : hour < 12 ? 'สวัสดีตอนเช้า' : hour < 17 ? 'สวัสดีตอนบ่าย' : 'สวัสดีตอนเย็น';
-  const streakMsg = profile.currentStreak === 0
-    ? 'Start your streak today!'
-    : profile.currentStreak === 1
-    ? '1 day streak — keep going!'
-    : `${profile.currentStreak} day streak — amazing!`;
-
   return (
-    <div className="scroll" style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 14 }}>
-      {/* Header */}
-      <div style={s.header}>
-        <div>
-          <div style={s.greeting}>{thaiGreeting}!</div>
-          <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 2 }}>{profile.name}</div>
-          <div style={s.sub}>{streakMsg}</div>
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-          <div style={s.streak}>
-            <span style={{ fontSize: 20 }}>🔥</span>
-            <span style={{ fontSize: 20, fontWeight: 800, color: 'var(--gold)' }}>{profile.currentStreak}</span>
-          </div>
-          {profile.streakShields > 0 && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 10, color: 'var(--info)', fontWeight: 700 }}>
-              {'🛡️'.repeat(Math.min(profile.streakShields, 3))}
-              {profile.streakShields > 3 && <span>+{profile.streakShields - 3}</span>}
-            </div>
-          )}
-        </div>
-      </div>
+    <div className="scroll" style={{ padding: '16px 16px 24px', display: 'flex', flexDirection: 'column', gap: 14 }}>
 
-      {/* Streak milestone */}
-      {profile.currentStreak > 0 && [7, 30, 100, 365].includes(profile.currentStreak) && (
-        <div className="anim-scale" style={{ background: 'linear-gradient(135deg, rgba(245,158,11,0.15), rgba(239,68,68,0.08))', border: '1px solid var(--gold)', borderRadius: 14, padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 12 }}>
-          <span style={{ fontSize: 28 }}>{profile.currentStreak >= 365 ? '🏆' : profile.currentStreak >= 100 ? '💎' : profile.currentStreak >= 30 ? '⭐' : '🔥'}</span>
-          <div>
-            <div style={{ fontWeight: 800, fontSize: 15, color: 'var(--gold)' }}>{profile.currentStreak}-Day Streak!</div>
-            <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-              {profile.currentStreak === 7 ? 'One full week of learning Thai!' : profile.currentStreak === 30 ? 'One month! คุณเก่งมาก!' : profile.currentStreak === 100 ? 'A hundred days! ยอดเยี่ยม!' : 'A full year! คุณเป็นนักเรียนไทย!'}
-            </div>
-          </div>
-        </div>
-      )}
+      {/* CHARACTER HERO CARD */}
+      <div style={{
+        position: 'relative',
+        background: character.bgGradient,
+        borderRadius: 24,
+        border: `1px solid ${character.color}44`,
+        boxShadow: `0 0 28px ${character.glowColor}, 0 4px 20px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06)`,
+        padding: '20px 20px 18px',
+        overflow: 'hidden',
+      }}>
+        <div style={{ position: 'absolute', top: -40, right: -40, width: 180, height: 180, borderRadius: '50%', background: `radial-gradient(circle, ${character.glowColor} 0%, transparent 70%)`, pointerEvents: 'none' }} />
 
-      {/* Level + XP card */}
-      <div style={{ ...s.card, background: 'linear-gradient(135deg, rgba(22,12,53,0.98) 0%, rgba(20,10,48,0.95) 100%)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 14 }}>
-          {/* Level badge */}
-          <div style={{ flexShrink: 0, width: 48, height: 48, borderRadius: 14, background: 'linear-gradient(135deg, #E8961C 0%, #FFB84D 100%)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 16px rgba(245,158,66,0.45)' }}>
-            <div style={{ fontSize: 8, color: 'rgba(30,10,0,0.65)', fontWeight: 700, letterSpacing: 0.5, lineHeight: 1 }}>LV</div>
-            <div style={{ fontSize: 20, fontWeight: 900, color: '#1A0A00', lineHeight: 1 }}>{profile.currentLevel}</div>
+        <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 16 }}>
+          {/* Character avatar frame with pixel corners */}
+          <div style={{
+            width: 80, height: 80, borderRadius: 20,
+            background: 'linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03))',
+            border: `2px solid ${character.color}66`,
+            boxShadow: `0 0 20px ${character.glowColor}, inset 0 0 20px rgba(0,0,0,0.4)`,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: 44, flexShrink: 0, position: 'relative',
+          }}>
+            <span style={{ filter: `drop-shadow(0 0 8px ${character.color})` }}>{character.emoji}</span>
+            <div style={{ position: 'absolute', top: -2, left: -2, width: 8, height: 8, borderTop: `2px solid ${character.color}`, borderLeft: `2px solid ${character.color}` }} />
+            <div style={{ position: 'absolute', top: -2, right: -2, width: 8, height: 8, borderTop: `2px solid ${character.color}`, borderRight: `2px solid ${character.color}` }} />
+            <div style={{ position: 'absolute', bottom: -2, left: -2, width: 8, height: 8, borderBottom: `2px solid ${character.color}`, borderLeft: `2px solid ${character.color}` }} />
+            <div style={{ position: 'absolute', bottom: -2, right: -2, width: 8, height: 8, borderBottom: `2px solid ${character.color}`, borderRight: `2px solid ${character.color}` }} />
           </div>
+
           <div style={{ flex: 1 }}>
-            <div style={{ fontWeight: 800, fontSize: 16, letterSpacing: -0.3 }}>{levelCfg.titleThai}</div>
-            <div style={{ fontSize: 11, color: 'var(--text-sec)', marginTop: 2 }}>{levelCfg.titleEnglish}</div>
-          </div>
-          <div style={{ textAlign: 'right' }}>
-            <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--primary)' }}>{levelXP.toLocaleString()}</div>
-            <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>/ {XP_PER_LEVEL} XP</div>
-          </div>
-        </div>
-        {/* Glowing XP bar */}
-        <div style={{ height: 6, background: 'rgba(255,255,255,0.05)', borderRadius: 999, overflow: 'hidden' }}>
-          <div style={{ width: `${(levelXP / XP_PER_LEVEL) * 100}%`, height: '100%', background: 'linear-gradient(90deg, #D4801A, #F59E42, #FFB84D)', borderRadius: 999, boxShadow: '0 0 12px rgba(245,158,66,0.7)', transition: 'width 0.5s cubic-bezier(0.34,1.2,0.64,1)' }} />
-        </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 8, fontSize: 10, color: 'var(--text-muted)' }}>
-          <span>✦ {profile.totalXP.toLocaleString()} total XP</span>
-          <span>{(XP_PER_LEVEL - levelXP).toLocaleString()} to next level</span>
-        </div>
-      </div>
-
-      {/* Active companions */}
-      {profile.activeCompanionIds.length > 0 && (
-        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-          {profile.activeCompanionIds.map(cid => {
-            const c = SPIRIT_COMPANIONS.find(x => x.id === cid);
-            if (!c) return null;
-            const icon = cid === 'phi_krasue' ? '👻' : cid === 'nang_tani' ? '🌿' : cid === 'phi_pret' ? '🙏' : cid === 'mae_nak' ? '💀' : cid === 'garuda' ? '🦅' : '👁️';
-            return (
-              <div key={cid} style={{ display: 'flex', alignItems: 'center', gap: 5, background: 'rgba(139,92,246,0.1)', border: '1px solid rgba(139,92,246,0.4)', borderRadius: 999, padding: '4px 10px' }}>
-                <span style={{ fontSize: 14 }}>{icon}</span>
-                <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--purple)' }}>{c.nameEnglish}</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3 }}>
+              <span style={{ fontSize: 18, fontWeight: 900, color: character.color, letterSpacing: 1, textShadow: `0 0 12px ${character.color}88` }}>{character.name}</span>
+              <div style={{ background: 'linear-gradient(135deg, #D4801A, #FFB84D)', borderRadius: 6, padding: '2px 8px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <span style={{ fontSize: 7, color: 'rgba(30,10,0,0.7)', fontWeight: 700, letterSpacing: 0.5, lineHeight: 1 }}>LV</span>
+                <span style={{ fontSize: 14, fontWeight: 900, color: '#1A0A00', lineHeight: 1 }}>{profile.currentLevel}</span>
               </div>
-            );
-          })}
-        </div>
-      )}
-
-      {/* Region atmospheric card */}
-      <div style={{ ...s.card, borderLeft: `3px solid ${regionColor}`, position: 'relative', overflow: 'hidden', padding: '20px 20px 16px' }}>
-        {/* Ambient glow */}
-        <div style={{ position: 'absolute', top: -30, right: -30, width: 140, height: 140, borderRadius: '50%', background: `radial-gradient(circle, ${regionColor}28 0%, transparent 70%)`, pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', bottom: -20, left: -20, width: 100, height: 100, borderRadius: '50%', background: `radial-gradient(circle, rgba(139,92,246,0.15) 0%, transparent 70%)`, pointerEvents: 'none' }} />
-        <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 14 }}>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 1.2, marginBottom: 5 }}>Current Region</div>
-            <div style={{ fontWeight: 900, fontSize: 20, letterSpacing: -0.5, lineHeight: 1.1 }}>{regionCfg.nameThai}</div>
-            <div style={{ fontSize: 13, color: regionColor, fontWeight: 600, marginTop: 2 }}>{regionCfg.nameEnglish}</div>
-            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4, lineHeight: 1.4 }}>{regionCfg.description}</div>
+            </div>
+            <div style={{ fontSize: 11, color: `${character.color}bb`, fontWeight: 600, marginBottom: 5 }}>{character.role}</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)' }}>{levelCfg.titleThai}</span>
+              {profile.currentStreak > 0 && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 3, background: 'rgba(245,158,66,0.15)', border: '1px solid rgba(245,158,66,0.35)', borderRadius: 999, padding: '2px 8px' }}>
+                  <span style={{ fontSize: 11 }}>🔥</span>
+                  <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--gold)' }}>{profile.currentStreak}</span>
+                </div>
+              )}
+            </div>
           </div>
-          <div style={{ fontSize: 44, opacity: 0.9 }} className="float">🗺️</div>
+        </div>
+
+        {/* XP bar */}
+        <div style={{ marginTop: 14 }}>
+          <div style={{ height: 4, background: 'rgba(255,255,255,0.08)', borderRadius: 999, overflow: 'hidden' }}>
+            <div style={{ width: `${(levelXP / XP_PER_LEVEL) * 100}%`, height: '100%', background: `linear-gradient(90deg, ${character.color}88, ${character.color})`, borderRadius: 999, boxShadow: `0 0 8px ${character.color}` }} />
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4, fontSize: 9, color: 'rgba(255,255,255,0.35)' }}>
+            <span>{levelXP} XP</span>
+            <span>{XP_PER_LEVEL - levelXP} to LV {profile.currentLevel + 1}</span>
+          </div>
         </div>
       </div>
 
-      {/* Stats row — shown after a few reviews */}
-      {(unlocks?.statsRow) && (
+      {/* STUDY CTA */}
+      <button
+        className={canStudy ? 'gold-pulse' : ''}
+        style={{
+          borderRadius: 18, padding: '18px 24px', fontWeight: 800, fontSize: 17, width: '100%',
+          display: 'flex', alignItems: 'center', gap: 16,
+          background: canStudy
+            ? 'linear-gradient(135deg, #D4801A 0%, #F59E42 45%, #FFB84D 80%, #F5C060 100%)'
+            : 'rgba(255,255,255,0.05)',
+          color: canStudy ? '#1A0800' : 'var(--text-muted)',
+          border: canStudy ? 'none' : '1px solid rgba(255,255,255,0.08)',
+          boxShadow: canStudy ? '0 6px 32px rgba(245,158,66,0.45)' : 'none',
+        }}
+        onClick={onStudy}
+        disabled={!canStudy}
+      >
+        <span style={{ fontSize: 26 }}>{canStudy ? '⚔️' : '🎉'}</span>
+        <div style={{ flex: 1, textAlign: 'left' }}>
+          <div style={{ fontWeight: 900, fontSize: 17 }}>{canStudy ? 'Continue Journey' : 'All caught up!'}</div>
+          <div style={{ fontSize: 12, opacity: 0.75, marginTop: 2 }}>
+            {canStudy
+              ? `${stats.dueToday} due · ${stats.newAvailable} new · ~${stats.estimatedMinutes} min`
+              : 'Come back tomorrow for new words'}
+          </div>
+        </div>
+        {canStudy && <span style={{ fontSize: 22, opacity: 0.8 }}>›</span>}
+      </button>
+
+      {/* STATS ROW */}
+      {unlocks?.statsRow && (
         <div style={{ display: 'flex', gap: 10 }}>
           {[
             { label: 'Due Today', value: stats.dueToday, icon: '📋', color: stats.dueToday > 0 ? 'var(--warning)' : 'var(--success)' },
             { label: 'New Words', value: stats.newAvailable, icon: '✨', color: 'var(--info)' },
             { label: 'Mastered', value: stats.masteredCards, icon: '⭐', color: 'var(--gold)' },
           ].map(({ label, value, icon, color }) => (
-            <div key={label} style={{ flex: 1, background: 'rgba(22,12,53,0.9)', borderRadius: 16, padding: '14px 8px', border: '1px solid rgba(255,255,255,0.07)', textAlign: 'center', boxShadow: '0 2px 12px rgba(0,0,0,0.3)', borderTop: `2px solid ${color}` }}>
+            <div key={label} style={{ flex: 1, background: 'rgba(22,12,53,0.9)', borderRadius: 16, padding: '14px 8px', border: '1px solid rgba(255,255,255,0.07)', textAlign: 'center', borderTop: `2px solid ${color}`, boxShadow: '0 2px 10px rgba(0,0,0,0.3)' }}>
               <div style={{ fontSize: 18 }}>{icon}</div>
               <div style={{ fontSize: 20, fontWeight: 800, color }}>{value}</div>
               <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 2 }}>{label}</div>
@@ -152,386 +133,42 @@ export function Home({ onStudy, onQuiz, onFavQuiz, onHardQuiz, onTone, onMatch, 
         </div>
       )}
 
-      {/* ── CONTINUE JOURNEY (primary CTA) ── */}
-      <button
-        className={canStudy ? 'gold-pulse' : ''}
-        style={{
-          ...s.studyBtn,
-          background: canStudy
-            ? 'linear-gradient(135deg, #D4801A 0%, #F59E42 45%, #FFB84D 80%, #F5C060 100%)'
-            : 'rgba(255,255,255,0.05)',
-          color: canStudy ? '#1A0800' : 'var(--text-muted)',
-          border: canStudy ? 'none' : '1px solid rgba(255,255,255,0.08)',
-          boxShadow: canStudy ? '0 6px 32px rgba(245,158,66,0.45), 0 2px 8px rgba(0,0,0,0.3)' : 'none',
-        }}
-        onClick={onStudy}
-        disabled={!canStudy}
-      >
-        <span style={{ fontSize: 26 }}>{canStudy ? '⚔️' : '🎉'}</span>
-        <div style={{ flex: 1, textAlign: 'left' }}>
-          <div style={{ fontWeight: 900, fontSize: 17, letterSpacing: -0.3 }}>
-            {canStudy ? 'Continue Journey' : 'All caught up!'}
-          </div>
-          <div style={{ fontSize: 12, opacity: 0.75, marginTop: 3, fontWeight: 500 }}>
-            {canStudy
-              ? `${stats.dueToday} due · ${stats.newAvailable} new · ~${stats.estimatedMinutes} min`
-              : 'Return tomorrow for new words'}
-          </div>
-        </div>
-        {canStudy && <span style={{ fontSize: 22, opacity: 0.8 }}>›</span>}
-      </button>
-
-      {/* Quiz */}
-      {unlocks?.quiz && (
-        <button style={s.quizBtn} onClick={onQuiz}>
-          <span style={{ fontSize: 22 }}>🧠</span>
-          <div style={{ flex: 1, textAlign: 'left' }}>
-            <div style={{ fontWeight: 700 }}>Quick Quiz</div>
-            <div style={{ fontSize: 12, opacity: 0.75, marginTop: 2 }}>10 questions · Test your memory</div>
-          </div>
-          <span style={{ fontSize: 18, opacity: 0.5 }}>›</span>
-        </button>
-      )}
-
-      {/* Saved words quiz */}
-      {unlocks?.quiz && favoriteCount > 0 && (
-        <button style={{ ...s.quizBtn, border: '1px solid rgba(239,68,68,0.35)', color: 'var(--error)', background: 'rgba(239,68,68,0.07)' }} onClick={onFavQuiz}>
-          <span style={{ fontSize: 22 }}>♥</span>
-          <div style={{ flex: 1, textAlign: 'left' }}>
-            <div style={{ fontWeight: 700 }}>Saved Words Quiz</div>
-            <div style={{ fontSize: 12, opacity: 0.75, marginTop: 2 }}>{favoriteCount} saved · Practice bookmarks</div>
-          </div>
-          <span style={{ fontSize: 18, opacity: 0.5 }}>›</span>
-        </button>
-      )}
-
-      {/* Daily challenge — unlocks after first few words */}
+      {/* DAILY CHALLENGE */}
       {unlocks?.dailyChallenge && dailyChallenge && (() => {
         const challengeColor = dailyChallenge.completed ? 'var(--success)' : 'var(--gold)';
         const challengeNav: Record<string, (() => void) | undefined> = {
-          study: onStudy, new_words: onStudy, quiz: onQuiz,
-          tone_trainer: onTone, memory_match: onMatch, sentence_builder: onSentence,
+          study: onStudy, new_words: onStudy, tone_trainer: onTone, memory_match: onMatch, sentence_builder: onSentence,
         };
         const challengeIcon: Record<string, string> = {
-          study: '📖', new_words: '✨', quiz: '🧠',
-          tone_trainer: '🎵', memory_match: '🃏', sentence_builder: '🔤',
+          study: '📖', new_words: '✨', quiz: '🧠', tone_trainer: '🎵', memory_match: '🃏', sentence_builder: '🔤',
         };
         const startFn = challengeNav[dailyChallenge.type];
         return (
-          <div style={{ ...s.card, borderLeft: `4px solid ${challengeColor}` }}>
+          <div style={{ background: 'linear-gradient(135deg, rgba(22,12,53,0.94), rgba(14,7,38,0.9))', borderRadius: 18, padding: '16px 18px', border: '1px solid rgba(255,255,255,0.08)', borderLeft: `3px solid ${challengeColor}`, boxShadow: '0 2px 12px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.04)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
               <div style={{ fontSize: 12, fontWeight: 700, color: challengeColor, textTransform: 'uppercase', letterSpacing: 0.5 }}>
-                {dailyChallenge.completed ? '✅ Daily Challenge Done!' : '🎯 Daily Challenge'}
+                {dailyChallenge.completed ? '✅ Daily Done!' : '🎯 Daily Challenge'}
               </div>
               <span style={{ fontSize: 11, color: 'var(--gold)', fontWeight: 700 }}>+{dailyChallenge.xpReward} XP</span>
             </div>
-            <div style={{ fontSize: 14, marginBottom: 8 }}>{dailyChallenge.description}</div>
-            <div className="progress-track" style={{ height: 6 }}>
-              <div className="progress-fill" style={{ width: `${Math.min(100, (dailyChallenge.progress / dailyChallenge.goal) * 100)}%`, background: challengeColor }} />
+            <div style={{ fontSize: 14, marginBottom: 10 }}>{dailyChallenge.description}</div>
+            <div style={{ height: 5, background: 'rgba(255,255,255,0.06)', borderRadius: 999, overflow: 'hidden' }}>
+              <div style={{ width: `${Math.min(100, (dailyChallenge.progress / dailyChallenge.goal) * 100)}%`, height: '100%', background: challengeColor, borderRadius: 999, boxShadow: `0 0 6px ${challengeColor}88` }} />
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 6 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}>
               <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{dailyChallenge.progress}/{dailyChallenge.goal}</span>
               {!dailyChallenge.completed && startFn && (
                 <button
-                  style={{ background: 'linear-gradient(135deg, #D4801A, #FFB84D)', color: '#1A0800', borderRadius: 10, padding: '6px 16px', fontWeight: 700, fontSize: 12, display: 'flex', alignItems: 'center', gap: 5, boxShadow: '0 2px 12px rgba(245,158,66,0.35)' }}
+                  style={{ background: 'linear-gradient(135deg, #D4801A, #FFB84D)', color: '#1A0800', borderRadius: 10, padding: '6px 16px', fontWeight: 700, fontSize: 12, boxShadow: '0 2px 10px rgba(245,158,66,0.3)' }}
                   onClick={startFn}
                 >
-                  {challengeIcon[dailyChallenge.type] ?? '▶'} Start Now
+                  {challengeIcon[dailyChallenge.type] ?? '▶'} Go
                 </button>
               )}
             </div>
           </div>
         );
       })()}
-
-      {/* SRS level distribution — shown after enough data */}
-      {unlocks?.srsCharts && facade && <SrsLevelChart srsMap={facade.srsMap} />}
-
-      {/* 7-day review forecast */}
-      {unlocks?.srsCharts && facade && <ReviewForecast srsMap={facade.srsMap} />}
-
-      {/* Word of the day */}
-      {wordOfDay && (
-        <div style={{ ...s.card, background: 'var(--surface-hi)', border: '1px solid var(--primary)' }}>
-          <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 10 }}>🌟 Word of the Day</div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-            <button
-              style={{ flex: 1, textAlign: 'left', background: 'transparent', padding: 0 }}
-              onClick={() => speakThai(wordOfDay.thai)}
-            >
-              <div style={{ fontSize: 38, fontWeight: 700 }}>{wordOfDay.thai}</div>
-              <div style={{ fontSize: 14, color: 'var(--text-muted)' }}>{wordOfDay.romanization} <span style={{ fontSize: 12, color: 'var(--primary)' }}>🔊</span></div>
-              <div style={{ fontSize: 15, color: 'var(--text-sec)', marginTop: 4 }}>{wordOfDay.englishMeaning}</div>
-            </button>
-            <div style={{ textAlign: 'right', flexShrink: 0 }}>
-              <div style={{ fontSize: 12, fontWeight: 700, color: TONE_COLORS[wordOfDay.tone], background: `${TONE_COLORS[wordOfDay.tone]}22`, borderRadius: 8, padding: '4px 10px' }}>{wordOfDay.tone}</div>
-              <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 6 }}>{wordOfDay.category.replace(/_/g, ' ')}</div>
-            </div>
-          </div>
-          {wordOfDay.exampleSentence && (
-            <div style={{ background: 'var(--surface)', borderRadius: 8, padding: '10px 12px', marginTop: 10, borderLeft: '3px solid var(--primary)' }}>
-              <div style={{ fontSize: 13, fontWeight: 500 }}>{wordOfDay.exampleSentence.thai}</div>
-              <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>{wordOfDay.exampleSentence.romanization}</div>
-              <div style={{ fontSize: 12, color: 'var(--text-sec)', fontStyle: 'italic', marginTop: 3 }}>"{wordOfDay.exampleSentence.englishNatural}"</div>
-            </div>
-          )}
-          {wordOfDay.culturalNote && (
-            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 10, paddingTop: 10, borderTop: '1px solid var(--border)', fontStyle: 'italic', lineHeight: 1.5 }}>
-              💡 {wordOfDay.culturalNote}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Grammar tip of the day */}
-      <GrammarTip />
-
-      {/* Struggling words call to action — shown after enough reviews */}
-      {unlocks?.strugglingWords && stats.strugglingCards > 0 && (
-        <button style={{ ...s.studyBtn, background: 'rgba(249,115,22,0.12)', border: '1px solid var(--warning)', color: 'var(--warning)' }} onClick={onHardQuiz}>
-          <span style={{ fontSize: 22 }}>⚠️</span>
-          <div style={{ flex: 1, textAlign: 'left' }}>
-            <div style={{ fontWeight: 700 }}>{stats.strugglingCards} Struggling Word{stats.strugglingCards !== 1 ? 's' : ''}</div>
-            <div style={{ fontSize: 12, opacity: 0.8, marginTop: 2 }}>Quiz only your difficult words</div>
-          </div>
-          <span style={{ fontSize: 18 }}>→</span>
-        </button>
-      )}
-
-      {/* Active quests — shown once quiz unlocked */}
-      {unlocks?.quiz && profile.activeQuestIds.length > 0 && (
-        <div>
-          <div style={s.sectionTitle}>Active Quests</div>
-          {profile.activeQuestIds.slice(0, 3).map(qid => (
-            <div key={qid} style={{ ...s.card, borderLeft: `3px solid ${regionColor}`, flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-              <span style={{ fontSize: 16 }}>⚔️</span>
-              <span style={{ flex: 1, fontSize: 13, color: 'var(--text-sec)' }}>
-                {qid.replace(/_/g, ' ').replace(/^[a-z]{2}_\d+_/, '').replace(/_/g, ' ')}
-              </span>
-            </div>
-          ))}
-          {profile.activeQuestIds.length > 3 && (
-            <div style={{ fontSize: 11, color: 'var(--text-muted)', textAlign: 'center', marginTop: 4 }}>+{profile.activeQuestIds.length - 3} more quests</div>
-          )}
-        </div>
-      )}
-
-      {/* Next unlock hint — shown while features are still gating */}
-      {unlocks && !unlocks.sentenceBuilder && (() => {
-        const w = profile.totalWordsLearned;
-        const next = !unlocks.quiz ? { at: 5, label: 'Quiz mode' }
-          : !unlocks.phrasebook ? { at: 10, label: 'Phrasebook' }
-          : !unlocks.memoryMatch ? { at: 15, label: 'Memory Match' }
-          : !unlocks.toneTrainer ? { at: 20, label: 'Tone Trainer' }
-          : !unlocks.alphabetDrill ? { at: 25, label: 'Alphabet Drill' }
-          : { at: 35, label: 'Sentence Builder' };
-        const pct = Math.min(100, Math.round((w / next.at) * 100));
-        return (
-          <div style={{ background: 'var(--surface)', borderRadius: 12, padding: '12px 16px', border: '1px solid var(--border)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: 'var(--text-muted)', marginBottom: 6 }}>
-              <span>🔓 Next unlock: <span style={{ color: 'var(--purple)', fontWeight: 700 }}>{next.label}</span></span>
-              <span>{w}/{next.at} words</span>
-            </div>
-            <div className="progress-track" style={{ height: 4 }}>
-              <div className="progress-fill" style={{ width: `${pct}%`, background: 'var(--purple)' }} />
-            </div>
-          </div>
-        );
-      })()}
-
-      {/* Footer stats */}
-      {unlocks?.statsRow && (
-        <div style={{ display: 'flex', justifyContent: 'center', gap: 20, paddingBottom: 4 }}>
-          <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>📚 {stats.totalCards} cards</span>
-          <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>📝 {profile.totalWordsLearned} learned</span>
-          {stats.strugglingCards > 0 && (
-            <span style={{ fontSize: 12, color: 'var(--warning)' }}>⚠️ {stats.strugglingCards} struggling</span>
-          )}
-        </div>
-      )}
     </div>
   );
 }
-
-const GRAMMAR_TIPS = [
-  { tip: 'ไม่ (mâi) negates any verb or adjective', example: 'กิน → ไม่กิน', meaning: 'eat → don\'t eat' },
-  { tip: 'ไหม (mǎi) turns statements into yes/no questions', example: 'อร่อยไหม?', meaning: 'Is it delicious?' },
-  { tip: 'มาก (mâak) = very/a lot — goes after adjective', example: 'ดีมาก', meaning: 'very good' },
-  { tip: 'กำลัง (gam-lang) = currently doing (present progressive)', example: 'กำลังกิน', meaning: 'currently eating' },
-  { tip: 'จะ (jà) = will/going to (future marker)', example: 'จะไปตลาด', meaning: 'going to the market' },
-  { tip: 'เคย (koei) = have ever done (past experience)', example: 'เคยไปภูเก็ตไหม?', meaning: 'Have you ever been to Phuket?' },
-  { tip: 'ครับ / ค่ะ adds politeness — always at sentence end', example: 'ขอบคุณครับ', meaning: 'Thank you (male speaker)' },
-  { tip: 'ก็ (gô) = also/too — connects similar ideas', example: 'ฉันก็ชอบ', meaning: 'I like it too' },
-  { tip: 'แล้ว (láew) = already / then (sequence or completion)', example: 'กินแล้ว', meaning: 'already ate' },
-  { tip: 'ยัง (yang) = still / yet (ongoing state)', example: 'ยังไม่มา', meaning: 'still hasn\'t come' },
-  { tip: 'ที่สุด (thîi-sùt) = most — Thai superlative suffix', example: 'อร่อยที่สุด', meaning: 'most delicious' },
-  { tip: 'ด้วย (dûai) = also / too — adds something extra', example: 'ขอด้วย', meaning: 'I\'ll have one too' },
-  { tip: 'ได้ (dâi) after verb = can / was able to', example: 'ช่วยได้ไหม', meaning: 'Can you help?' },
-  { tip: 'ให้ (hâi) = to give / let / make someone do', example: 'ให้ฉันไป', meaning: 'Let me go' },
-  { tip: 'Thai adjectives follow the noun, unlike English', example: 'คนดี', meaning: 'good person (person good)' },
-  { tip: 'No conjugation — verbs stay the same for all subjects', example: 'ฉันไป / เขาไป / เราไป', meaning: 'I go / he goes / we go' },
-  { tip: 'ขอ (kŏr) = to request / may I have', example: 'ขอน้ำหน่อย', meaning: 'May I have some water?' },
-  { tip: 'หน่อย (nòi) softens requests — makes them more polite', example: 'ช่วยหน่อยได้ไหม', meaning: 'Could you help me a bit?' },
-  { tip: 'นะ (ná) softens statements, seeks mild agreement', example: 'ดีนะ', meaning: 'That\'s good, isn\'t it?' },
-  { tip: 'เลย (loei) = right away / absolutely / at all', example: 'ไม่ชอบเลย', meaning: 'Don\'t like it at all' },
-  { tip: 'ถ้า (thâa) = if — starts conditional sentences', example: 'ถ้าหิว บอกนะ', meaning: 'If you\'re hungry, tell me' },
-  { tip: 'เพราะ (phró) = because — explains reason', example: 'ไม่ไปเพราะป่วย', meaning: 'Not going because sick' },
-  { tip: 'แต่ (tàe) = but — introduces contrast', example: 'อร่อยแต่แพง', meaning: 'Delicious but expensive' },
-  { tip: 'หรือ (rŭe) = or — connects alternatives', example: 'ชาหรือกาแฟ', meaning: 'Tea or coffee?' },
-  { tip: 'ทั้ง...และ... = both...and...', example: 'ทั้งอร่อยและถูก', meaning: 'Both delicious and cheap' },
-  { tip: 'Numbers come after nouns in Thai (noun + number + classifier)', example: 'หมา 2 ตัว', meaning: '2 dogs (dog 2 body-shaped)' },
-  { tip: 'Classifiers (ลักษณนาม) are required with numbers', example: 'คน = people, ตัว = animals, อัน = small objects', meaning: 'Different shapes use different classifiers' },
-  { tip: 'อยู่ (yùu) after verb = currently in that state', example: 'นอนอยู่', meaning: 'currently sleeping' },
-  { tip: 'ใจ (jai) = heart/mind — appears in many emotion words', example: 'ดีใจ / เสียใจ / ใจดี', meaning: 'happy / sad / kind-hearted' },
-  { tip: 'ขึ้น (khuên) = up / increase after verbs', example: 'ดีขึ้น', meaning: 'getting better (better-up)' },
-  { tip: 'ลง (long) = down / decrease after verbs', example: 'เย็นลง', meaning: 'cooling down' },
-  { tip: 'Thai has no articles (a/an/the) — context makes it clear', example: 'ผมเห็นแมว', meaning: 'I saw a/the cat' },
-  { tip: 'มี (mii) = to have / there is / there are', example: 'มีน้ำไหม', meaning: 'Is there any water? / Do you have water?' },
-  { tip: 'อยาก (yàak) = want to (desire for action)', example: 'อยากกินส้มตำ', meaning: 'want to eat papaya salad' },
-  { tip: 'ต้อง (tông) = must / have to (obligation)', example: 'ต้องไปแล้ว', meaning: 'Must go now' },
-  { tip: 'ไป (pai) and มา (maa) indicate direction: away vs. toward', example: 'เดินไป / เดินมา', meaning: 'walk away / walk toward (speaker)' },
-  { tip: 'Reduplication intensifies adjectives or shows plurality', example: 'ช้าๆ / ดีๆ', meaning: 'slowly / many good things' },
-  { tip: 'คือ (khue) = is/are — used to define or identify', example: 'นี่คืออะไร', meaning: 'What is this?' },
-  { tip: 'เมื่อ / ตอน = when (past) / when (moment)', example: 'เมื่อวาน / ตอนเด็ก', meaning: 'yesterday / when young' },
-  { tip: 'บาง (baang) = some (not all) / sometimes', example: 'บางคน / บางครั้ง', meaning: 'some people / sometimes' },
-];
-
-function GrammarTip() {
-  const [showExample, setShowExample] = React.useState(false);
-  const dayIndex = Math.floor(Date.now() / 86400000);
-  const tip = GRAMMAR_TIPS[dayIndex % GRAMMAR_TIPS.length];
-  return (
-    <button
-      style={{ background: 'var(--surface)', borderRadius: 14, padding: 16, border: '1px solid var(--border)', textAlign: 'left', width: '100%' }}
-      onClick={() => setShowExample(s => !s)}
-    >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-        <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--info)', textTransform: 'uppercase', letterSpacing: 0.5 }}>Grammar Tip of the Day</div>
-        <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{showExample ? '▲ hide' : '▼ example'}</span>
-      </div>
-      <div style={{ fontWeight: 600, fontSize: 14, color: 'var(--text)', marginBottom: showExample ? 8 : 0 }}>{tip.tip}</div>
-      {showExample && (
-        <div style={{ background: 'var(--surface-hi)', borderRadius: 8, padding: '8px 12px', display: 'flex', alignItems: 'center', gap: 10 }}>
-          <span style={{ fontSize: 20, fontWeight: 700, color: 'var(--primary)' }}>{tip.example}</span>
-          <span style={{ fontSize: 13, color: 'var(--text-muted)', fontStyle: 'italic' }}>"{tip.meaning}"</span>
-        </div>
-      )}
-    </button>
-  );
-}
-
-function SrsLevelChart({ srsMap }: { srsMap: Map<string, { interval: number }> }) {
-  const BUCKETS = [
-    { label: 'New',    max: 0,    color: 'var(--border)' },
-    { label: '1d',     max: 2,    color: '#1d5fa8' },
-    { label: '4d',     max: 7,    color: '#2070cc' },
-    { label: '1wk',    max: 14,   color: 'var(--info)' },
-    { label: '2wk',    max: 30,   color: 'var(--primary)' },
-    { label: '1mo+',   max: 9999, color: 'var(--success)' },
-  ];
-
-  const counts = BUCKETS.map(() => 0);
-  const total = VOCABULARY.length;
-  let seen = 0;
-  for (const [, state] of srsMap) {
-    seen++;
-    const iv = state.interval;
-    const bi = BUCKETS.findIndex((b, i) => i === BUCKETS.length - 1 || iv <= b.max);
-    if (bi >= 0) counts[bi]++;
-  }
-  counts[0] = total - seen;
-
-  const max = Math.max(1, ...counts);
-
-  return (
-    <div style={{ background: 'var(--surface)', borderRadius: 14, padding: '14px 16px', border: '1px solid var(--border)' }}>
-      <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 12 }}>SRS Level Distribution</div>
-      <div style={{ display: 'flex', gap: 6, alignItems: 'flex-end', height: 48 }}>
-        {BUCKETS.map((b, i) => (
-          <div key={b.label} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-            <div style={{ width: '100%', height: Math.max(3, (counts[i] / max) * 40), background: counts[i] > 0 ? b.color : 'var(--border)', borderRadius: 3, transition: 'height 0.4s ease' }} />
-            <span style={{ fontSize: 9, color: 'var(--text-muted)', fontWeight: 600 }}>{b.label}</span>
-          </div>
-        ))}
-      </div>
-      <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 8 }}>
-        {seen} / {total} words in SRS · {counts[counts.length - 1]} long-term
-      </div>
-    </div>
-  );
-}
-
-function ReviewForecast({ srsMap }: { srsMap: Map<string, { nextReviewDate: string; isNew?: boolean }> }) {
-  const days = 7;
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  const counts = Array.from({ length: days }, (_, i) => {
-    const d = new Date(today);
-    d.setDate(d.getDate() + i);
-    const dateStr = d.toISOString().split('T')[0];
-    let n = 0;
-    for (const [, s] of srsMap) {
-      if (s.nextReviewDate === dateStr && !s.isNew) n++;
-    }
-    return { label: i === 0 ? 'Today' : i === 1 ? 'Tmrw' : d.toLocaleDateString('en', { weekday: 'short' }), count: n };
-  });
-
-  const max = Math.max(1, ...counts.map(c => c.count));
-  const total7 = counts.reduce((s, c) => s + c.count, 0);
-  if (total7 === 0) return null;
-
-  return (
-    <div style={{ background: 'var(--surface)', borderRadius: 14, padding: '14px 16px', border: '1px solid var(--border)' }}>
-      <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 12 }}>
-        7-Day Review Forecast · {total7} cards
-      </div>
-      <div style={{ display: 'flex', gap: 6, alignItems: 'flex-end', height: 52 }}>
-        {counts.map(({ label, count }, i) => (
-          <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-            {count > 0 && <span style={{ fontSize: 9, color: 'var(--text-muted)', fontWeight: 700 }}>{count}</span>}
-            <div style={{ width: '100%', height: Math.max(3, (count / max) * 36), background: i === 0 ? 'var(--warning)' : count > 0 ? 'var(--info)' : 'var(--border)', borderRadius: 3, transition: 'height 0.3s' }} />
-            <span style={{ fontSize: 9, color: i === 0 ? 'var(--warning)' : 'var(--text-muted)', fontWeight: i === 0 ? 700 : 600 }}>{label}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-const s: Record<string, React.CSSProperties> = {
-  header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 },
-  card: {
-    background: 'linear-gradient(135deg, rgba(22,12,53,0.95) 0%, rgba(30,18,72,0.90) 100%)',
-    borderRadius: 20,
-    padding: 18,
-    border: '1px solid rgba(255,255,255,0.08)',
-    display: 'flex', flexDirection: 'column',
-    boxShadow: '0 4px 24px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06)',
-  },
-  sectionTitle: { fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 1.2, marginBottom: 10 },
-  studyBtn: {
-    borderRadius: 18,
-    padding: '20px 24px',
-    fontWeight: 800,
-    fontSize: 17,
-    width: '100%',
-    display: 'flex', alignItems: 'center', gap: 16,
-    letterSpacing: -0.2,
-  },
-  quizBtn: {
-    borderRadius: 16, padding: '15px 20px', fontWeight: 700, fontSize: 15,
-    width: '100%', display: 'flex', alignItems: 'center', gap: 14,
-    background: 'rgba(139,92,246,0.1)',
-    border: '1px solid rgba(139,92,246,0.35)',
-    color: 'var(--purple-lt)',
-  },
-  streak: {
-    background: 'rgba(245,158,66,0.12)',
-    border: '1px solid rgba(245,158,66,0.3)',
-    borderRadius: 999, padding: '5px 14px',
-    display: 'flex', alignItems: 'center', gap: 6,
-  },
-  greeting: { fontSize: 22, fontWeight: 800, letterSpacing: -0.5, lineHeight: 1.2 },
-  sub: { fontSize: 12, color: 'var(--text-muted)', marginTop: 3 },
-};

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useGame } from '../context/GameContext';
+import { CHARACTERS } from '../data/characters';
 
 const STEPS = [
   {
@@ -22,7 +23,7 @@ const STEPS = [
     title: 'Quests & Rewards',
     subtitle: 'Gamified learning',
     body: 'Complete quests to unlock new regions, earn XP and gold, collect spirit companions, and climb all the way to the Spirit Realm.',
-    cta: 'Next →',
+    cta: 'Choose your guide →',
     features: ['🗺️ 7 regions to explore', '🏆 Achievements', '🔥 Daily streaks', '🎯 Daily challenges'],
   },
 ];
@@ -30,22 +31,21 @@ const STEPS = [
 export function Onboarding({ onDone }: { onDone: () => void }) {
   const { createProfile } = useGame();
   const [step, setStep] = useState(0);
+  const [selectedChar, setSelectedChar] = useState('byte');
   const [name, setName] = useState('');
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
 
-  const isNameStep = step === STEPS.length;
+  const isCharStep = step === STEPS.length;
+  const isNameStep = step === STEPS.length + 1;
 
-  const next = () => {
-    if (step < STEPS.length - 1) setStep(s => s + 1);
-    else setStep(STEPS.length);
-  };
+  const next = () => setStep(s => s + 1);
 
   const start = async () => {
     const n = name.trim();
     if (!n) { setErr('Enter your name to begin.'); return; }
     setBusy(true); setErr('');
-    await createProfile(n);
+    await createProfile(n, selectedChar);
     onDone();
   };
 
@@ -81,6 +81,64 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
     </div>
   );
 
+  if (isCharStep) {
+    const selected = CHARACTERS.find(c => c.id === selectedChar) ?? CHARACTERS[0];
+    return (
+      <div style={s.root}>
+        {/* Progress dots */}
+        <div style={{ display: 'flex', gap: 6, justifyContent: 'center' }}>
+          {STEPS.map((_, i) => (
+            <div key={i} style={{ width: 8, height: 8, borderRadius: 999, background: 'var(--primary)' }} />
+          ))}
+          <div style={{ width: 24, height: 8, borderRadius: 999, background: 'linear-gradient(90deg, var(--primary), var(--gold))', boxShadow: '0 0 8px rgba(245,158,66,0.5)' }} />
+          <div style={{ width: 8, height: 8, borderRadius: 999, background: 'rgba(255,255,255,0.1)' }} />
+        </div>
+
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: 26, fontWeight: 900, color: 'var(--gold)', letterSpacing: -0.5, marginBottom: 4 }}>Choose Your Guide</div>
+          <div style={{ fontSize: 13, color: 'var(--text-sec)' }}>Each stray has a different specialty</div>
+        </div>
+
+        {/* Character grid */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, flex: 1, alignContent: 'start' }}>
+          {CHARACTERS.map(char => {
+            const active = selectedChar === char.id;
+            return (
+              <button
+                key={char.id}
+                onClick={() => setSelectedChar(char.id)}
+                style={{
+                  background: active ? char.bgGradient : 'rgba(22,12,53,0.8)',
+                  border: `2px solid ${active ? char.color : 'rgba(255,255,255,0.07)'}`,
+                  borderRadius: 16, padding: '14px 12px',
+                  textAlign: 'left',
+                  boxShadow: active ? `0 0 20px ${char.glowColor}` : 'none',
+                  transition: 'all 0.2s',
+                  position: 'relative',
+                  overflow: 'hidden',
+                }}
+              >
+                {active && <div style={{ position: 'absolute', top: -20, right: -20, width: 80, height: 80, borderRadius: '50%', background: `radial-gradient(circle, ${char.glowColor} 0%, transparent 70%)`, pointerEvents: 'none' }} />}
+                <div style={{ fontSize: 32, marginBottom: 6, filter: active ? `drop-shadow(0 0 6px ${char.color})` : 'none' }}>{char.emoji}</div>
+                <div style={{ fontSize: 12, fontWeight: 900, color: active ? char.color : 'var(--text)', letterSpacing: 0.5, marginBottom: 2 }}>{char.name}</div>
+                <div style={{ fontSize: 10, color: active ? `${char.color}bb` : 'var(--text-muted)', fontWeight: 600, marginBottom: 4 }}>{char.role}</div>
+                <div style={{ fontSize: 9, color: 'var(--text-muted)', lineHeight: 1.4 }}>{char.learnFocus}</div>
+                {active && <div style={{ position: 'absolute', top: 8, right: 8, width: 16, height: 16, borderRadius: '50%', background: char.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9 }}>✓</div>}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Selected summary */}
+        <div style={{ background: `linear-gradient(135deg, rgba(22,12,53,0.95), rgba(14,7,38,0.9))`, border: `1px solid ${selected.color}44`, borderRadius: 14, padding: '12px 16px', fontSize: 12, color: 'var(--text-sec)', lineHeight: 1.5 }}>
+          <span style={{ color: selected.color, fontWeight: 700 }}>{selected.name}:</span> {selected.description}
+        </div>
+
+        <button style={s.btn} onClick={next}>Continue as {selected.name} →</button>
+      </div>
+    );
+  }
+
   const current = STEPS[step];
 
   return (
@@ -90,6 +148,7 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
         {STEPS.map((_, i) => (
           <div key={i} style={{ width: i === step ? 24 : 8, height: 8, borderRadius: 999, background: i === step ? 'linear-gradient(90deg, var(--primary), var(--gold))' : i < step ? 'var(--primary)' : 'rgba(255,255,255,0.1)', transition: 'all 0.3s', boxShadow: i === step ? '0 0 8px rgba(245,158,66,0.5)' : 'none' }} />
         ))}
+        <div style={{ width: 8, height: 8, borderRadius: 999, background: 'rgba(255,255,255,0.1)' }} />
         <div style={{ width: 8, height: 8, borderRadius: 999, background: 'var(--border)' }} />
       </div>
 

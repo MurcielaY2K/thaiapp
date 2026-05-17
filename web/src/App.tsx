@@ -185,7 +185,7 @@ export function App() {
       )}
 
       <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-        {tab === 'home'    && <Home onStudy={() => setView('study')} onQuiz={() => setView('quiz')} onFavQuiz={() => setView('quiz_fav')} onHardQuiz={() => setView('quiz_hard')} onTone={() => setView('tone')} onMatch={() => setView('match')} onSentence={() => setView('sentence')} unlocks={unlocks} />}
+        {tab === 'home'    && <Home onStudy={() => setView('study')} onTone={() => setView('tone')} onMatch={() => setView('match')} onSentence={() => setView('sentence')} unlocks={unlocks} />}
         {tab === 'learn'   && <LearnTab onStudy={() => setView('study')} onQuiz={() => setView('quiz')} onTone={() => setView('tone')} onSentence={() => setView('sentence')} onAlphabet={() => setView('alphabet')} onPhrasebook={() => setView('phrasebook')} onMatch={() => setView('match')} unlocks={unlocks} />}
         {tab === 'map'     && <MapTab onStudyRegion={r => { setStudyState({ region: r }); setView('study'); }} />}
         {tab === 'browse'  && <VocabBrowser />}

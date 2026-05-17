@@ -12,12 +12,14 @@ interface ShopItem {
   price: number;
   badge?: string;
   badgeColor?: string;
+  requiredLevel?: number;
   action: (profile: import('@engine/types').UserProfile) => import('@engine/types').UserProfile | null;
   canBuy: (profile: import('@engine/types').UserProfile) => boolean;
   owned?: (profile: import('@engine/types').UserProfile) => boolean;
 }
 
 const COMPANIONS_FOR_SALE = ['phi_krasue', 'nang_tani', 'phi_lok'] as const;
+const COMPANION_LEVEL: Record<string, number> = { phi_krasue: 3, nang_tani: 5, phi_lok: 7 };
 
 const ITEMS: ShopItem[] = [
   // ── Streak protection ─────────────────────────────────────────────────────
@@ -76,6 +78,7 @@ const ITEMS: ShopItem[] = [
   // ── Spirit companions (common) ─────────────────────────────────────────────
   ...COMPANIONS_FOR_SALE.map((cid): ShopItem => {
     const c = SPIRIT_COMPANIONS.find(x => x.id === cid)!;
+    const reqLevel = COMPANION_LEVEL[cid] ?? 1;
     return {
       id: `companion_${cid}`,
       icon: cid === 'phi_krasue' ? '👻' : cid === 'nang_tani' ? '🌿' : '👁️',
@@ -85,10 +88,11 @@ const ITEMS: ShopItem[] = [
       price: 1000,
       badge: c.rarity.toUpperCase(),
       badgeColor: 'var(--info)',
+      requiredLevel: reqLevel,
       owned: (p) => p.collectedCompanionIds.includes(cid),
-      canBuy: (p) => p.gold >= 1000 && !p.collectedCompanionIds.includes(cid),
+      canBuy: (p) => p.gold >= 1000 && !p.collectedCompanionIds.includes(cid) && p.currentLevel >= reqLevel,
       action: (p) => {
-        if (p.gold < 1000 || p.collectedCompanionIds.includes(cid)) return null;
+        if (p.gold < 1000 || p.collectedCompanionIds.includes(cid) || p.currentLevel < reqLevel) return null;
         const collected = [...p.collectedCompanionIds, cid];
         const active = p.activeCompanionIds.length < 3
           ? [...p.activeCompanionIds, cid]
@@ -182,20 +186,25 @@ export function Shop({ onBack }: { onBack: () => void }) {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {sec.items.map(item => {
                 const isOwned = item.owned?.(profile) ?? false;
-                const canBuy = item.canBuy(profile) && !buying;
+                const levelLocked = item.requiredLevel !== undefined && profile.currentLevel < item.requiredLevel;
+                const canBuy = item.canBuy(profile) && !buying && !levelLocked;
                 const isBuying = buying === item.id;
                 return (
-                  <div key={item.id} style={{ background: 'linear-gradient(135deg, rgba(22,12,53,0.94), rgba(14,7,38,0.9))', border: `1px solid ${isOwned ? 'rgba(16,185,129,0.45)' : 'rgba(255,255,255,0.08)'}`, borderRadius: 14, padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 14, opacity: isOwned ? 0.7 : 1, boxShadow: '0 2px 10px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.04)' }}>
-                    <span style={{ fontSize: 32, flexShrink: 0 }}>{item.icon}</span>
+                  <div key={item.id} style={{ background: 'linear-gradient(135deg, rgba(22,12,53,0.94), rgba(14,7,38,0.9))', border: `1px solid ${isOwned ? 'rgba(16,185,129,0.45)' : levelLocked ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.08)'}`, borderRadius: 14, padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 14, opacity: isOwned || levelLocked ? 0.65 : 1, boxShadow: '0 2px 10px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.04)' }}>
+                    <span style={{ fontSize: 32, flexShrink: 0, filter: levelLocked ? 'grayscale(1) brightness(0.5)' : 'none' }}>{levelLocked ? '🔒' : item.icon}</span>
                     <div style={{ flex: 1 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
                         <span style={{ fontWeight: 700, fontSize: 14 }}>{item.title}</span>
-                        {item.badge && <span style={{ fontSize: 9, fontWeight: 800, color: item.badgeColor, background: `${item.badgeColor}22`, borderRadius: 4, padding: '1px 6px', textTransform: 'uppercase' }}>{item.badge}</span>}
+                        {item.badge && !levelLocked && <span style={{ fontSize: 9, fontWeight: 800, color: item.badgeColor, background: `${item.badgeColor}22`, borderRadius: 4, padding: '1px 6px', textTransform: 'uppercase' }}>{item.badge}</span>}
                       </div>
                       <div style={{ fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.4 }}>{item.description}</div>
                     </div>
                     {isOwned
                       ? <span style={{ color: 'var(--success)', fontWeight: 700, fontSize: 13, flexShrink: 0 }}>✓ Owned</span>
+                      : levelLocked
+                      ? <div style={{ textAlign: 'center', flexShrink: 0 }}>
+                          <div style={{ fontSize: 10, fontWeight: 800, color: 'var(--text-muted)', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, padding: '6px 10px', whiteSpace: 'nowrap' }}>🔒 LV {item.requiredLevel}</div>
+                        </div>
                       : (
                         <button
                           style={{ background: canBuy ? (item.currency === 'gold' ? 'var(--gold)' : 'var(--info)') : 'var(--surface-hi)', color: canBuy ? '#fff' : 'var(--text-muted)', borderRadius: 10, padding: '8px 14px', fontWeight: 700, fontSize: 13, flexShrink: 0, border: canBuy ? 'none' : '1px solid var(--border)', minWidth: 80, opacity: isBuying ? 0.6 : 1 }}

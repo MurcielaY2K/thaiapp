@@ -42,6 +42,7 @@ export function Study({
   const { profile } = useGame();
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [started, setStarted] = useState(!!regionFilter);
+  const [quickMode, setQuickMode] = useState(false);
 
   const availableCategories = useMemo(() => {
     const unlocked = profile?.unlockedRegions ?? ['krung_thon'];
@@ -57,9 +58,11 @@ export function Study({
       <StudySetup
         availableCategories={availableCategories}
         selectedCategories={selectedCategories}
+        quickMode={quickMode}
         onToggle={cat => setSelectedCategories(prev =>
           prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat]
         )}
+        onQuickMode={setQuickMode}
         onStart={() => setStarted(true)}
         onExit={onExit}
       />
@@ -70,6 +73,7 @@ export function Study({
     <StudySession
       categoryFilter={selectedCategories.length > 0 ? selectedCategories : undefined}
       regionFilter={regionFilter}
+      maxCards={quickMode ? 10 : undefined}
       onComplete={onComplete}
       onExit={onExit}
     />
@@ -79,13 +83,17 @@ export function Study({
 function StudySetup({
   availableCategories,
   selectedCategories,
+  quickMode,
   onToggle,
+  onQuickMode,
   onStart,
   onExit,
 }: {
   availableCategories: string[];
   selectedCategories: string[];
+  quickMode: boolean;
   onToggle: (cat: string) => void;
+  onQuickMode: (quick: boolean) => void;
   onStart: () => void;
   onExit: () => void;
 }) {
@@ -104,6 +112,29 @@ function StudySetup({
           <div style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 4, lineHeight: 1.5 }}>
             SRS flashcards — rated by memory. Pick categories to focus, or study everything.
           </div>
+        </div>
+
+        {/* Session length toggle */}
+        <div style={{ display: 'flex', gap: 10 }}>
+          {([false, true] as const).map(isQuick => (
+            <button
+              key={String(isQuick)}
+              onClick={() => onQuickMode(isQuick)}
+              style={{
+                flex: 1, borderRadius: 14, padding: '14px 12px', fontWeight: 700, fontSize: 14,
+                background: quickMode === isQuick
+                  ? 'linear-gradient(135deg, rgba(212,128,26,0.9), rgba(245,158,66,0.95))'
+                  : 'rgba(22,12,53,0.8)',
+                border: quickMode === isQuick ? 'none' : '1px solid rgba(255,255,255,0.08)',
+                color: quickMode === isQuick ? '#1A0800' : 'var(--text-sec)',
+                boxShadow: quickMode === isQuick ? '0 4px 16px rgba(245,158,66,0.35)' : 'none',
+              }}
+            >
+              <div style={{ fontSize: 20, marginBottom: 4 }}>{isQuick ? '⚡' : '📖'}</div>
+              <div>{isQuick ? 'Quick · 10 cards' : 'Full Session'}</div>
+              <div style={{ fontSize: 11, opacity: 0.7, marginTop: 2 }}>{isQuick ? '~5 min' : 'All due cards'}</div>
+            </button>
+          ))}
         </div>
 
         <div style={{ background: 'var(--surface)', borderRadius: 14, padding: 16, border: '1px solid var(--border)' }}>
@@ -160,10 +191,10 @@ function StudySetup({
 
       <div style={{ padding: '12px 20px', paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 12px)' }}>
         <button
-          style={{ background: 'var(--primary)', color: '#fff', borderRadius: 14, padding: 18, fontWeight: 700, fontSize: 16, width: '100%' }}
+          style={{ background: 'linear-gradient(135deg, #D4801A 0%, #F59E42 45%, #FFB84D 80%, #F5C060 100%)', color: '#1A0800', borderRadius: 14, padding: 18, fontWeight: 800, fontSize: 16, width: '100%', boxShadow: '0 4px 20px rgba(245,158,66,0.4)' }}
           onClick={onStart}
         >
-          {selectedCategories.length > 0 ? `Study ${selectedCategories.map(c => c.replace(/_/g, ' ')).join(', ')}` : 'Start Full Session'} →
+          {quickMode ? '⚡ Quick Session →' : selectedCategories.length > 0 ? `Study ${selectedCategories.map(c => c.replace(/_/g, ' ')).join(', ')} →` : 'Start Full Session →'}
         </button>
       </div>
     </div>
@@ -173,11 +204,13 @@ function StudySetup({
 function StudySession({
   categoryFilter,
   regionFilter,
+  maxCards,
   onComplete,
   onExit,
 }: {
   categoryFilter?: string[];
   regionFilter?: string;
+  maxCards?: number;
   onComplete: (summary: SessionSummary, xp: number, questIds: string[]) => void;
   onExit: () => void;
 }) {
@@ -229,13 +262,14 @@ function StudySession({
 
     if (q >= 3) { sfx.correct(); setSessionCorrect(c => c + 1); setCombo(c => c + 1); }
     else { sfx.wrong(); setCombo(0); }
-    setSessionTotal(t => t + 1);
+    const newTotal = sessionTotal + 1;
+    setSessionTotal(newTotal);
 
     const timeTaken = Date.now() - startTime.current;
     const result = facade.answerCard(q as ReviewQuality, timeTaken);
     const updated = result.updatedSession;
 
-    if (updated.isComplete) {
+    if (updated.isComplete || (maxCards !== undefined && newTotal >= maxCards)) {
       setExiting(true);
       sfx.complete();
       const endResult = await facade.endSession();
