@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { View, StyleSheet, Animated } from 'react-native';
-import type { Pet, EvolutionStage, PetMood, PixelStyle } from '../../types';
+import type { Pet, EvolutionStage, PetMood } from '../../types';
 
 interface Props {
   pet: Pet;
@@ -64,6 +64,8 @@ function petSprite(
 
   if (species === 'cat') return catSprite(p, s, a, e, o, isHappy, isSad, isBig);
   if (species === 'bird') return birdSprite(p, s, a, e, o, isHappy);
+  if (species === 'rabbit') return rabbitSprite(p, s, a, e, o, isHappy);
+  if (species === 'reptile') return reptileSprite(p, s, a, e, o, isHappy);
   return dogSprite(p, s, a, e, o, isHappy, isSad, isBig);
 }
 
@@ -117,39 +119,94 @@ function birdSprite(p: string, s: string, a: string, e: string, o: string, happy
   ];
 }
 
+function rabbitSprite(p: string, s: string, a: string, e: string, o: string, happy: boolean): Sprite {
+  const mouth = happy ? a : s;
+  return [
+    [null, o,  null, null, null, o,  null],
+    [null, p,  null, null, null, p,  null],
+    [null, o,  p,    p,    p,   o,   null],
+    [o,    p,  e,    p,    e,   p,   o   ],
+    [o,    p,  p,   mouth, p,   p,   o   ],
+    [null, o,  p,    p,    p,   o,   null],
+    [null, null, o,  o,   o,  null,  null],
+  ];
+}
+
+function reptileSprite(p: string, s: string, a: string, e: string, o: string, happy: boolean): Sprite {
+  const sc = '#1a6b1a'; // scale accent
+  const mouth = happy ? a : s;
+  return [
+    [null, o,  o,   null, o,   o,   null],
+    [o,    p,  sc,  p,    sc,  p,   o   ],
+    [o,    sc, e,   p,    e,  sc,   o   ],
+    [o,    p,  sc, mouth, sc,  p,   o   ],
+    [null, o,  p,   sc,   p,   o,   null],
+    [null, null, o, p,    o,   null, null],
+    [null, null, null, o, null, null, null],
+  ];
+}
+
+// Personality-driven animation configs
+const PERSONALITY_ANIM = {
+  hyperactive: { bounceH: -10, bounceDur: 300, blinkDelay: 1200 },
+  lazy:        { bounceH: -2,  bounceDur: 1200, blinkDelay: 6000 },
+  chaotic:     { bounceH: -8,  bounceDur: 400,  blinkDelay: 800  },
+  dramatic:    { bounceH: -8,  bounceDur: 700,  blinkDelay: 2000 },
+  affectionate:{ bounceH: -5,  bounceDur: 700,  blinkDelay: 2500 },
+  jealous:     { bounceH: -4,  bounceDur: 900,  blinkDelay: 3000 },
+  intelligent: { bounceH: -3,  bounceDur: 800,  blinkDelay: 4000 },
+  weird:       { bounceH: -6,  bounceDur: 550,  blinkDelay: 700  },
+};
+
 export function PixelPet({ pet, size = 120 }: Props) {
   const bounceAnim = useRef(new Animated.Value(0)).current;
   const blinkAnim = useRef(new Animated.Value(1)).current;
+  const wobbleAnim = useRef(new Animated.Value(0)).current;
+
+  const anim = PERSONALITY_ANIM[pet.personality] ?? PERSONALITY_ANIM.affectionate;
 
   useEffect(() => {
     const bounce = Animated.loop(
       Animated.sequence([
-        Animated.timing(bounceAnim, { toValue: -6, duration: 600, useNativeDriver: true }),
-        Animated.timing(bounceAnim, { toValue: 0, duration: 600, useNativeDriver: true }),
+        Animated.timing(bounceAnim, { toValue: anim.bounceH, duration: anim.bounceDur, useNativeDriver: true }),
+        Animated.timing(bounceAnim, { toValue: 0, duration: anim.bounceDur, useNativeDriver: true }),
       ])
     );
     bounce.start();
 
     const blink = Animated.loop(
       Animated.sequence([
-        Animated.delay(3000),
+        Animated.delay(anim.blinkDelay),
         Animated.timing(blinkAnim, { toValue: 0, duration: 80, useNativeDriver: true }),
         Animated.timing(blinkAnim, { toValue: 1, duration: 80, useNativeDriver: true }),
       ])
     );
     blink.start();
 
+    // Chaotic and weird pets get a sideways wobble
+    if (pet.personality === 'chaotic' || pet.personality === 'weird') {
+      const wobble = Animated.loop(
+        Animated.sequence([
+          Animated.timing(wobbleAnim, { toValue: 4, duration: 180, useNativeDriver: true }),
+          Animated.timing(wobbleAnim, { toValue: -4, duration: 180, useNativeDriver: true }),
+          Animated.timing(wobbleAnim, { toValue: 0, duration: 180, useNativeDriver: true }),
+          Animated.delay(600),
+        ])
+      );
+      wobble.start();
+    }
+
     return () => {
       bounce.stop();
       blink.stop();
     };
-  }, []);
+  }, [pet.personality]);
 
   const sprite = buildSprite(pet);
   const pixelSize = Math.floor(size / 7);
 
   return (
-    <Animated.View style={[styles.container, { transform: [{ translateY: bounceAnim }] }]}>
+    <Animated.View style={[styles.container, { transform: [{ translateY: bounceAnim }, { translateX: wobbleAnim }] }]}>
       {sprite.map((row, ri) => (
         <View key={ri} style={styles.row}>
           {row.map((color, ci) => (

@@ -1,24 +1,77 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
-  View, StyleSheet, TouchableOpacity, Animated, SafeAreaView, ScrollView,
+  View, StyleSheet, TouchableOpacity, Animated, SafeAreaView,
 } from 'react-native';
 import { router } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import { usePetStore } from '../../store/petStore';
+import { useAchievementStore } from '../../store/achievementStore';
+import { useNotifications } from '../../hooks/useNotifications';
 import { PixelPet } from '../../components/pixel/PixelPet';
 import { PixelBackground } from '../../components/pixel/PixelBackground';
 import { PixelText } from '../../components/pixel/PixelText';
 import { MoodBubble } from '../../components/care/MoodBubble';
 import { StatsBar } from '../../components/care/StatsBar';
+import { AchievementToast } from '../../components/ui/AchievementToast';
 import { Colors } from '../../constants/colors';
 import { EVOLUTION_STAGES } from '../../constants/petData';
+import type { Achievement } from '../../store/achievementStore';
 
 export default function HomeScreen() {
   const { pet, updateDecay, coins, gems } = usePetStore();
+  const { newUnlocks, dismissNewUnlocks, updateStats, load: loadAch } = useAchievementStore();
+  const [pendingAchievement, setPendingAchievement] = useState<Achievement | null>(null);
+  const [achievementQueue, setAchievementQueue] = useState<Achievement[]>([]);
   const [petTapped, setPetTapped] = useState(false);
+  const prevEvolutionRef = useRef<string | null>(null);
+
   const heartAnim = useRef(new Animated.Value(0)).current;
   const tapScaleAnim = useRef(new Animated.Value(1)).current;
 
+  useNotifications(pet);
+
+  // Load achievements on mount
+  useEffect(() => {
+    loadAch();
+  }, []);
+
+  // Sync pet stats to achievement store
+  useEffect(() => {
+    if (!pet) return;
+    updateStats({
+      totalCareActions: pet.totalCareActions,
+      evolutionStage: pet.evolutionStage,
+      maxHappiness: Math.max(pet.stats.happiness, 0),
+      neglectStreak: pet.neglectStreak,
+    });
+  }, [pet?.totalCareActions, pet?.evolutionStage, pet?.neglectStreak]);
+
+  // Evolution celebration
+  useEffect(() => {
+    if (!pet) return;
+    if (prevEvolutionRef.current && prevEvolutionRef.current !== pet.evolutionStage) {
+      router.push('/modals/evolution');
+    }
+    prevEvolutionRef.current = pet.evolutionStage;
+  }, [pet?.evolutionStage]);
+
+  // Achievement queue processing
+  useEffect(() => {
+    if (newUnlocks.length > 0) {
+      setAchievementQueue(prev => [...prev, ...newUnlocks]);
+      dismissNewUnlocks();
+    }
+  }, [newUnlocks.length]);
+
+  useEffect(() => {
+    if (!pendingAchievement && achievementQueue.length > 0) {
+      const [next, ...rest] = achievementQueue;
+      setPendingAchievement(next);
+      setAchievementQueue(rest);
+    }
+  }, [pendingAchievement, achievementQueue.length]);
+
+  // Decay loop (every 6 minutes)
   useEffect(() => {
     const interval = setInterval(updateDecay, 6 * 60 * 1000);
     return () => clearInterval(interval);
@@ -41,11 +94,8 @@ export default function HomeScreen() {
       Animated.spring(tapScaleAnim, { toValue: 1, useNativeDriver: true }),
     ]).start();
 
-    // Float heart
     heartAnim.setValue(0);
-    Animated.sequence([
-      Animated.timing(heartAnim, { toValue: 1, duration: 800, useNativeDriver: true }),
-    ]).start();
+    Animated.timing(heartAnim, { toValue: 1, duration: 800, useNativeDriver: true }).start();
   };
 
   const heartY = heartAnim.interpolate({ inputRange: [0, 1], outputRange: [0, -60] });
@@ -54,6 +104,12 @@ export default function HomeScreen() {
   return (
     <PixelBackground theme={roomTheme}>
       <SafeAreaView style={styles.safe}>
+        {/* Achievement toast overlay */}
+        <AchievementToast
+          achievement={pendingAchievement}
+          onDismiss={() => setPendingAchievement(null)}
+        />
+
         {/* Top bar */}
         <View style={styles.topBar}>
           <View style={styles.currencyRow}>
@@ -73,7 +129,7 @@ export default function HomeScreen() {
         <View style={styles.xpRow}>
           <PixelText size={10} color={Colors.ui.xp}>LVL {stats.level}</PixelText>
           <View style={styles.xpTrack}>
-            <View style={[styles.xpFill, { width: `${(stats.xp % 100)}%` }]} />
+            <View style={[styles.xpFill, { width: `${stats.xp % 100}%` }]} />
           </View>
           <PixelText size={10} color={Colors.ui.xp}>{stats.xp} XP</PixelText>
         </View>
@@ -87,7 +143,7 @@ export default function HomeScreen() {
           </View>
         )}
 
-        {/* Pet display */}
+        {/* Pet stage */}
         <View style={styles.petStage}>
           <MoodBubble mood={mood} personality={personality} name={name} />
 
@@ -97,18 +153,13 @@ export default function HomeScreen() {
             </TouchableOpacity>
           </Animated.View>
 
-          {/* Floating heart on tap */}
           <Animated.View
             pointerEvents="none"
-            style={[
-              styles.floatingHeart,
-              { opacity: heartOpacity, transform: [{ translateY: heartY }] },
-            ]}
+            style={[styles.floatingHeart, { opacity: heartOpacity, transform: [{ translateY: heartY }] }]}
           >
             <PixelText size={24}>💕</PixelText>
           </Animated.View>
 
-          {/* Floor shadow */}
           <View style={styles.shadow} />
         </View>
 
@@ -123,7 +174,7 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        {/* Quick action buttons */}
+        {/* Quick actions */}
         <View style={styles.quickActions}>
           <TouchableOpacity style={styles.qaBtn} onPress={() => router.push('/(tabs)/care')}>
             <PixelText size={22}>💕</PixelText>
@@ -136,6 +187,10 @@ export default function HomeScreen() {
           <TouchableOpacity style={styles.qaBtn} onPress={() => router.push('/(tabs)/shop')}>
             <PixelText size={22}>👒</PixelText>
             <PixelText size={9} color={Colors.neon.purple}>DRESS</PixelText>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.qaBtn} onPress={() => router.push('/(tabs)/profile')}>
+            <PixelText size={22}>🏆</PixelText>
+            <PixelText size={9} color={Colors.neon.yellow}>AWARDS</PixelText>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -153,13 +208,8 @@ const styles = StyleSheet.create({
     paddingTop: 8,
     paddingBottom: 4,
   },
-  currencyRow: {
-    gap: 8,
-    flexDirection: 'row',
-  },
-  nameTag: {
-    alignItems: 'center',
-  },
+  currencyRow: { gap: 8, flexDirection: 'row' },
+  nameTag: { alignItems: 'center' },
   xpRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -210,10 +260,7 @@ const styles = StyleSheet.create({
     borderRadius: 40,
     marginTop: 4,
   },
-  statsPanel: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-  },
+  statsPanel: { paddingHorizontal: 16, paddingVertical: 8 },
   statsPanelInner: {
     backgroundColor: Colors.bg.card,
     borderRadius: 4,
@@ -225,7 +272,7 @@ const styles = StyleSheet.create({
   quickActions: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    paddingHorizontal: 32,
+    paddingHorizontal: 16,
     paddingVertical: 8,
     paddingBottom: 16,
   },
@@ -236,7 +283,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     borderWidth: 2,
     borderColor: Colors.ui.border,
-    paddingHorizontal: 20,
+    paddingHorizontal: 14,
     paddingVertical: 10,
   },
 });

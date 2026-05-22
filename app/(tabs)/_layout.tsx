@@ -7,12 +7,20 @@ interface TabIconProps {
   emoji: string;
   label: string;
   focused: boolean;
+  badge?: number;
 }
 
-function TabIcon({ emoji, label, focused }: TabIconProps) {
+function TabIcon({ emoji, label, focused, badge }: TabIconProps) {
   return (
     <View style={[styles.tabItem, focused && styles.tabItemActive]}>
-      <PixelText size={focused ? 22 : 18}>{emoji}</PixelText>
+      <View>
+        <PixelText size={focused ? 20 : 17}>{emoji}</PixelText>
+        {badge != null && badge > 0 && (
+          <View style={styles.badge}>
+            <PixelText size={7} color={Colors.bg.deep}>{badge > 9 ? '9+' : badge}</PixelText>
+          </View>
+        )}
+      </View>
       <PixelText
         size={8}
         color={focused ? Colors.neon.pink : Colors.ui.textDim}
@@ -63,6 +71,12 @@ export default function TabLayout() {
           tabBarIcon: ({ focused }) => <TabIcon emoji="🛍️" label="SHOP" focused={focused} />,
         }}
       />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          tabBarIcon: ({ focused }) => <TabIcon emoji="👤" label="PROFILE" focused={focused} />,
+        }}
+      />
     </Tabs>
   );
 }
@@ -72,23 +86,35 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.bg.dark,
     borderTopColor: Colors.ui.border,
     borderTopWidth: 2,
-    height: 70,
-    paddingBottom: 8,
+    height: 68,
+    paddingBottom: 6,
     paddingTop: 4,
   },
   tabItem: {
     alignItems: 'center',
     justifyContent: 'center',
     gap: 2,
-    paddingHorizontal: 4,
+    paddingHorizontal: 2,
     paddingVertical: 4,
     borderRadius: 4,
-    minWidth: 52,
+    minWidth: 44,
+    position: 'relative',
   },
   tabItemActive: {
     backgroundColor: Colors.bg.mid,
     shadowColor: Colors.neon.pink,
     shadowOpacity: 0.3,
     shadowRadius: 4,
+  },
+  badge: {
+    position: 'absolute',
+    top: -3,
+    right: -5,
+    backgroundColor: Colors.neon.pink,
+    borderRadius: 6,
+    width: 14,
+    height: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
