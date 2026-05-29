@@ -19,7 +19,7 @@ import type { Achievement } from '../../store/achievementStore';
 
 export default function HomeScreen() {
   const { pet, updateDecay, coins, gems } = usePetStore();
-  const { newUnlocks, dismissNewUnlocks, updateStats, load: loadAch } = useAchievementStore();
+  const { newUnlocks, dismissNewUnlocks, updateStats, stats: achStats, load: loadAch } = useAchievementStore();
   const [pendingAchievement, setPendingAchievement] = useState<Achievement | null>(null);
   const [achievementQueue, setAchievementQueue] = useState<Achievement[]>([]);
   const [petTapped, setPetTapped] = useState(false);
@@ -41,7 +41,7 @@ export default function HomeScreen() {
     updateStats({
       totalCareActions: pet.totalCareActions,
       evolutionStage: pet.evolutionStage,
-      maxHappiness: Math.max(pet.stats.happiness, 0),
+      maxHappiness: Math.max(achStats.maxHappiness, pet.stats.happiness),
       neglectStreak: pet.neglectStreak,
     });
   }, [pet?.totalCareActions, pet?.evolutionStage, pet?.neglectStreak]);

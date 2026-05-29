@@ -183,9 +183,9 @@ export function PixelPet({ pet, size = 120 }: Props) {
     );
     blink.start();
 
-    // Chaotic and weird pets get a sideways wobble
+    let wobble: Animated.CompositeAnimation | null = null;
     if (pet.personality === 'chaotic' || pet.personality === 'weird') {
-      const wobble = Animated.loop(
+      wobble = Animated.loop(
         Animated.sequence([
           Animated.timing(wobbleAnim, { toValue: 4, duration: 180, useNativeDriver: true }),
           Animated.timing(wobbleAnim, { toValue: -4, duration: 180, useNativeDriver: true }),
@@ -199,6 +199,7 @@ export function PixelPet({ pet, size = 120 }: Props) {
     return () => {
       bounce.stop();
       blink.stop();
+      wobble?.stop();
     };
   }, [pet.personality]);
 

@@ -58,6 +58,7 @@ export function FishingGame({ onGameOver, onBack }: Props) {
   const hookX = useRef(new Animated.Value(POND_W / 2)).current;
   const hookY = useRef(new Animated.Value(0)).current;
   const coinsRef = useRef(0);
+  const timeLeftRef = useRef(60);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const biteTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const fishTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -148,6 +149,7 @@ export function FishingGame({ onGameOver, onBack }: Props) {
 
   const startGame = () => {
     coinsRef.current = 0;
+    timeLeftRef.current = 60;
     reelWindowRef.current = false;
     setTotalCoins(0);
     setCatchCount(0);
@@ -156,13 +158,9 @@ export function FishingGame({ onGameOver, onBack }: Props) {
     setPhaseSync('casting');
 
     timerRef.current = setInterval(() => {
-      setTimeLeft(t => {
-        if (t <= 1) {
-          endGame();
-          return 0;
-        }
-        return t - 1;
-      });
+      timeLeftRef.current -= 1;
+      setTimeLeft(timeLeftRef.current);
+      if (timeLeftRef.current <= 0) endGame();
     }, 1000);
 
     fishTimerRef.current = setInterval(spawnFish, 1800);

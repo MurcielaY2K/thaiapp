@@ -58,6 +58,7 @@ export function DanceBattle({ onGameOver, onBack }: Props) {
   const comboRef = useRef(0);
   const notesRef = useRef<Note[]>([]);
   const isPlaying = useRef(false);
+  const timeLeftRef = useRef(45);
   const spawnTimer = useRef<ReturnType<typeof setInterval> | null>(null);
   const gameTimer = useRef<ReturnType<typeof setInterval> | null>(null);
   const sequenceIdx = useRef(0);
@@ -117,6 +118,7 @@ export function DanceBattle({ onGameOver, onBack }: Props) {
   const startGame = () => {
     scoreRef.current = 0;
     comboRef.current = 0;
+    timeLeftRef.current = 45;
     sequenceIdx.current = 0;
     noteInSequence.current = 0;
     notesRef.current = [];
@@ -129,10 +131,9 @@ export function DanceBattle({ onGameOver, onBack }: Props) {
 
     spawnTimer.current = setInterval(spawnNote, 1000);
     gameTimer.current = setInterval(() => {
-      setTimeLeft(t => {
-        if (t <= 1) { endGame(); return 0; }
-        return t - 1;
-      });
+      timeLeftRef.current -= 1;
+      setTimeLeft(timeLeftRef.current);
+      if (timeLeftRef.current <= 0) endGame();
     }, 1000);
   };
 
