@@ -76,7 +76,7 @@ export function DanceBattle({ onGameOver, onBack }: Props) {
     setNotes([]);
     if (scoreRef.current > highScore) setHighScore(scoreRef.current);
     setPhase('gameover');
-    onGameOver(scoreRef.current);
+    onGameOver(Math.floor(scoreRef.current / 2));
   }, [highScore, onGameOver]);
 
   const spawnNote = useCallback(() => {
@@ -197,7 +197,7 @@ export function DanceBattle({ onGameOver, onBack }: Props) {
       <PixelText size={48}>🎭</PixelText>
       <PixelText variant="title" size={18} color={Colors.neon.pink} glow>DANCE OVER!</PixelText>
       <PixelText size={14} color={Colors.neon.yellow}>Score: {score}</PixelText>
-      <PixelText size={12} color={Colors.neon.green}>+{Math.floor(score / 2)} coins earned!</PixelText>
+      <PixelText size={12} color={Colors.neon.green}>+{Math.floor(score / 2)} 🪙 coins earned!</PixelText>
       {score >= highScore && score > 0 && (
         <PixelText size={12} color={Colors.neon.cyan}>🏆 New High Score!</PixelText>
       )}

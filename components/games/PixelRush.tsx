@@ -60,7 +60,7 @@ export function PixelRush({ onGameOver, onBack }: Props) {
     setObstacles([]);
     if (scoreRef.current > highScore) setHighScore(scoreRef.current);
     setPhase('gameover');
-    onGameOver(scoreRef.current);
+    onGameOver(scoreRef.current * 2);
   }, [highScore, onGameOver]);
 
   const spawnObstacle = useCallback(() => {
@@ -165,7 +165,7 @@ export function PixelRush({ onGameOver, onBack }: Props) {
       <PixelText size={48}>💀</PixelText>
       <PixelText variant="title" size={18} color={Colors.neon.green} glow>WIPED OUT!</PixelText>
       <PixelText size={14} color={Colors.neon.yellow}>Distance: {score}m</PixelText>
-      <PixelText size={12} color={Colors.neon.green}>+{score * 2} coins earned!</PixelText>
+      <PixelText size={12} color={Colors.neon.green}>+{score * 2} 🪙 coins earned!</PixelText>
       {score >= highScore && score > 0 && (
         <PixelText size={12} color={Colors.neon.cyan}>🏆 New Record!</PixelText>
       )}

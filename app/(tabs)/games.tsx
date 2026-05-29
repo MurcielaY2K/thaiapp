@@ -7,7 +7,6 @@ import { usePetStore } from '../../store/petStore';
 import { useAchievementStore } from '../../store/achievementStore';
 import { PixelText } from '../../components/pixel/PixelText';
 import { Colors } from '../../constants/colors';
-import { MINI_GAMES } from '../../constants/petData';
 
 // Game components
 import { TreatCatch } from '../../components/games/TreatCatch';
@@ -33,14 +32,20 @@ export default function GamesScreen() {
   const petLevel = pet.stats.level;
 
   const handleGameOver = (gameId: string, result: number) => {
+    // result = coins earned by the game (already multiplied)
     earnCoins(result);
-    updateStats({ totalGamesPlayed: stats.totalGamesPlayed + 1 });
+    updateStats({
+      totalGamesPlayed: stats.totalGamesPlayed + 1,
+      coinsEarned: stats.coinsEarned + result,
+    });
 
-    if (gameId === 'treat_catch') updateStats({ bestTreatScore: Math.max(stats.bestTreatScore, result) });
-    if (gameId === 'retro_race') updateStats({ bestRaceScore: Math.max(stats.bestRaceScore, result) });
+    // Achievement stats use raw game scores (divide out coin multipliers)
+    // treat_catch passes score*5, retro_race passes score*3, dance passes score/2, obstacle passes score*2
+    if (gameId === 'treat_catch') updateStats({ bestTreatScore: Math.max(stats.bestTreatScore, Math.round(result / 5)) });
+    if (gameId === 'retro_race') updateStats({ bestRaceScore: Math.max(stats.bestRaceScore, Math.round(result / 3)) });
     if (gameId === 'fishing') updateStats({ bestFishCoins: Math.max(stats.bestFishCoins, result) });
-    if (gameId === 'dance') updateStats({ bestDanceScore: Math.max(stats.bestDanceScore, Math.floor(result / 2)) });
-    if (gameId === 'obstacle') updateStats({ bestRushScore: Math.max(stats.bestRushScore, result * 2) });
+    if (gameId === 'dance') updateStats({ bestDanceScore: Math.max(stats.bestDanceScore, result * 2) });
+    if (gameId === 'obstacle') updateStats({ bestRushScore: Math.max(stats.bestRushScore, Math.round(result / 2)) });
   };
 
   if (activeGame) {
@@ -58,20 +63,12 @@ export default function GamesScreen() {
   }
 
   // Game menu
-  const allGames = [
-    ...MINI_GAMES,
-    // Extra games with different IDs
-    { id: 'dance', name: 'Dance Battle', emoji: '💃', description: 'Hit the arrows in time!', unlockLevel: 6 },
-    { id: 'obstacle', name: 'Pixel Rush', emoji: '⚡', description: 'Tap to jump over obstacles!', unlockLevel: 4 },
-  ];
-
-  // Deduplicate by id (MINI_GAMES already has dance/obstacle, filter those out)
   const displayGames = [
     { id: 'treat_catch', name: 'Treat Catch', emoji: '🦴', description: 'Slide to catch treats!', unlockLevel: 1 },
     { id: 'retro_race', name: 'Retro Race', emoji: '🏎️', description: 'Dodge the traffic!', unlockLevel: 3 },
+    { id: 'obstacle', name: 'Pixel Rush', emoji: '⚡', description: 'Auto-runner! Tap to jump.', unlockLevel: 4 },
     { id: 'fishing', name: 'Pixel Fishing', emoji: '🎣', description: 'Reel in rare fish!', unlockLevel: 5 },
     { id: 'dance', name: 'Dance Battle', emoji: '💃', description: 'Hit the beat!', unlockLevel: 6 },
-    { id: 'obstacle', name: 'Pixel Rush', emoji: '⚡', description: 'Auto-runner! Tap to jump.', unlockLevel: 4 },
     { id: 'puzzle', name: 'Paw Puzzle', emoji: '🧩', description: 'Solve pixel puzzles!', unlockLevel: 7 },
   ];
 

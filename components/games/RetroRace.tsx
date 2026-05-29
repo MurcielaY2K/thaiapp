@@ -56,7 +56,7 @@ export function RetroRace({ onGameOver, onBack }: Props) {
     setObstacles([]);
     if (scoreRef.current > highScore) setHighScore(scoreRef.current);
     setGameState('gameover');
-    onGameOver(scoreRef.current);
+    onGameOver(scoreRef.current * 3);
   }, [highScore, onGameOver]);
 
   const spawnObstacle = useCallback(() => {
@@ -163,7 +163,7 @@ export function RetroRace({ onGameOver, onBack }: Props) {
       <PixelText size={48}>💥</PixelText>
       <PixelText variant="title" size={18} color={Colors.ui.danger} glow>CRASH!</PixelText>
       <PixelText size={14} color={Colors.neon.yellow}>Distance: {score}</PixelText>
-      <PixelText size={12} color={Colors.neon.green}>+{score * 3} coins earned!</PixelText>
+      <PixelText size={12} color={Colors.neon.green}>+{score * 3} 🪙 coins earned!</PixelText>
       <RetroButton label="Race Again" onPress={startGame} color={Colors.neon.cyan} emoji="▶" />
       <RetroButton label="← Back" onPress={onBack} color={Colors.ui.textDim} size="sm" />
     </View>

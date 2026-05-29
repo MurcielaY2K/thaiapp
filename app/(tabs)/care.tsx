@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View, StyleSheet, ScrollView, SafeAreaView, Animated,
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { usePetStore } from '../../store/petStore';
+import { useAchievementStore } from '../../store/achievementStore';
 import { PixelPet } from '../../components/pixel/PixelPet';
 import { PixelText } from '../../components/pixel/PixelText';
 import { CareButton } from '../../components/care/CareButton';
@@ -13,8 +14,9 @@ import { CARE_ACTIONS, PERSONALITY_TRAITS } from '../../constants/petData';
 
 export default function CareScreen() {
   const { pet, cooldowns, performCareAction } = usePetStore();
+  const { updateStats, stats } = useAchievementStore();
   const [lastAction, setLastAction] = useState<string | null>(null);
-  const feedbackAnim = new Animated.Value(0);
+  const feedbackAnim = useRef(new Animated.Value(0)).current;
 
   if (!pet) return null;
 
@@ -29,6 +31,14 @@ export default function CareScreen() {
     setLastAction(action.label);
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
+    // Track specific action types for achievements
+    if (action.type === 'feed') {
+      updateStats({ totalFeeds: stats.totalFeeds + 1 });
+    } else if (action.type === 'hug') {
+      updateStats({ totalHugs: stats.totalHugs + 1 });
+    }
+
+    feedbackAnim.setValue(0);
     Animated.sequence([
       Animated.timing(feedbackAnim, { toValue: 1, duration: 200, useNativeDriver: true }),
       Animated.delay(1500),

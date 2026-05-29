@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { Platform } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import type { Pet } from '../types';
 
@@ -66,11 +67,10 @@ async function schedulePetNotifications(pet: Pet) {
 
 export function useNotifications(pet: Pet | null) {
   useEffect(() => {
-    if (!pet) return;
+    if (!pet || Platform.OS === 'web') return;
     schedulePetNotifications(pet);
 
     return () => {
-      // Reschedule on unmount (app going to background)
       schedulePetNotifications(pet);
     };
   }, [pet?.id, pet?.lastInteraction]);

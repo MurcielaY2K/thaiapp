@@ -14,6 +14,7 @@ interface Fish {
   id: number;
   emoji: string;
   x: Animated.Value;
+  y: number;
   rarity: 'common' | 'rare' | 'legendary';
   coins: number;
 }
@@ -38,7 +39,7 @@ function pickFish(): (typeof FISH_TYPES)[0] {
 }
 
 interface Props {
-  onGameOver: (coins: number) => void;
+  onGameOver: (score: number) => void;
   onBack: () => void;
 }
 
@@ -53,7 +54,6 @@ export function FishingGame({ onGameOver, onBack }: Props) {
   const [catchCount, setCatchCount] = useState(0);
   const [lastCatch, setLastCatch] = useState<{ emoji: string; coins: number; rarity: string } | null>(null);
   const [fishInPond, setFishInPond] = useState<Fish[]>([]);
-  const [reelWindow, setReelWindow] = useState(false);
 
   const hookX = useRef(new Animated.Value(POND_W / 2)).current;
   const hookY = useRef(new Animated.Value(0)).current;
@@ -61,12 +61,21 @@ export function FishingGame({ onGameOver, onBack }: Props) {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const biteTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const fishTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  // Use a ref to avoid stale closure in setTimeout
+  const reelWindowRef = useRef(false);
+  const phaseRef = useRef<Phase>('menu');
+
+  const setPhaseSync = (p: Phase) => {
+    phaseRef.current = p;
+    setPhase(p);
+  };
 
   const spawnFish = useCallback(() => {
     const type = pickFish();
     const fish: Fish = {
       id: fishId++,
       ...type,
+      y: 30 + Math.random() * 60,
       x: new Animated.Value(-40),
     };
     setFishInPond(prev => [...prev, fish]);
@@ -86,13 +95,65 @@ export function FishingGame({ onGameOver, onBack }: Props) {
     });
   }, []);
 
+  const endGame = useCallback(() => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    if (fishTimerRef.current) clearInterval(fishTimerRef.current);
+    if (biteTimerRef.current) clearTimeout(biteTimerRef.current);
+    setFishInPond([]);
+    setPhaseSync('result');
+    onGameOver(coinsRef.current);
+  }, [onGameOver]);
+
+  const castLine = () => {
+    if (phaseRef.current !== 'casting') return;
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
+    Animated.timing(hookY, { toValue: 100, duration: 400, useNativeDriver: true }).start(() => {
+      setPhaseSync('waiting');
+
+      const biteDelay = 1500 + Math.random() * 3500;
+      biteTimerRef.current = setTimeout(() => {
+        setPhaseSync('biting');
+        reelWindowRef.current = true;
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+
+        // Miss window: 2s to reel in
+        biteTimerRef.current = setTimeout(() => {
+          if (reelWindowRef.current) {
+            reelWindowRef.current = false;
+            hookY.setValue(0);
+            setPhaseSync('casting');
+          }
+        }, 2000);
+      }, biteDelay);
+    });
+  };
+
+  const reelIn = () => {
+    if (phaseRef.current !== 'biting') return;
+    reelWindowRef.current = false;
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+
+    Animated.timing(hookY, { toValue: 0, duration: 300, useNativeDriver: true }).start(() => {
+      const caught = pickFish();
+      coinsRef.current += caught.coins;
+      setTotalCoins(c => c + caught.coins);
+      setCatchCount(c => c + 1);
+      setLastCatch({ emoji: caught.emoji, coins: caught.coins, rarity: caught.rarity });
+      setPhaseSync('casting');
+
+      setTimeout(() => setLastCatch(null), 1500);
+    });
+  };
+
   const startGame = () => {
     coinsRef.current = 0;
+    reelWindowRef.current = false;
     setTotalCoins(0);
     setCatchCount(0);
     setTimeLeft(60);
     setFishInPond([]);
-    setPhase('casting');
+    setPhaseSync('casting');
 
     timerRef.current = setInterval(() => {
       setTimeLeft(t => {
@@ -105,58 +166,6 @@ export function FishingGame({ onGameOver, onBack }: Props) {
     }, 1000);
 
     fishTimerRef.current = setInterval(spawnFish, 1800);
-  };
-
-  const endGame = useCallback(() => {
-    if (timerRef.current) clearInterval(timerRef.current);
-    if (fishTimerRef.current) clearInterval(fishTimerRef.current);
-    if (biteTimerRef.current) clearTimeout(biteTimerRef.current);
-    setFishInPond([]);
-    setPhase('result');
-    onGameOver(coinsRef.current);
-  }, [onGameOver]);
-
-  const castLine = () => {
-    if (phase !== 'casting') return;
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-
-    Animated.timing(hookY, { toValue: 100, duration: 400, useNativeDriver: true }).start(() => {
-      setPhase('waiting');
-
-      // Random bite window 1.5–5s
-      const biteDelay = 1500 + Math.random() * 3500;
-      biteTimerRef.current = setTimeout(() => {
-        setPhase('biting');
-        setReelWindow(true);
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-
-        // Miss window: 2s to reel
-        biteTimerRef.current = setTimeout(() => {
-          if (reelWindow) {
-            setReelWindow(false);
-            hookY.setValue(0);
-            setPhase('casting');
-          }
-        }, 2000);
-      }, biteDelay);
-    });
-  };
-
-  const reelIn = () => {
-    if (phase !== 'biting') return;
-    setReelWindow(false);
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-
-    Animated.timing(hookY, { toValue: 0, duration: 300, useNativeDriver: true }).start(() => {
-      const caught = pickFish();
-      coinsRef.current += caught.coins;
-      setTotalCoins(c => c + caught.coins);
-      setCatchCount(c => c + 1);
-      setLastCatch({ emoji: caught.emoji, coins: caught.coins, rarity: caught.rarity });
-      setPhase('casting');
-
-      setTimeout(() => setLastCatch(null), 1500);
-    });
   };
 
   useEffect(() => () => {
@@ -213,7 +222,7 @@ export function FishingGame({ onGameOver, onBack }: Props) {
         {fishInPond.map(fish => (
           <Animated.Text
             key={fish.id}
-            style={[styles.swimFish, { transform: [{ translateX: fish.x }], top: 30 + Math.random() * 60 }]}
+            style={[styles.swimFish, { transform: [{ translateX: fish.x }], top: fish.y }]}
           >
             {fish.emoji}
           </Animated.Text>

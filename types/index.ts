@@ -43,6 +43,7 @@ export interface Pet {
   roomTheme: RoomTheme;
   createdAt: number;
   lastInteraction: number;
+  lastDecayAt?: number;
   totalCareActions: number;
   neglectStreak: number;
 }

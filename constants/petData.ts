@@ -62,10 +62,10 @@ export const CARE_ACTIONS: CareAction[] = [
 export const MINI_GAMES: MiniGame[] = [
   { id: 'treat_catch', name: 'Treat Catch', emoji: '🦴', description: 'Catch falling treats!', unlockLevel: 1 },
   { id: 'retro_race', name: 'Retro Race', emoji: '🏎️', description: 'Race through pixel streets!', unlockLevel: 3 },
+  { id: 'obstacle', name: 'Pixel Rush', emoji: '⚡', description: 'Dodge obstacles!', unlockLevel: 4 },
   { id: 'fishing', name: 'Pixel Fishing', emoji: '🎣', description: 'Reel in rare fish!', unlockLevel: 5 },
+  { id: 'dance', name: 'Dance Battle', emoji: '💃', description: 'Hit the beat!', unlockLevel: 6 },
   { id: 'puzzle', name: 'Paw Puzzle', emoji: '🧩', description: 'Solve pixel puzzles!', unlockLevel: 7 },
-  { id: 'dance', name: 'Dance Battle', emoji: '💃', description: 'Hit the beat!', unlockLevel: 10 },
-  { id: 'obstacle', name: 'Pixel Rush', emoji: '⚡', description: 'Dodge obstacles!', unlockLevel: 12 },
 ];
 
 export const ACCESSORIES: Accessory[] = [

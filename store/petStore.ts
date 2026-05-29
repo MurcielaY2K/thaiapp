@@ -92,8 +92,9 @@ export const usePetStore = create<PetStore>((set, get) => ({
     ];
     const pixelColors = colorPalettes[Math.floor(Math.random() * colorPalettes.length)];
 
+    const now = Date.now();
     const newPet: Pet = {
-      id: Date.now().toString(),
+      id: now.toString(),
       name,
       species,
       personality,
@@ -105,8 +106,9 @@ export const usePetStore = create<PetStore>((set, get) => ({
       pixelColors,
       accessories: [],
       roomTheme: 'bedroom',
-      createdAt: Date.now(),
-      lastInteraction: Date.now(),
+      createdAt: now,
+      lastInteraction: now,
+      lastDecayAt: now,
       totalCareActions: 0,
       neglectStreak: 0,
     };
@@ -125,8 +127,13 @@ export const usePetStore = create<PetStore>((set, get) => ({
 
       if (petJson) {
         const pet: Pet = JSON.parse(petJson);
-        const hoursPassed = (Date.now() - pet.lastInteraction) / (1000 * 60 * 60);
-        const neglectStreak = hoursPassed >= NEGLECT_THRESHOLDS.gremlin ? pet.neglectStreak + 1 : 0;
+        const now = Date.now();
+        // Use lastDecayAt to track time since stats were last computed, preventing
+        // double-decay across sessions. Fall back to lastInteraction for old saves.
+        const decayFrom = pet.lastDecayAt ?? pet.lastInteraction;
+        const hoursPassed = (now - decayFrom) / (1000 * 60 * 60);
+        const hoursSinceInteraction = (now - pet.lastInteraction) / (1000 * 60 * 60);
+        const neglectStreak = hoursSinceInteraction >= NEGLECT_THRESHOLDS.gremlin ? pet.neglectStreak + 1 : 0;
         const decayedStats = applyDecay(pet.stats, Math.min(hoursPassed, 12));
         const updatedPet: Pet = {
           ...pet,
@@ -134,12 +141,15 @@ export const usePetStore = create<PetStore>((set, get) => ({
           mood: calcMood(decayedStats),
           evolutionStage: calcEvolution(decayedStats.xp),
           neglectStreak,
+          lastDecayAt: now,
         };
         set({
           pet: updatedPet,
           coins: coinsStr ? parseInt(coinsStr) : 100,
           gems: gemsStr ? parseInt(gemsStr) : 5,
         });
+        // Persist immediately so next load doesn't re-apply this session's decay
+        await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updatedPet));
       }
     } finally {
       set({ isLoading: false });
@@ -180,6 +190,7 @@ export const usePetStore = create<PetStore>((set, get) => ({
       mood: calcMood(newStats),
       evolutionStage: calcEvolution(newStats.xp),
       lastInteraction: now,
+      lastDecayAt: now,
       totalCareActions: pet.totalCareActions + 1,
       neglectStreak: 0,
     };
@@ -194,7 +205,9 @@ export const usePetStore = create<PetStore>((set, get) => ({
   updateDecay: () => {
     const { pet } = get();
     if (!pet) return;
-    const hoursPassed = (Date.now() - pet.lastInteraction) / (1000 * 60 * 60);
+    const now = Date.now();
+    const lastDecay = pet.lastDecayAt ?? pet.lastInteraction;
+    const hoursPassed = (now - lastDecay) / (1000 * 60 * 60);
     if (hoursPassed < 0.1) return;
 
     const decayed = applyDecay(pet.stats, 0.1);
@@ -202,6 +215,7 @@ export const usePetStore = create<PetStore>((set, get) => ({
       ...pet,
       stats: decayed,
       mood: calcMood(decayed),
+      lastDecayAt: now,
     };
     set({ pet: updatedPet });
   },

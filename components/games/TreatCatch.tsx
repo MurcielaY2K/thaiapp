@@ -156,7 +156,7 @@ export function TreatCatch({ onGameOver, onBack }: Props) {
       <PixelText size={48}>🎯</PixelText>
       <PixelText variant="title" size={18} color={Colors.neon.pink} glow>GAME OVER</PixelText>
       <PixelText size={14} color={Colors.neon.yellow}>Score: {score}</PixelText>
-      <PixelText size={12} color={Colors.neon.green}>+{score * 5} coins earned!</PixelText>
+      <PixelText size={12} color={Colors.neon.green}>+{score * 5} 🪙 coins earned!</PixelText>
       {score >= highScore && score > 0 && (
         <PixelText size={12} color={Colors.neon.cyan}>🏆 New High Score!</PixelText>
       )}
