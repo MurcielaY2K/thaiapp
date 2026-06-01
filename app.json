@@ -1,27 +1,26 @@
 {
   "expo": {
-    "name": "Petagotchi",
-    "slug": "petagotchi",
+    "name": "Thai",
+    "slug": "thaiapp",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "petagotchi",
-    "userInterfaceStyle": "automatic",
+    "scheme": "thaiapp",
+    "userInterfaceStyle": "dark",
     "splash": {
-      "image": "./assets/images/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#1a0a2e"
+      "backgroundColor": "#0d0d1a"
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.petagotchi.app"
+      "bundleIdentifier": "com.thaiapp.learn"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#1a0a2e"
+        "backgroundColor": "#0d0d1a"
       },
-      "package": "com.petagotchi.app"
+      "package": "com.thaiapp.learn"
     },
     "web": {
       "bundler": "metro",
@@ -31,20 +30,7 @@
     },
     "plugins": [
       "expo-router",
-      "expo-font",
-      [
-        "expo-image-picker",
-        {
-          "photosPermission": "Petagotchi needs your photos to transform your pet into a pixel creature!"
-        }
-      ],
-      [
-        "expo-notifications",
-        {
-          "icon": "./assets/images/notification-icon.png",
-          "color": "#ff6b9d"
-        }
-      ]
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true
