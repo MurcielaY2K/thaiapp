@@ -15,4 +15,4 @@ web-build/
 
 expo-env.d.ts
 # @end expo-cli
-dist/
+# dist/ — tracked for GitHub Pages deployment
