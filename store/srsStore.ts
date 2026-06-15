@@ -4,6 +4,7 @@ import { VOCABULARY, type Word } from '../data/vocabulary';
 
 const SESSION_SIZE = 20;
 const STORAGE_KEY = '@thaiapp_progress';
+const WRITING_KEY = '@thaiapp_writing';
 const MIN_EASE = 1.3;
 
 export interface WordProgress {
@@ -22,24 +23,34 @@ interface Stats {
 
 interface SrsStore {
   progress: Record<string, WordProgress>;
+  writing: Record<string, number>; // char id -> times practiced
   currentSession: Word[];
   isLoading: boolean;
 
   load: () => Promise<void>;
   startSession: () => void;
   recordAnswer: (wordId: string, correct: boolean) => void;
+  markWritten: (charId: string) => void;
   getStats: () => Stats;
 }
 
 export const useSrsStore = create<SrsStore>((set, get) => ({
   progress: {},
+  writing: {},
   currentSession: [],
   isLoading: true,
 
   load: async () => {
     try {
-      const json = await AsyncStorage.getItem(STORAGE_KEY);
-      set({ progress: json ? JSON.parse(json) : {}, isLoading: false });
+      const [json, wjson] = await Promise.all([
+        AsyncStorage.getItem(STORAGE_KEY),
+        AsyncStorage.getItem(WRITING_KEY),
+      ]);
+      set({
+        progress: json ? JSON.parse(json) : {},
+        writing: wjson ? JSON.parse(wjson) : {},
+        isLoading: false,
+      });
     } catch {
       set({ isLoading: false });
     }
@@ -87,6 +98,13 @@ export const useSrsStore = create<SrsStore>((set, get) => ({
     };
     set({ progress: updated });
     AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+  },
+
+  markWritten: (charId) => {
+    const { writing } = get();
+    const updated = { ...writing, [charId]: (writing[charId] ?? 0) + 1 };
+    set({ writing: updated });
+    AsyncStorage.setItem(WRITING_KEY, JSON.stringify(updated));
   },
 
   getStats: () => {

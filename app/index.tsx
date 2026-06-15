@@ -4,10 +4,11 @@ import {
 } from 'react-native';
 import { router } from 'expo-router';
 import { useSrsStore } from '../store/srsStore';
+import { ALL_CHARS } from '../data/alphabet';
 import { Colors } from '../constants/colors';
 
 export default function HomeScreen() {
-  const { load, isLoading, startSession, getStats } = useSrsStore();
+  const { load, isLoading, startSession, getStats, writing } = useSrsStore();
 
   useEffect(() => { load(); }, []);
 
@@ -22,8 +23,9 @@ export default function HomeScreen() {
   const stats = getStats();
   const sessionSize = Math.min(20, stats.dueToday + stats.newWords);
   const hasSession = sessionSize > 0;
+  const charsLearned = ALL_CHARS.filter(c => writing[c.id]).length;
 
-  const handleStart = () => {
+  const handleStudy = () => {
     startSession();
     router.push('/session');
   };
@@ -44,35 +46,47 @@ export default function HomeScreen() {
             color={stats.dueToday > 0 ? Colors.accent : Colors.textDim}
           />
           <View style={styles.statDivider} />
-          <StatBox value={stats.newWords} label="new" color={Colors.textDim} />
-          <View style={styles.statDivider} />
           <StatBox value={stats.mastered} label="mastered" color={Colors.correct} />
+          <View style={styles.statDivider} />
+          <StatBox value={charsLearned} label="written" color={Colors.text} />
         </View>
 
-        <View style={styles.progressSection}>
-          <View style={styles.progressTrack}>
-            <View
-              style={[
-                styles.progressFill,
-                { width: `${((stats.total - stats.newWords) / stats.total) * 100}%` as any },
-              ]}
-            />
-          </View>
-          <Text style={styles.progressLabel}>
-            {stats.total - stats.newWords} / {stats.total} words seen
-          </Text>
-        </View>
+        <View style={styles.modes}>
+          {/* Study words */}
+          <TouchableOpacity
+            style={[styles.mode, styles.modePrimary, !hasSession && styles.modeDone]}
+            onPress={handleStudy}
+            disabled={!hasSession}
+            activeOpacity={0.85}
+          >
+            <Text style={styles.modeIcon}>📖</Text>
+            <View style={styles.modeTextWrap}>
+              <Text style={[styles.modeTitle, !hasSession && styles.modeTitleDone]}>
+                {hasSession ? 'Study words' : 'All caught up'}
+              </Text>
+              <Text style={[styles.modeSub, !hasSession && styles.modeSubDone]}>
+                {hasSession
+                  ? `${sessionSize} words · tap the meaning`
+                  : 'No words due — come back later'}
+              </Text>
+            </View>
+          </TouchableOpacity>
 
-        <TouchableOpacity
-          style={[styles.startBtn, !hasSession && styles.startBtnDone]}
-          onPress={handleStart}
-          disabled={!hasSession}
-          activeOpacity={0.85}
-        >
-          <Text style={[styles.startBtnText, !hasSession && styles.startBtnTextDone]}>
-            {hasSession ? `Study  ·  ${sessionSize} words` : '✓  All done for today'}
-          </Text>
-        </TouchableOpacity>
+          {/* Write alphabet */}
+          <TouchableOpacity
+            style={[styles.mode, styles.modeSecondary]}
+            onPress={() => router.push('/write')}
+            activeOpacity={0.85}
+          >
+            <Text style={styles.modeIcon}>✍️</Text>
+            <View style={styles.modeTextWrap}>
+              <Text style={[styles.modeTitle, styles.modeTitleDone]}>Write alphabet</Text>
+              <Text style={[styles.modeSub, styles.modeSubDone]}>
+                Trace characters · {charsLearned}/{ALL_CHARS.length} practiced
+              </Text>
+            </View>
+          </TouchableOpacity>
+        </View>
 
       </View>
     </SafeAreaView>
@@ -106,56 +120,46 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: Colors.card,
     borderRadius: 20,
-    paddingVertical: 28,
+    paddingVertical: 24,
     borderWidth: 1,
     borderColor: Colors.border,
   },
   statBox: { flex: 1, alignItems: 'center', gap: 8 },
-  statValue: { fontSize: 34, fontWeight: '700' },
+  statValue: { fontSize: 32, fontWeight: '700' },
   statLabel: { color: Colors.textDim, fontSize: 12, letterSpacing: 1.5 },
   statDivider: { width: 1, height: 40, backgroundColor: Colors.border },
-  progressSection: { gap: 10 },
-  progressTrack: {
-    height: 6,
-    backgroundColor: Colors.border,
-    borderRadius: 3,
-    overflow: 'hidden',
-  },
-  progressFill: {
-    height: '100%',
-    backgroundColor: Colors.accent,
-    borderRadius: 3,
-  },
-  progressLabel: {
-    color: Colors.textDim,
-    fontSize: 13,
-    textAlign: 'center',
-    letterSpacing: 0.5,
-  },
-  startBtn: {
-    backgroundColor: Colors.accent,
+  modes: { gap: 14 },
+  mode: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
     borderRadius: 18,
     paddingVertical: 22,
-    alignItems: 'center',
+    paddingHorizontal: 22,
+  },
+  modePrimary: {
+    backgroundColor: Colors.accent,
     shadowColor: Colors.accent,
-    shadowOpacity: 0.35,
+    shadowOpacity: 0.3,
     shadowRadius: 16,
     elevation: 8,
   },
-  startBtnDone: {
+  modeSecondary: {
     backgroundColor: Colors.card,
-    shadowOpacity: 0,
-    elevation: 0,
     borderWidth: 1,
     borderColor: Colors.border,
   },
-  startBtnText: {
-    color: Colors.bg,
-    fontSize: 18,
-    fontWeight: '700',
-    letterSpacing: 0.5,
+  modeDone: {
+    backgroundColor: Colors.card,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    shadowOpacity: 0,
+    elevation: 0,
   },
-  startBtnTextDone: {
-    color: Colors.textDim,
-  },
+  modeIcon: { fontSize: 30 },
+  modeTextWrap: { flex: 1, gap: 4 },
+  modeTitle: { color: Colors.bg, fontSize: 19, fontWeight: '700' },
+  modeTitleDone: { color: Colors.text },
+  modeSub: { color: 'rgba(13,13,26,0.7)', fontSize: 13 },
+  modeSubDone: { color: Colors.textDim },
 });
