@@ -7,6 +7,8 @@ import * as Haptics from 'expo-haptics';
 import { useSrsStore } from '../store/srsStore';
 import { VOCABULARY } from '../data/vocabulary';
 import { Colors } from '../constants/colors';
+import PixelSprite from '../components/PixelSprite';
+import { SPRITES } from '../data/sprites';
 
 const ALL_ENGLISH = VOCABULARY.map(w => w.en);
 
@@ -76,7 +78,7 @@ export default function SessionScreen() {
     return (
       <SafeAreaView style={styles.safe}>
         <View style={styles.done}>
-          <Text style={styles.doneEmoji}>{perfect ? '🎉' : '✓'}</Text>
+          <PixelSprite sprite={perfect ? SPRITES.garuda : SPRITES.naga} size={120} />
           <Text style={styles.doneTitle}>
             {perfect ? 'Perfect!' : 'Session done!'}
           </Text>
