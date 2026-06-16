@@ -143,6 +143,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 28,
     paddingTop: 36,
+    position: 'relative',
   },
   header: { alignItems: 'center', gap: 4 },
   title: { color: Colors.text, fontSize: 50, fontWeight: '200', letterSpacing: 4, marginTop: 8 },
