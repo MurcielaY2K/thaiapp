@@ -121,7 +121,7 @@ export default function WriteScreen() {
 
         <Text style={styles.hint}>
           {mode === 'watch'
-            ? 'Orange ink shows each stroke in order'
+            ? 'Watch the character being written, then switch to Trace'
             : 'Trace over the ghost guide with your finger'}
         </Text>
       </ScrollView>
