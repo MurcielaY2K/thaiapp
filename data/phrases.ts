@@ -539,4 +539,188 @@ export const PHRASE_CATEGORIES: PhraseCategory[] = [
       },
     ],
   },
+  {
+    key: 'slang',
+    th: 'คำแสลง',
+    label: 'Slang',
+    icon: '💬',
+    sentences: [
+      {
+        tokens: [
+          { th: 'หนัง', rom: 'nǎng', en: 'movie' },
+          { th: 'เรื่อง', rom: 'rɯ̂ang', en: '[title / classifier]' },
+          { th: 'นี้', rom: 'níi', en: 'this' },
+          { th: 'ปัง', rom: 'pang', en: 'awesome / a hit (slang)' },
+          { th: 'มาก', rom: 'mâak', en: 'very' },
+        ],
+        en: 'This movie is amazing.',
+      },
+      {
+        tokens: [
+          { th: 'ร้าน', rom: 'ráan', en: 'shop / eatery' },
+          { th: 'นี้', rom: 'níi', en: 'this' },
+          { th: 'อาหาร', rom: 'aa-hǎan', en: 'food' },
+          { th: 'แซ่บ', rom: 'sɛ̂ɛp', en: 'banging / delicious (slang)' },
+        ],
+        en: 'The food here is so good.',
+      },
+      {
+        tokens: [
+          { th: 'จริง', rom: 'jing', en: 'true / really' },
+          { th: 'ดิ', rom: 'dì', en: '[emphatic particle]' },
+        ],
+        en: 'For real?',
+      },
+      {
+        tokens: [
+          { th: 'วันนี้', rom: 'wan-níi', en: 'today' },
+          { th: 'ขอ', rom: 'khɔ̌ɔ', en: 'let me' },
+          { th: 'ชิลๆ', rom: 'chiu-chiu', en: 'chill out (slang)' },
+        ],
+        en: 'Today I just want to chill.',
+      },
+      {
+        tokens: [
+          { th: 'ฉัน', rom: 'chǎn', en: 'I / me' },
+          { th: 'งง', rom: 'ngong', en: 'confused (slang)' },
+          { th: 'มาก', rom: 'mâak', en: 'very' },
+        ],
+        en: "I'm so confused.",
+      },
+      {
+        tokens: [
+          { th: 'เขา', rom: 'khǎo', en: 'he / she' },
+          { th: 'เทพ', rom: 'thêep', en: 'a pro / godlike (slang)' },
+          { th: 'มาก', rom: 'mâak', en: 'very' },
+          { th: 'เลย', rom: 'lɤɤy', en: '[emphasis]' },
+        ],
+        en: 'They are seriously a pro.',
+      },
+    ],
+  },
+  {
+    key: 'movies',
+    th: 'หนังและซีรีส์',
+    label: 'Movies & Series',
+    icon: '🎬',
+    sentences: [
+      {
+        tokens: [
+          { th: 'คืนนี้', rom: 'khɯɯn-níi', en: 'tonight' },
+          { th: 'ดู', rom: 'duu', en: 'watch' },
+          { th: 'หนัง', rom: 'nǎng', en: 'movie' },
+          { th: 'กัน', rom: 'kan', en: 'together' },
+          { th: 'ไหม', rom: 'mǎi', en: '[question particle]' },
+        ],
+        en: 'Want to watch a movie tonight?',
+      },
+      {
+        tokens: [
+          { th: 'มี', rom: 'mii', en: 'have' },
+          { th: 'ซีรีส์', rom: 'sii-rîi', en: 'series' },
+          { th: 'อะไร', rom: 'à-rai', en: 'what / any' },
+          { th: 'แนะนำ', rom: 'nɛ́-nam', en: 'recommend' },
+          { th: 'ไหม', rom: 'mǎi', en: '[question particle]' },
+        ],
+        en: 'Any series to recommend?',
+      },
+      {
+        tokens: [
+          { th: 'เรื่อง', rom: 'rɯ̂ang', en: 'story / title' },
+          { th: 'นี้', rom: 'níi', en: 'this' },
+          { th: 'สนุก', rom: 'sà-nùk', en: 'fun / entertaining' },
+          { th: 'มาก', rom: 'mâak', en: 'very' },
+        ],
+        en: 'This one is really fun.',
+      },
+      {
+        tokens: [
+          { th: 'อย่า', rom: 'yàa', en: "don't" },
+          { th: 'สปอยล์', rom: 'sà-pɔɔy', en: 'spoil / spoiler' },
+          { th: 'นะ', rom: 'ná', en: '[softening particle]' },
+        ],
+        en: "Don't spoil it!",
+      },
+      {
+        tokens: [
+          { th: 'ฉัน', rom: 'chǎn', en: 'I / me' },
+          { th: 'ดู', rom: 'duu', en: 'watch' },
+          { th: 'จบ', rom: 'jòp', en: 'finish' },
+          { th: 'แล้ว', rom: 'lɛ́ɛw', en: 'already' },
+        ],
+        en: 'I already finished watching it.',
+      },
+      {
+        tokens: [
+          { th: 'พระเอก', rom: 'phrá-èek', en: 'male lead' },
+          { th: 'หล่อ', rom: 'lɔ̀ɔ', en: 'handsome' },
+          { th: 'มาก', rom: 'mâak', en: 'very' },
+        ],
+        en: 'The male lead is so handsome.',
+      },
+    ],
+  },
+  {
+    key: 'online',
+    th: 'ออนไลน์',
+    label: 'Online',
+    icon: '📱',
+    sentences: [
+      {
+        tokens: [
+          { th: 'เปิด', rom: 'pɤ̀ɤt', en: 'open / turn on' },
+          { th: 'เน็ตฟลิกซ์', rom: 'nét-flíks', en: 'Netflix' },
+          { th: 'หน่อย', rom: 'nɔ̀i', en: '[a bit / please]' },
+        ],
+        en: 'Put on Netflix.',
+      },
+      {
+        tokens: [
+          { th: 'กด', rom: 'kòt', en: 'press / tap' },
+          { th: 'ติดตาม', rom: 'tìt-taam', en: 'follow' },
+          { th: 'ด้วย', rom: 'dûay', en: 'too / also' },
+          { th: 'นะ', rom: 'ná', en: '[particle]' },
+        ],
+        en: 'Hit follow too, okay?',
+      },
+      {
+        tokens: [
+          { th: 'ฉัน', rom: 'chǎn', en: 'I / me' },
+          { th: 'ไลก์', rom: 'láai', en: 'like' },
+          { th: 'โพสต์', rom: 'póost', en: 'post' },
+          { th: 'ของ', rom: 'khɔ̌ɔng', en: 'of' },
+          { th: 'คุณ', rom: 'khun', en: 'you' },
+          { th: 'แล้ว', rom: 'lɛ́ɛw', en: 'already' },
+        ],
+        en: 'I already liked your post.',
+      },
+      {
+        tokens: [
+          { th: 'เน็ต', rom: 'nét', en: 'internet' },
+          { th: 'ช้า', rom: 'cháa', en: 'slow' },
+          { th: 'มาก', rom: 'mâak', en: 'very' },
+        ],
+        en: 'The internet is so slow.',
+      },
+      {
+        tokens: [
+          { th: 'แชร์', rom: 'chɛɛ', en: 'share' },
+          { th: 'ให้', rom: 'hâi', en: '[for me]' },
+          { th: 'หน่อย', rom: 'nɔ̀i', en: 'a bit' },
+          { th: 'ได้', rom: 'dâai', en: 'can / able' },
+          { th: 'ไหม', rom: 'mǎi', en: '[question particle]' },
+        ],
+        en: 'Can you share it for me?',
+      },
+      {
+        tokens: [
+          { th: 'มือถือ', rom: 'mɯɯ-thɯ̌ɯ', en: 'mobile phone' },
+          { th: 'ฉัน', rom: 'chǎn', en: 'my' },
+          { th: 'แบต', rom: 'bɛ̀t', en: 'battery' },
+          { th: 'หมด', rom: 'mòt', en: 'run out / dead' },
+        ],
+        en: "My phone's battery is dead.",
+      },
+    ],
+  },
 ];
