@@ -107,6 +107,21 @@ export default function HomeScreen() {
               </Text>
             </View>
           </TouchableOpacity>
+
+          {/* Read stories */}
+          <TouchableOpacity
+            style={[styles.mode, styles.modeSecondary]}
+            onPress={() => router.push('/read')}
+            activeOpacity={0.85}
+          >
+            <Text style={styles.modeIcon}>📜</Text>
+            <View style={styles.modeTextWrap}>
+              <Text style={[styles.modeTitle, styles.modeTitleDone]}>Read stories</Text>
+              <Text style={[styles.modeSub, styles.modeSubDone]}>
+                Illustrated scenes · tap words to hear them
+              </Text>
+            </View>
+          </TouchableOpacity>
         </View>
 
         {/* Decorative Thai skyline */}

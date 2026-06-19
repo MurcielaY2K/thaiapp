@@ -270,9 +270,74 @@ export const mountains: Sprite = {
   ],
 };
 
+// ── CAT — gray sitting cat (reading scenes) ─────────────────────────────────
+export const cat: Sprite = {
+  w: 16, h: 16,
+  palette: { o: '#2a2a33', g: '#8a8a99', l: '#b3b3c2', p: '#e89ab0', k: '#0d1117', w: '#ffffff' },
+  rows: [
+    '...o........o...',
+    '...oo......oo...',
+    '..oglo....olgo..',
+    '..ogllggggllgo..',
+    '..oglllllllllo..',
+    '..oglkllllklgo..',
+    '..ogllllllllgo..',
+    '..oglllppllllo..',
+    '..ogllwllwllgo..',
+    '...oglllllllo...',
+    '...ogggggggo....',
+    '..ogggggggggo...',
+    '..ogggggggggo...',
+    '..oggggggggggo..',
+    '..oglgggggglgo..',
+    '..oooooooooooo..',
+  ],
+};
+
+// ── GIRL — Manee-style child (reading scenes) ───────────────────────────────
+export const girl: Sprite = {
+  w: 16, h: 16,
+  palette: { h: '#2a2230', s: '#f0c69a', g: '#3aa86a', p: '#c84a8a', k: '#0d1117', r: '#e08aa0' },
+  rows: [
+    '....hhhhhhhh....',
+    '...hhhhhhhhhh...',
+    '..hhhsssssshhh..',
+    '..hhsssssssshh..',
+    '..hssksssskssh..',
+    '..hssssssssssh..',
+    '..hssssrrssssh..',
+    '...hhhhhhhhhh...',
+    '....gggggggg....',
+    '...gggggggggg...',
+    '..gggggggggggg..',
+    '...gggggggggg...',
+    '....pppppppp....',
+    '...pppppppppp...',
+    '..pppppppppppp..',
+    '...ss......ss...',
+  ],
+};
+
+// ── SUN — small retro sun (reading scenes) ──────────────────────────────────
+export const sun: Sprite = {
+  w: 9, h: 9,
+  palette: { y: '#ffcf33', o: '#f5a623' },
+  rows: [
+    '....o....',
+    '.o.....o.',
+    '...yyy...',
+    '..yyyyy..',
+    'o.yyyyy.o',
+    '..yyyyy..',
+    '...yyy...',
+    '.o.....o.',
+    '....o....',
+  ],
+};
+
 export const SPRITES = {
   naga, nagaSleep, garuda, elephant, hanuman, yaksha,
-  lotus, chedi, temple, palm, mountains,
+  lotus, chedi, temple, palm, mountains, cat, girl, sun,
 } as const;
 
 export type SpriteName = keyof typeof SPRITES;
