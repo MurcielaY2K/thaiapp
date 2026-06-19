@@ -116,9 +116,9 @@ export default function HomeScreen() {
           >
             <Text style={styles.modeIcon}>📜</Text>
             <View style={styles.modeTextWrap}>
-              <Text style={[styles.modeTitle, styles.modeTitleDone]}>Read stories</Text>
+              <Text style={[styles.modeTitle, styles.modeTitleDone]}>Read &amp; phrases</Text>
               <Text style={[styles.modeSub, styles.modeSubDone]}>
-                Illustrated scenes · tap words to hear them
+                Illustrated stories · phrases by category
               </Text>
             </View>
           </TouchableOpacity>

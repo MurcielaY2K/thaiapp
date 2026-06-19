@@ -7,6 +7,7 @@ import { Colors } from '../constants/colors';
 import PixelSprite from '../components/PixelSprite';
 import { SPRITES } from '../data/sprites';
 import { READING_LESSONS, type Sentence, type Token } from '../data/reading';
+import { PHRASE_CATEGORIES } from '../data/phrases';
 
 function speak(text: string) {
   if (Platform.OS !== 'web') return;
@@ -23,19 +24,33 @@ function speak(text: string) {
 }
 
 type Selected = { s: number; t: number } | null;
+// 'stories' for the illustrated lessons, otherwise a category key
+type Tab = 'stories' | string;
 
 export default function ReadScreen() {
+  const [tab, setTab] = useState<Tab>('stories');
   const [lessonIdx, setLessonIdx] = useState(0);
   const [showPhonemic, setShowPhonemic] = useState(true);
   const [showTranslate, setShowTranslate] = useState(false);
   const [selected, setSelected] = useState<Selected>(null);
 
   const lesson = READING_LESSONS[lessonIdx];
+  const category = useMemo(
+    () => PHRASE_CATEGORIES.find(c => c.key === tab) ?? null,
+    [tab]
+  );
+
+  const sentences: Sentence[] = tab === 'stories' ? lesson.sentences : (category?.sentences ?? []);
 
   const selectedToken: Token | null = useMemo(() => {
     if (!selected) return null;
-    return lesson.sentences[selected.s]?.tokens[selected.t] ?? null;
-  }, [selected, lesson]);
+    return sentences[selected.s]?.tokens[selected.t] ?? null;
+  }, [selected, sentences]);
+
+  const switchTab = (next: Tab) => {
+    setTab(next);
+    setSelected(null);
+  };
 
   const goLesson = (next: number) => {
     setLessonIdx((next + READING_LESSONS.length) % READING_LESSONS.length);
@@ -48,7 +63,7 @@ export default function ReadScreen() {
   };
 
   const readAll = () => {
-    speak(lesson.sentences.map(se => se.tokens.map(tk => tk.th).join('')).join(' '));
+    speak(sentences.map(se => se.tokens.map(tk => tk.th).join('')).join(' '));
   };
 
   return (
@@ -58,45 +73,80 @@ export default function ReadScreen() {
         <TouchableOpacity style={styles.close} onPress={() => router.replace('/')}>
           <Text style={styles.closeText}>✕</Text>
         </TouchableOpacity>
-        <View style={styles.lessonNav}>
-          <TouchableOpacity style={styles.navArrow} onPress={() => goLesson(lessonIdx - 1)}>
-            <Text style={styles.navArrowText}>‹</Text>
-          </TouchableOpacity>
-          <Text style={styles.lessonCounter}>{lessonIdx + 1} / {READING_LESSONS.length}</Text>
-          <TouchableOpacity style={styles.navArrow} onPress={() => goLesson(lessonIdx + 1)}>
-            <Text style={styles.navArrowText}>›</Text>
-          </TouchableOpacity>
-        </View>
+        <Text style={styles.screenTitle}>Read</Text>
         <View style={{ width: 40 }} />
+      </View>
+
+      {/* Category tabs */}
+      <View>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.tabs}
+        >
+          <Tab label="📜 Stories" active={tab === 'stories'} onPress={() => switchTab('stories')} />
+          {PHRASE_CATEGORIES.map(c => (
+            <Tab
+              key={c.key}
+              label={`${c.icon} ${c.label}`}
+              active={tab === c.key}
+              onPress={() => switchTab(c.key)}
+            />
+          ))}
+        </ScrollView>
       </View>
 
       <ScrollView
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        {/* Title */}
-        <Text style={styles.title}>{lesson.title}</Text>
-        <Text style={styles.titleEn}>{lesson.titleEn}</Text>
-
-        {/* Illustration */}
-        <View style={styles.scene}>
-          <View style={styles.sky} pointerEvents="none">
-            <View style={styles.sunWrap}>
-              <PixelSprite sprite={SPRITES.sun} size={34} opacity={0.95} />
+        {tab === 'stories' ? (
+          <>
+            {/* Lesson nav */}
+            <View style={styles.lessonNav}>
+              <TouchableOpacity style={styles.navArrow} onPress={() => goLesson(lessonIdx - 1)}>
+                <Text style={styles.navArrowText}>‹</Text>
+              </TouchableOpacity>
+              <View style={styles.lessonTitleWrap}>
+                <Text style={styles.title}>{lesson.title}</Text>
+                <Text style={styles.titleEn}>{lesson.titleEn} · {lessonIdx + 1}/{READING_LESSONS.length}</Text>
+              </View>
+              <TouchableOpacity style={styles.navArrow} onPress={() => goLesson(lessonIdx + 1)}>
+                <Text style={styles.navArrowText}>›</Text>
+              </TouchableOpacity>
             </View>
-          </View>
-          <View style={styles.ground} />
-          <View style={styles.sceneRow} pointerEvents="none">
-            {lesson.scene.map((item, i) => (
-              <PixelSprite
-                key={i}
-                sprite={SPRITES[item.sprite]}
-                size={item.size}
-                opacity={item.opacity ?? 1}
-              />
-            ))}
-          </View>
-        </View>
+
+            {/* Illustration */}
+            <View style={styles.scene}>
+              <View style={styles.sky} pointerEvents="none">
+                <View style={styles.sunWrap}>
+                  <PixelSprite sprite={SPRITES.sun} size={34} opacity={0.95} />
+                </View>
+              </View>
+              <View style={styles.ground} />
+              <View style={styles.sceneRow} pointerEvents="none">
+                {lesson.scene.map((item, i) => (
+                  <PixelSprite
+                    key={i}
+                    sprite={SPRITES[item.sprite]}
+                    size={item.size}
+                    opacity={item.opacity ?? 1}
+                  />
+                ))}
+              </View>
+            </View>
+          </>
+        ) : (
+          category && (
+            <View style={styles.catHeader}>
+              <Text style={styles.catIcon}>{category.icon}</Text>
+              <View>
+                <Text style={styles.title}>{category.th}</Text>
+                <Text style={styles.titleEn}>{category.label} · everyday phrases</Text>
+              </View>
+            </View>
+          )
+        )}
 
         {/* Toggles */}
         <View style={styles.toggles}>
@@ -122,7 +172,7 @@ export default function ReadScreen() {
 
         {/* Sentences */}
         <View style={styles.sentences}>
-          {lesson.sentences.map((sentence, s) => (
+          {sentences.map((sentence, s) => (
             <SentenceRow
               key={s}
               sentence={sentence}
@@ -181,6 +231,18 @@ function SentenceRow({
   );
 }
 
+function Tab({ label, active, onPress }: { label: string; active: boolean; onPress: () => void }) {
+  return (
+    <TouchableOpacity
+      style={[styles.tab, active && styles.tabActive]}
+      onPress={onPress}
+      activeOpacity={0.8}
+    >
+      <Text style={[styles.tabText, active && styles.tabTextActive]}>{label}</Text>
+    </TouchableOpacity>
+  );
+}
+
 function Toggle({ label, on, onPress }: { label: string; on: boolean; onPress: () => void }) {
   return (
     <TouchableOpacity
@@ -210,19 +272,33 @@ const styles = StyleSheet.create({
     borderWidth: 1, borderColor: Colors.border,
   },
   closeText: { color: Colors.textDim, fontSize: 16 },
-  lessonNav: { flexDirection: 'row', alignItems: 'center', gap: 14 },
+  screenTitle: { color: Colors.text, fontSize: 18, fontWeight: '700', letterSpacing: 1 },
+
+  tabs: { paddingHorizontal: 16, paddingVertical: 14, gap: 8 },
+  tab: {
+    paddingVertical: 8, paddingHorizontal: 14, borderRadius: 12,
+    backgroundColor: Colors.card, borderWidth: 1, borderColor: Colors.border,
+  },
+  tabActive: { backgroundColor: 'rgba(255,159,67,0.14)', borderColor: Colors.accent },
+  tabText: { color: Colors.textDim, fontSize: 13, fontWeight: '600' },
+  tabTextActive: { color: Colors.accent },
+
+  content: { paddingHorizontal: 20, paddingTop: 4, paddingBottom: 36 },
+
+  lessonNav: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 },
+  lessonTitleWrap: { flex: 1, alignItems: 'center' },
   navArrow: {
-    width: 34, height: 34, borderRadius: 17,
+    width: 36, height: 36, borderRadius: 18,
     backgroundColor: Colors.card, alignItems: 'center', justifyContent: 'center',
     borderWidth: 1, borderColor: Colors.border,
   },
-  navArrowText: { color: Colors.accent, fontSize: 20, lineHeight: 22, fontWeight: '700' },
-  lessonCounter: { color: Colors.textDim, fontSize: 14, letterSpacing: 1, minWidth: 44, textAlign: 'center' },
+  navArrowText: { color: Colors.accent, fontSize: 22, lineHeight: 24, fontWeight: '700' },
 
-  content: { paddingHorizontal: 20, paddingTop: 12, paddingBottom: 36 },
+  title: { color: Colors.text, fontSize: 26, fontWeight: '700', textAlign: 'center' },
+  titleEn: { color: Colors.textDim, fontSize: 13, textAlign: 'center', marginTop: 2, letterSpacing: 0.5 },
 
-  title: { color: Colors.text, fontSize: 30, fontWeight: '700', textAlign: 'center' },
-  titleEn: { color: Colors.textDim, fontSize: 14, textAlign: 'center', marginTop: 2, marginBottom: 14, letterSpacing: 0.5 },
+  catHeader: { flexDirection: 'row', alignItems: 'center', gap: 14, marginBottom: 4, paddingVertical: 6 },
+  catIcon: { fontSize: 40 },
 
   scene: {
     width: '100%',
