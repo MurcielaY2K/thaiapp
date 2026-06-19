@@ -286,4 +286,257 @@ export const PHRASE_CATEGORIES: PhraseCategory[] = [
       },
     ],
   },
+  {
+    key: 'colors',
+    th: 'สี',
+    label: 'Colors',
+    icon: '🎨',
+    sentences: [
+      {
+        tokens: [
+          { th: 'เสื้อ', rom: 'sɯ̂a', en: 'shirt' },
+          { th: 'สี', rom: 'sǐi', en: 'color' },
+          { th: 'อะไร', rom: 'à-rai', en: 'what' },
+        ],
+        en: 'What color is the shirt?',
+      },
+      {
+        tokens: [
+          { th: 'ฉัน', rom: 'chǎn', en: 'I / me' },
+          { th: 'ชอบ', rom: 'chɔ̂ɔp', en: 'like' },
+          { th: 'สี', rom: 'sǐi', en: 'color' },
+          { th: 'แดง', rom: 'dɛɛng', en: 'red' },
+        ],
+        en: 'I like red.',
+      },
+      {
+        tokens: [
+          { th: 'ท้องฟ้า', rom: 'tɔ́ɔng-fáa', en: 'sky' },
+          { th: 'สี', rom: 'sǐi', en: 'color' },
+          { th: 'ฟ้า', rom: 'fáa', en: 'light blue' },
+        ],
+        en: 'The sky is blue.',
+      },
+      {
+        tokens: [
+          { th: 'มี', rom: 'mii', en: 'have' },
+          { th: 'สี', rom: 'sǐi', en: 'color' },
+          { th: 'อื่น', rom: 'ɯ̀ɯn', en: 'other' },
+          { th: 'ไหม', rom: 'mǎi', en: '[question particle]' },
+        ],
+        en: 'Do you have other colors?',
+      },
+    ],
+  },
+  {
+    key: 'health',
+    th: 'สุขภาพ',
+    label: 'Health',
+    icon: '🏥',
+    sentences: [
+      {
+        tokens: [
+          { th: 'ฉัน', rom: 'chǎn', en: 'I / me' },
+          { th: 'ไม่', rom: 'mâi', en: 'not' },
+          { th: 'สบาย', rom: 'sà-baai', en: 'well' },
+        ],
+        en: "I'm not feeling well.",
+      },
+      {
+        tokens: [
+          { th: 'ปวด', rom: 'pùat', en: 'ache / hurt' },
+          { th: 'หัว', rom: 'hǔa', en: 'head' },
+        ],
+        en: 'I have a headache.',
+      },
+      {
+        tokens: [
+          { th: 'ฉัน', rom: 'chǎn', en: 'I / me' },
+          { th: 'ต้องการ', rom: 'tɔ̂ng-kaan', en: 'need' },
+          { th: 'หมอ', rom: 'mɔ̌ɔ', en: 'doctor' },
+        ],
+        en: 'I need a doctor.',
+      },
+      {
+        tokens: [
+          { th: 'โรงพยาบาล', rom: 'roong-phá-yaa-baan', en: 'hospital' },
+          { th: 'อยู่', rom: 'yùu', en: 'is (located)' },
+          { th: 'ที่ไหน', rom: 'thîi-nǎi', en: 'where' },
+        ],
+        en: 'Where is the hospital?',
+      },
+      {
+        tokens: [
+          { th: 'ช่วย', rom: 'chûay', en: 'help' },
+          { th: 'ด้วย', rom: 'dûay', en: '[please / with]' },
+        ],
+        en: 'Help!',
+      },
+    ],
+  },
+  {
+    key: 'hotel',
+    th: 'โรงแรม',
+    label: 'Hotel',
+    icon: '🏨',
+    sentences: [
+      {
+        tokens: [
+          { th: 'มี', rom: 'mii', en: 'have' },
+          { th: 'ห้อง', rom: 'hɔ̂ng', en: 'room' },
+          { th: 'ว่าง', rom: 'wâang', en: 'vacant / free' },
+          { th: 'ไหม', rom: 'mǎi', en: '[question particle]' },
+        ],
+        en: 'Do you have a room available?',
+      },
+      {
+        tokens: [
+          { th: 'ราคา', rom: 'raa-khaa', en: 'price' },
+          { th: 'เท่าไร', rom: 'thâo-rai', en: 'how much' },
+        ],
+        en: "What's the price?",
+      },
+      {
+        tokens: [
+          { th: 'ขอ', rom: 'khɔ̌ɔ', en: 'may I have' },
+          { th: 'กุญแจ', rom: 'kun-jɛɛ', en: 'key' },
+          { th: 'ห้อง', rom: 'hɔ̂ng', en: 'room' },
+        ],
+        en: 'May I have the room key.',
+      },
+      {
+        tokens: [
+          { th: 'ไวไฟ', rom: 'wai-faai', en: 'wifi' },
+          { th: 'รหัส', rom: 'rá-hàt', en: 'password / code' },
+          { th: 'อะไร', rom: 'à-rai', en: 'what' },
+        ],
+        en: "What's the wifi password?",
+      },
+    ],
+  },
+  {
+    key: 'feelings',
+    th: 'ความรู้สึก',
+    label: 'Feelings',
+    icon: '😊',
+    sentences: [
+      {
+        tokens: [
+          { th: 'ฉัน', rom: 'chǎn', en: 'I / me' },
+          { th: 'มี', rom: 'mii', en: 'have' },
+          { th: 'ความสุข', rom: 'khwaam-sùk', en: 'happiness' },
+        ],
+        en: "I'm happy.",
+      },
+      {
+        tokens: [
+          { th: 'ฉัน', rom: 'chǎn', en: 'I / me' },
+          { th: 'เหนื่อย', rom: 'nɯ̀ay', en: 'tired' },
+          { th: 'มาก', rom: 'mâak', en: 'very' },
+        ],
+        en: "I'm very tired.",
+      },
+      {
+        tokens: [
+          { th: 'ฉัน', rom: 'chǎn', en: 'I / me' },
+          { th: 'คิดถึง', rom: 'khít-thǔng', en: 'miss (someone)' },
+          { th: 'คุณ', rom: 'khun', en: 'you' },
+        ],
+        en: 'I miss you.',
+      },
+      {
+        tokens: [
+          { th: 'ฉัน', rom: 'chǎn', en: 'I / me' },
+          { th: 'ดีใจ', rom: 'dii-jai', en: 'glad' },
+          { th: 'ที่', rom: 'thîi', en: 'that' },
+          { th: 'ได้', rom: 'dâai', en: 'got to' },
+          { th: 'เจอ', rom: 'jɤɤ', en: 'meet' },
+          { th: 'คุณ', rom: 'khun', en: 'you' },
+        ],
+        en: "I'm glad to meet you.",
+      },
+    ],
+  },
+  {
+    key: 'weather',
+    th: 'อากาศ',
+    label: 'Weather',
+    icon: '🌦️',
+    sentences: [
+      {
+        tokens: [
+          { th: 'วันนี้', rom: 'wan-níi', en: 'today' },
+          { th: 'อากาศ', rom: 'aa-kàat', en: 'weather' },
+          { th: 'ดี', rom: 'dii', en: 'good / nice' },
+        ],
+        en: 'The weather is nice today.',
+      },
+      {
+        tokens: [
+          { th: 'ร้อน', rom: 'rɔ́ɔn', en: 'hot' },
+          { th: 'มาก', rom: 'mâak', en: 'very' },
+        ],
+        en: "It's very hot.",
+      },
+      {
+        tokens: [
+          { th: 'ฝน', rom: 'fǒn', en: 'rain' },
+          { th: 'ตก', rom: 'tòk', en: 'fall' },
+        ],
+        en: "It's raining.",
+      },
+      {
+        tokens: [
+          { th: 'พรุ่งนี้', rom: 'phrûng-níi', en: 'tomorrow' },
+          { th: 'ฝน', rom: 'fǒn', en: 'rain' },
+          { th: 'จะ', rom: 'jà', en: '[future marker]' },
+          { th: 'ตก', rom: 'tòk', en: 'fall' },
+          { th: 'ไหม', rom: 'mǎi', en: '[question particle]' },
+        ],
+        en: 'Will it rain tomorrow?',
+      },
+    ],
+  },
+  {
+    key: 'numbers',
+    th: 'ตัวเลข',
+    label: 'Numbers',
+    icon: '🔢',
+    sentences: [
+      {
+        tokens: [
+          { th: 'หนึ่ง', rom: 'nɯ̀ng', en: 'one' },
+          { th: 'สอง', rom: 'sɔ̌ɔng', en: 'two' },
+          { th: 'สาม', rom: 'sǎam', en: 'three' },
+        ],
+        en: 'One, two, three.',
+      },
+      {
+        tokens: [
+          { th: 'ฉัน', rom: 'chǎn', en: 'I / me' },
+          { th: 'อายุ', rom: 'aa-yú', en: 'age' },
+          { th: 'สาม', rom: 'sǎam', en: 'three' },
+          { th: 'สิบ', rom: 'sìp', en: 'ten' },
+          { th: 'ปี', rom: 'pii', en: 'year' },
+        ],
+        en: 'I am thirty years old.',
+      },
+      {
+        tokens: [
+          { th: 'ขอ', rom: 'khɔ̌ɔ', en: 'may I have' },
+          { th: 'สอง', rom: 'sɔ̌ɔng', en: 'two' },
+          { th: 'ที่', rom: 'thîi', en: '[seats / portions]' },
+        ],
+        en: 'A table for two, please.',
+      },
+      {
+        tokens: [
+          { th: 'รวม', rom: 'ruam', en: 'total' },
+          { th: 'ทั้งหมด', rom: 'táng-mòt', en: 'all together' },
+          { th: 'เท่าไร', rom: 'thâo-rai', en: 'how much' },
+        ],
+        en: 'How much is it all together?',
+      },
+    ],
+  },
 ];
