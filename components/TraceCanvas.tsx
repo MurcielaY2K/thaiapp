@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import {
   View, Text, StyleSheet, PanResponder, LayoutChangeEvent,
   TouchableOpacity, Platform, GestureResponderEvent,
@@ -11,7 +11,9 @@ const STROKE = 14;
 const FONT = '"Noto Sans Thai", "Thonburi", -apple-system, sans-serif';
 const GRID_COLOR      = 'rgba(255,255,255,0.07)';
 const GRID_DASH_COLOR = 'rgba(255,255,255,0.14)';
-const GHOST_COLOR     = 'rgba(255,255,255,0.16)';
+const GHOST_COLOR     = 'rgba(255,255,255,0.15)';
+const HIT_COLOR       = 'rgba(46,204,113,0.40)';
+const MISS_COLOR      = 'rgba(231,76,60,0.38)';
 
 function speak(text: string) {
   if (Platform.OS !== 'web') return;
@@ -19,10 +21,9 @@ function speak(text: string) {
   if (!w.speechSynthesis) return;
   w.speechSynthesis.cancel();
   const u = new w.SpeechSynthesisUtterance(text);
-  u.lang = 'th-TH';
-  u.rate = 0.7;
-  const voices = w.speechSynthesis.getVoices?.() ?? [];
-  const thai = voices.find((v: any) => /th(-|_)?/i.test(v.lang));
+  u.lang = 'th-TH'; u.rate = 0.7;
+  const thai = (w.speechSynthesis.getVoices?.() ?? [])
+    .find((v: any) => /th(-|_)?/i.test(v.lang));
   if (thai) u.voice = thai;
   w.speechSynthesis.speak(u);
 }
@@ -32,44 +33,51 @@ export default function TraceCanvas({ char }: { char: string }) {
   return <NativeTrace char={char} />;
 }
 
-// ── Web: real <canvas> with touch-action:none so the page never scrolls ──────
+// ── Web: canvas + pointer capture + accuracy scanner ─────────────────────────
+
+type ScanState = 'idle' | 'scanning' | 'done';
+
 function WebTrace({ char }: { char: string }) {
-  const [size, setSize] = useState(0);
-  const [showGuide, setShowGuide] = useState(true);
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const strokesRef = useRef<Point[][]>([]);
-  const drawingRef = useRef(false);
-  const showGuideRef = useRef(true);
+  const [size, setSize]             = useState(0);
+  const [showGuide, setShowGuide]   = useState(true);
+  const [hasStrokes, setHasStrokes] = useState(false);
+  const [scanState, setScanState]   = useState<ScanState>('idle');
+  const [accuracy, setAccuracy]     = useState<number | null>(null);
+
+  const canvasRef   = useRef<HTMLCanvasElement | null>(null);
+  const strokesRef  = useRef<Point[][]>([]);
+  const drawingRef  = useRef(false);
+  const showRef     = useRef(true);
+  const scanRafRef  = useRef(0);
 
   const onLayout = (e: LayoutChangeEvent) =>
     setSize(Math.round(e.nativeEvent.layout.width));
 
-  useEffect(() => { showGuideRef.current = showGuide; redraw(); }, [showGuide]);
-
-  const redraw = () => {
+  // ── draw everything onto main canvas ───────────────────────────────────────
+  const redraw = useCallback(() => {
     const cv = canvasRef.current;
     if (!cv || !size) return;
     const dpr = window.devicePixelRatio || 1;
-    const w = size * dpr;
+    const w = cv.width; // already in physical px
     const ctx = cv.getContext('2d')!;
     ctx.clearRect(0, 0, w, w);
 
     // grid
     ctx.lineWidth = 1;
-    ctx.strokeStyle = GRID_COLOR;
     ctx.setLineDash([]);
-    for (const pos of [w * 0.25, w * 0.75]) {
-      ctx.beginPath(); ctx.moveTo(0, pos); ctx.lineTo(w, pos); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(pos, 0); ctx.lineTo(pos, w); ctx.stroke();
+    ctx.strokeStyle = GRID_COLOR;
+    for (const p of [w * 0.25, w * 0.75]) {
+      ctx.beginPath(); ctx.moveTo(0, p); ctx.lineTo(w, p); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(p, 0); ctx.lineTo(p, w); ctx.stroke();
     }
     ctx.strokeStyle = GRID_DASH_COLOR;
-    ctx.setLineDash([4, 4]);
+    ctx.setLineDash([4 * dpr, 4 * dpr]);
     ctx.beginPath(); ctx.moveTo(0, w / 2); ctx.lineTo(w, w / 2); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(w / 2, 0); ctx.lineTo(w / 2, w); ctx.stroke();
     ctx.setLineDash([]);
 
     // ghost
-    if (showGuideRef.current) {
+    if (showRef.current) {
       ctx.fillStyle = GHOST_COLOR;
       ctx.font = `300 ${w * 0.66}px ${FONT}`;
       ctx.textAlign = 'center';
@@ -77,10 +85,10 @@ function WebTrace({ char }: { char: string }) {
       ctx.fillText(char, w / 2, w / 2);
     }
 
-    // ink
+    // user ink
     ctx.strokeStyle = Colors.accent;
-    ctx.fillStyle = Colors.accent;
-    ctx.lineWidth = STROKE * dpr;
+    ctx.fillStyle   = Colors.accent;
+    ctx.lineWidth   = STROKE * dpr;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
     for (const s of strokesRef.current) {
@@ -95,9 +103,9 @@ function WebTrace({ char }: { char: string }) {
       for (let i = 1; i < s.length; i++) ctx.lineTo(s[i].x * dpr, s[i].y * dpr);
       ctx.stroke();
     }
-  };
+  }, [size, char]);
 
-  // Set up canvas + pointer listeners
+  // ── pointer setup ──────────────────────────────────────────────────────────
   useEffect(() => {
     const cv = canvasRef.current;
     if (!cv || !size) return;
@@ -117,6 +125,9 @@ function WebTrace({ char }: { char: string }) {
       drawingRef.current = true;
       strokesRef.current.push([pos(e)]);
       cv.setPointerCapture?.(e.pointerId);
+      setHasStrokes(true);
+      setScanState('idle');
+      setAccuracy(null);
       redraw();
     };
     const move = (e: PointerEvent) => {
@@ -125,10 +136,7 @@ function WebTrace({ char }: { char: string }) {
       const cur = strokesRef.current[strokesRef.current.length - 1];
       const p = pos(e);
       const last = cur[cur.length - 1];
-      if (Math.hypot(p.x - last.x, p.y - last.y) >= 2) {
-        cur.push(p);
-        redraw();
-      }
+      if (Math.hypot(p.x - last.x, p.y - last.y) >= 2) { cur.push(p); redraw(); }
     };
     const up = () => { drawingRef.current = false; };
 
@@ -136,41 +144,188 @@ function WebTrace({ char }: { char: string }) {
     cv.addEventListener('pointermove', move);
     cv.addEventListener('pointerup', up);
     cv.addEventListener('pointercancel', up);
-    cv.addEventListener('pointerleave', up);
     return () => {
       cv.removeEventListener('pointerdown', down);
       cv.removeEventListener('pointermove', move);
       cv.removeEventListener('pointerup', up);
       cv.removeEventListener('pointercancel', up);
-      cv.removeEventListener('pointerleave', up);
     };
-  }, [size, char]);
+  }, [size, char, redraw]);
 
-  // New character → wipe ink
-  useEffect(() => { strokesRef.current = []; redraw(); }, [char]);
+  // new character → reset
+  useEffect(() => {
+    cancelAnimationFrame(scanRafRef.current);
+    strokesRef.current = [];
+    setHasStrokes(false);
+    setScanState('idle');
+    setAccuracy(null);
+    redraw();
+  }, [char]);
 
-  const clear = () => { strokesRef.current = []; redraw(); };
+  useEffect(() => { showRef.current = showGuide; redraw(); }, [showGuide, redraw]);
+
+  // ── accuracy scanner ───────────────────────────────────────────────────────
+  const startScan = useCallback(() => {
+    const cv = canvasRef.current;
+    if (!cv || !size || scanState === 'scanning') return;
+    cancelAnimationFrame(scanRafRef.current);
+    setScanState('scanning');
+    setAccuracy(null);
+
+    const dpr = window.devicePixelRatio || 1;
+    const w   = cv.width;
+    const ctx = cv.getContext('2d')!;
+
+    // Snapshot the current drawing (grid + ghost + ink)
+    const snapshot = ctx.getImageData(0, 0, w, w);
+
+    // Build reference hit-zone: character drawn thick (forgiving)
+    const refCv = document.createElement('canvas');
+    refCv.width = w; refCv.height = w;
+    const refCtx = refCv.getContext('2d')!;
+    refCtx.fillStyle   = '#fff';
+    refCtx.strokeStyle = '#fff';
+    refCtx.lineWidth   = STROKE * dpr * 2.2; // generous acceptance zone
+    refCtx.font = `300 ${w * 0.66}px ${FONT}`;
+    refCtx.textAlign = 'center';
+    refCtx.textBaseline = 'middle';
+    refCtx.strokeText(char, w / 2, w / 2);
+    refCtx.fillText(char, w / 2, w / 2);
+    const refData = refCtx.getImageData(0, 0, w, w).data;
+
+    // Build user-ink-only canvas
+    const inkCv = document.createElement('canvas');
+    inkCv.width = w; inkCv.height = w;
+    const inkCtx = inkCv.getContext('2d')!;
+    inkCtx.fillStyle   = '#fff';
+    inkCtx.strokeStyle = '#fff';
+    inkCtx.lineWidth   = STROKE * dpr;
+    inkCtx.lineCap = 'round'; inkCtx.lineJoin = 'round';
+    for (const s of strokesRef.current) {
+      if (s.length === 1) {
+        inkCtx.beginPath();
+        inkCtx.arc(s[0].x * dpr, s[0].y * dpr, (STROKE * dpr) / 2, 0, Math.PI * 2);
+        inkCtx.fill();
+        continue;
+      }
+      inkCtx.beginPath();
+      inkCtx.moveTo(s[0].x * dpr, s[0].y * dpr);
+      for (let i = 1; i < s.length; i++) inkCtx.lineTo(s[i].x * dpr, s[i].y * dpr);
+      inkCtx.stroke();
+    }
+    const inkData = inkCtx.getImageData(0, 0, w, w).data;
+
+    // Pre-compute per-column results
+    const cols = w;
+    const rows = w;
+    const colResult: ('hit' | 'miss' | 'empty')[] = new Array(cols);
+    let refCols = 0, hitCols = 0;
+    for (let x = 0; x < cols; x++) {
+      let hasRef = false, hasInk = false;
+      for (let y = 0; y < rows; y++) {
+        const i = (y * cols + x) * 4;
+        if (refData[i + 3] > 20) hasRef = true;
+        if (inkData[i + 3] > 20) hasInk = true;
+        if (hasRef && hasInk) break;
+      }
+      if (!hasRef) { colResult[x] = 'empty'; continue; }
+      refCols++;
+      if (hasInk) { colResult[x] = 'hit'; hitCols++; } else colResult[x] = 'miss';
+    }
+    const finalAccuracy = refCols > 0 ? Math.round((hitCols / refCols) * 100) : 0;
+
+    // Animate the scan
+    const SPEED = Math.ceil(cols / 55); // finish in ~55 frames
+    let scanX = 0;
+
+    const step = () => {
+      ctx.putImageData(snapshot, 0, 0);
+
+      // Draw color overlay up to scanX
+      for (let x = 0; x < scanX; x++) {
+        const r = colResult[x];
+        if (r === 'empty') continue;
+        ctx.fillStyle = r === 'hit' ? HIT_COLOR : MISS_COLOR;
+        ctx.fillRect(x, 0, 1, w);
+      }
+
+      // Scan line
+      if (scanX < cols) {
+        ctx.strokeStyle = 'rgba(255,255,255,0.85)';
+        ctx.lineWidth = Math.max(1, dpr);
+        ctx.setLineDash([]);
+        ctx.beginPath();
+        ctx.moveTo(scanX, 0);
+        ctx.lineTo(scanX, w);
+        ctx.stroke();
+      }
+
+      scanX += SPEED;
+      if (scanX <= cols) {
+        scanRafRef.current = requestAnimationFrame(step);
+      } else {
+        setAccuracy(finalAccuracy);
+        setScanState('done');
+      }
+    };
+    scanRafRef.current = requestAnimationFrame(step);
+  }, [size, char, scanState]);
+
+  const clear = () => {
+    cancelAnimationFrame(scanRafRef.current);
+    strokesRef.current = [];
+    setHasStrokes(false);
+    setScanState('idle');
+    setAccuracy(null);
+    redraw();
+  };
 
   const canvasEl = React.createElement('canvas', {
     ref: (el: HTMLCanvasElement | null) => { canvasRef.current = el; },
     style: { display: 'block', borderRadius: 20, touchAction: 'none' },
   });
 
+  const scoreColor =
+    accuracy == null ? Colors.text :
+    accuracy >= 75   ? Colors.correct :
+    accuracy >= 45   ? Colors.accent  :
+    Colors.wrong;
+
   return (
     <View>
       <View style={styles.canvas} onLayout={onLayout}>
         {size > 0 && canvasEl}
       </View>
+
+      {/* Score badge */}
+      {accuracy !== null && (
+        <View style={styles.scoreBadge}>
+          <Text style={[styles.scoreNum, { color: scoreColor }]}>{accuracy}%</Text>
+          <Text style={styles.scoreLabel}>
+            {accuracy >= 75 ? 'Great!' : accuracy >= 45 ? 'Good effort' : 'Keep practicing'}
+          </Text>
+        </View>
+      )}
+
+      {/* Tools */}
       <View style={styles.tools}>
         <Tool label="Clear" icon="◳" onPress={clear} />
         <Tool label={showGuide ? 'Hide' : 'Show'} icon="👁" onPress={() => setShowGuide(g => !g)} />
+        {hasStrokes && scanState !== 'scanning' && (
+          <Tool
+            label={scanState === 'done' ? 'Re-scan' : 'Check'}
+            icon="⟵⟶"
+            onPress={startScan}
+            accent
+          />
+        )}
         <Tool label="Listen" icon="🔊" onPress={() => speak(char)} />
       </View>
     </View>
   );
 }
 
-// ── Native fallback (View-based ink) ─────────────────────────────────────────
+// ── Native fallback ───────────────────────────────────────────────────────────
 function NativeTrace({ char }: { char: string }) {
   const strokesRef = useRef<Point[][]>([]);
   const [, force] = useReducer((x: number) => x + 1, 0);
@@ -186,17 +341,14 @@ function NativeTrace({ char }: { char: string }) {
     if (Math.hypot(x - last.x, y - last.y) >= 2.2) { cur.push({ x, y }); force(); }
   };
 
-  const pan = useRef(
-    PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
-      onMoveShouldSetPanResponder: () => true,
-      onPanResponderGrant: (e) => addPoint(e, true),
-      onPanResponderMove: (e) => addPoint(e, false),
-    })
-  ).current;
+  const pan = useRef(PanResponder.create({
+    onStartShouldSetPanResponder: () => true,
+    onMoveShouldSetPanResponder: () => true,
+    onPanResponderGrant: (e) => addPoint(e, true),
+    onPanResponderMove: (e) => addPoint(e, false),
+  })).current;
 
   const clear = () => { strokesRef.current = []; force(); };
-
   const dots: Point[] = [];
   for (const s of strokesRef.current) for (const p of s) dots.push(p);
 
@@ -226,11 +378,17 @@ function NativeTrace({ char }: { char: string }) {
   );
 }
 
-function Tool({ label, icon, onPress }: { label: string; icon: string; onPress: () => void }) {
+function Tool({
+  label, icon, onPress, accent,
+}: { label: string; icon: string; onPress: () => void; accent?: boolean }) {
   return (
-    <TouchableOpacity style={styles.tool} onPress={onPress} activeOpacity={0.7}>
+    <TouchableOpacity
+      style={[styles.tool, accent && styles.toolAccent]}
+      onPress={onPress}
+      activeOpacity={0.7}
+    >
       <Text style={styles.toolIcon}>{icon}</Text>
-      <Text style={styles.toolLabel}>{label}</Text>
+      <Text style={[styles.toolLabel, accent && styles.toolLabelAccent]}>{label}</Text>
     </TouchableOpacity>
   );
 }
@@ -254,11 +412,28 @@ const styles = StyleSheet.create({
   ghostWrap: { ...StyleSheet.absoluteFillObject, alignItems: 'center', justifyContent: 'center' },
   ghost: { fontSize: 200, lineHeight: 240, color: GHOST_COLOR, fontWeight: '300' },
   dot: { position: 'absolute', width: STROKE, height: STROKE, borderRadius: STROKE / 2, backgroundColor: Colors.accent },
-  tools: { flexDirection: 'row', justifyContent: 'center', gap: 14, marginTop: 18 },
-  tool: {
-    alignItems: 'center', gap: 6, paddingVertical: 8, paddingHorizontal: 18,
-    borderRadius: 14, backgroundColor: Colors.card, borderWidth: 1, borderColor: Colors.border, minWidth: 78,
+  scoreBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    marginTop: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    backgroundColor: Colors.card,
+    borderWidth: 1,
+    borderColor: Colors.border,
   },
-  toolIcon: { fontSize: 20, color: Colors.text },
-  toolLabel: { fontSize: 12, color: Colors.textDim, letterSpacing: 0.5 },
+  scoreNum: { fontSize: 22, fontWeight: '700' },
+  scoreLabel: { color: Colors.textDim, fontSize: 14 },
+  tools: { flexDirection: 'row', justifyContent: 'center', gap: 10, marginTop: 14, flexWrap: 'wrap' },
+  tool: {
+    alignItems: 'center', gap: 5, paddingVertical: 8, paddingHorizontal: 14,
+    borderRadius: 14, backgroundColor: Colors.card, borderWidth: 1, borderColor: Colors.border, minWidth: 68,
+  },
+  toolAccent: { backgroundColor: 'rgba(255,159,67,0.12)', borderColor: Colors.accent },
+  toolIcon: { fontSize: 18, color: Colors.text },
+  toolLabel: { fontSize: 11, color: Colors.textDim, letterSpacing: 0.5 },
+  toolLabelAccent: { color: Colors.accent },
 });
