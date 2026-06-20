@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import {
-  View, Text, StyleSheet, TouchableOpacity, SafeAreaView, ActivityIndicator,
-  Animated, Easing, Dimensions,
+  View, Text, StyleSheet, TouchableOpacity, SafeAreaView, ScrollView,
+  ActivityIndicator, Animated, Easing, Dimensions,
 } from 'react-native';
 import { router } from 'expo-router';
 import { useSrsStore } from '../store/srsStore';
@@ -14,14 +14,13 @@ const SCREEN_W = Dimensions.get('window').width;
 
 export default function HomeScreen() {
   const { load, isLoading, startSession, getStats, writing } = useSrsStore();
-
-  // Gentle mascot bob
   const bob = useRef(new Animated.Value(0)).current;
+
   useEffect(() => {
     const anim = Animated.loop(
       Animated.sequence([
-        Animated.timing(bob, { toValue: -8, duration: 1200, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
-        Animated.timing(bob, { toValue: 0, duration: 1200, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
+        Animated.timing(bob, { toValue: -7, duration: 1400, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
+        Animated.timing(bob, { toValue: 0,  duration: 1400, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
       ])
     );
     anim.start();
@@ -38,28 +37,25 @@ export default function HomeScreen() {
     );
   }
 
-  const stats = getStats();
+  const stats      = getStats();
   const sessionSize = Math.min(20, stats.dueToday + stats.newWords);
-  const hasSession = sessionSize > 0;
+  const hasSession  = sessionSize > 0;
   const charsLearned = ALL_CHARS.filter(c => writing[c.id]).length;
-
-  const handleStudy = () => {
-    startSession();
-    router.push('/session');
-  };
 
   return (
     <SafeAreaView style={styles.safe}>
-      <View style={styles.container}>
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
 
-        <View style={styles.header}>
+        {/* ── Hero ───────────────────────────────────────────────── */}
+        <View style={styles.hero}>
           <Animated.View style={{ transform: [{ translateY: bob }] }}>
-            <PixelSprite sprite={hasSession ? SPRITES.naga : SPRITES.nagaSleep} size={92} />
+            <PixelSprite sprite={hasSession ? SPRITES.naga : SPRITES.nagaSleep} size={76} />
           </Animated.View>
           <Text style={styles.title}>ภาษาไทย</Text>
-          <Text style={styles.subtitle}>THAI</Text>
+          <Text style={styles.subtitle}>T H A I</Text>
         </View>
 
+        {/* ── Stats ──────────────────────────────────────────────── */}
         <View style={styles.statsRow}>
           <StatBox
             value={stats.dueToday}
@@ -69,76 +65,77 @@ export default function HomeScreen() {
           <View style={styles.statDivider} />
           <StatBox value={stats.mastered} label="mastered" color={Colors.correct} />
           <View style={styles.statDivider} />
-          <StatBox value={charsLearned} label="written" color={Colors.text} />
+          <StatBox value={charsLearned}   label="written"  color={Colors.text} />
         </View>
 
+        {/* ── Mode cards ─────────────────────────────────────────── */}
         <View style={styles.modes}>
-          {/* Study words */}
-          <TouchableOpacity
-            style={[styles.mode, styles.modePrimary, !hasSession && styles.modeDone]}
-            onPress={handleStudy}
+          <ModeCard
+            color={hasSession ? '#ff9f43' : '#3d3d55'}
+            icon="📖"
+            title={hasSession ? 'Study words' : 'All caught up'}
+            sub={hasSession
+              ? `${sessionSize} words · tap the meaning`
+              : 'No words due · come back later'}
+            onPress={() => { startSession(); router.push('/session'); }}
             disabled={!hasSession}
-            activeOpacity={0.85}
-          >
-            <Text style={styles.modeIcon}>📖</Text>
-            <View style={styles.modeTextWrap}>
-              <Text style={[styles.modeTitle, !hasSession && styles.modeTitleDone]}>
-                {hasSession ? 'Study words' : 'All caught up'}
-              </Text>
-              <Text style={[styles.modeSub, !hasSession && styles.modeSubDone]}>
-                {hasSession
-                  ? `${sessionSize} words · tap the meaning`
-                  : 'No words due — come back later'}
-              </Text>
-            </View>
-          </TouchableOpacity>
-
-          {/* Write alphabet */}
-          <TouchableOpacity
-            style={[styles.mode, styles.modeSecondary]}
+          />
+          <ModeCard
+            color="#a78bfa"
+            icon="✍️"
+            title="Write alphabet"
+            sub={`Trace characters · ${charsLearned}/${ALL_CHARS.length} practiced`}
             onPress={() => router.push('/write')}
-            activeOpacity={0.85}
-          >
-            <Text style={styles.modeIcon}>✍️</Text>
-            <View style={styles.modeTextWrap}>
-              <Text style={[styles.modeTitle, styles.modeTitleDone]}>Write alphabet</Text>
-              <Text style={[styles.modeSub, styles.modeSubDone]}>
-                Trace characters · {charsLearned}/{ALL_CHARS.length} practiced
-              </Text>
-            </View>
-          </TouchableOpacity>
-
-          {/* Read stories */}
-          <TouchableOpacity
-            style={[styles.mode, styles.modeSecondary]}
+          />
+          <ModeCard
+            color="#34d399"
+            icon="📜"
+            title="Read & phrases"
+            sub="Illustrated stories · phrases by category"
             onPress={() => router.push('/read')}
-            activeOpacity={0.85}
-          >
-            <Text style={styles.modeIcon}>📜</Text>
-            <View style={styles.modeTextWrap}>
-              <Text style={[styles.modeTitle, styles.modeTitleDone]}>Read &amp; phrases</Text>
-              <Text style={[styles.modeSub, styles.modeSubDone]}>
-                Illustrated stories · phrases by category
-              </Text>
-            </View>
-          </TouchableOpacity>
+          />
         </View>
 
-        {/* Decorative Thai skyline */}
-        <View style={styles.scene} pointerEvents="none">
-          <View style={styles.mountains}>
-            <PixelSprite sprite={SPRITES.mountains} size={SCREEN_W} opacity={0.28} />
+        {/* ── Pixel-art scene (in-flow, never overlaps buttons) ──── */}
+        <View style={styles.sceneWrap} pointerEvents="none">
+          <View style={styles.mountainsLayer}>
+            <PixelSprite sprite={SPRITES.mountains} size={SCREEN_W} opacity={0.22} />
           </View>
-          <View style={styles.skyline}>
-            <PixelSprite sprite={SPRITES.palm} size={42} opacity={0.85} />
-            <PixelSprite sprite={SPRITES.temple} size={96} opacity={0.9} />
-            <PixelSprite sprite={SPRITES.chedi} size={54} opacity={0.9} />
-            <PixelSprite sprite={SPRITES.lotus} size={40} opacity={0.85} />
+          <View style={styles.skylineLayer}>
+            <PixelSprite sprite={SPRITES.palm}   size={36} opacity={0.85} />
+            <PixelSprite sprite={SPRITES.temple} size={80} opacity={0.9}  />
+            <PixelSprite sprite={SPRITES.chedi}  size={46} opacity={0.9}  />
+            <PixelSprite sprite={SPRITES.lotus}  size={34} opacity={0.85} />
           </View>
         </View>
 
-      </View>
+      </ScrollView>
     </SafeAreaView>
+  );
+}
+
+function ModeCard({
+  color, icon, title, sub, onPress, disabled,
+}: {
+  color: string; icon: string; title: string; sub: string;
+  onPress: () => void; disabled?: boolean;
+}) {
+  return (
+    <TouchableOpacity
+      style={[styles.card, { borderLeftColor: color, backgroundColor: color + '12' }]}
+      onPress={onPress}
+      disabled={disabled}
+      activeOpacity={0.75}
+    >
+      <View style={[styles.cardIconBox, { backgroundColor: color + '28' }]}>
+        <Text style={styles.cardIconText}>{icon}</Text>
+      </View>
+      <View style={styles.cardBody}>
+        <Text style={[styles.cardTitle, disabled && styles.cardTitleDim]}>{title}</Text>
+        <Text style={styles.cardSub}>{sub}</Text>
+      </View>
+      <Text style={[styles.cardChevron, { color: disabled ? Colors.textDim : color }]}>›</Text>
+    </TouchableOpacity>
   );
 }
 
@@ -153,84 +150,83 @@ function StatBox({ value, label, color }: { value: number; label: string; color:
 
 const styles = StyleSheet.create({
   loading: { flex: 1, backgroundColor: Colors.bg, alignItems: 'center', justifyContent: 'center' },
-  safe: { flex: 1, backgroundColor: Colors.bg },
-  container: {
-    flex: 1,
-    paddingHorizontal: 28,
-    paddingTop: 36,
-    position: 'relative',
+  safe:    { flex: 1, backgroundColor: Colors.bg },
+
+  content: {
+    paddingHorizontal: 24,
+    paddingTop: 24,
+    paddingBottom: 0,
   },
-  header: { alignItems: 'center', gap: 4 },
-  title: { color: Colors.text, fontSize: 50, fontWeight: '200', letterSpacing: 4, marginTop: 8 },
-  subtitle: { color: Colors.textDim, fontSize: 13, letterSpacing: 8 },
+
+  // ── Hero ──────────────────────────────────────────────────────────
+  hero: { alignItems: 'center', gap: 2, marginBottom: 22 },
+  title: {
+    color: Colors.text,
+    fontSize: 44,
+    fontWeight: '200',
+    letterSpacing: 4,
+    marginTop: 8,
+  },
+  subtitle: { color: Colors.textDim, fontSize: 11, letterSpacing: 7 },
+
+  // ── Stats ─────────────────────────────────────────────────────────
   statsRow: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.card,
-    borderRadius: 20,
-    paddingVertical: 24,
+    borderRadius: 16,
+    paddingVertical: 16,
     borderWidth: 1,
     borderColor: Colors.border,
-    marginTop: 28,
+    marginBottom: 14,
   },
-  statBox: { flex: 1, alignItems: 'center', gap: 8 },
-  statValue: { fontSize: 32, fontWeight: '700' },
-  statLabel: { color: Colors.textDim, fontSize: 12, letterSpacing: 1.5 },
-  statDivider: { width: 1, height: 40, backgroundColor: Colors.border },
-  modes: { gap: 14, marginTop: 22 },
-  mode: {
+  statBox:    { flex: 1, alignItems: 'center', gap: 6 },
+  statValue:  { fontSize: 26, fontWeight: '700' },
+  statLabel:  { color: Colors.textDim, fontSize: 11, letterSpacing: 1.5 },
+  statDivider:{ width: 1, height: 32, backgroundColor: Colors.border },
+
+  // ── Mode cards ────────────────────────────────────────────────────
+  modes: { gap: 10, marginBottom: 20 },
+
+  card: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 16,
-    borderRadius: 18,
-    paddingVertical: 22,
-    paddingHorizontal: 22,
-  },
-  modePrimary: {
-    backgroundColor: Colors.accent,
-    shadowColor: Colors.accent,
-    shadowOpacity: 0.3,
-    shadowRadius: 16,
-    elevation: 8,
-  },
-  modeSecondary: {
-    backgroundColor: Colors.card,
+    gap: 14,
+    borderRadius: 16,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
     borderWidth: 1,
     borderColor: Colors.border,
+    borderLeftWidth: 3,
   },
-  modeDone: {
-    backgroundColor: Colors.card,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    shadowOpacity: 0,
-    elevation: 0,
+  cardIconBox: {
+    width: 44, height: 44, borderRadius: 12,
+    alignItems: 'center', justifyContent: 'center',
   },
-  modeIcon: { fontSize: 30 },
-  modeTextWrap: { flex: 1, gap: 4 },
-  modeTitle: { color: Colors.bg, fontSize: 19, fontWeight: '700' },
-  modeTitleDone: { color: Colors.text },
-  modeSub: { color: 'rgba(13,13,26,0.7)', fontSize: 13 },
-  modeSubDone: { color: Colors.textDim },
+  cardIconText:  { fontSize: 22 },
+  cardBody:      { flex: 1, gap: 3 },
+  cardTitle:     { color: Colors.text, fontSize: 15, fontWeight: '700' },
+  cardTitleDim:  { color: Colors.textDim },
+  cardSub:       { color: Colors.textDim, fontSize: 12, lineHeight: 17 },
+  cardChevron:   { fontSize: 26, fontWeight: '200' },
 
-  scene: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
-    alignItems: 'center',
-    justifyContent: 'flex-end',
+  // ── Pixel-art decorative scene ────────────────────────────────────
+  sceneWrap: {
+    height: 86,
+    marginHorizontal: -24,   // bleed to screen edges
+    overflow: 'hidden',
   },
-  mountains: {
+  mountainsLayer: {
     position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
+    bottom: 0, left: 0, right: 0,
   },
-  skyline: {
+  skylineLayer: {
+    position: 'absolute',
+    bottom: 0, left: 0, right: 0,
     flexDirection: 'row',
     alignItems: 'flex-end',
     justifyContent: 'center',
     gap: 14,
-    paddingBottom: 6,
+    paddingBottom: 4,
   },
 });
