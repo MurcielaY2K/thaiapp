@@ -128,7 +128,7 @@ export default function WriteScreen() {
           mode === 'watch' ? (
             <StrokeAnimation key={`${char.id}-watch`} charId={char.id} char={char.char} size={canvasSize} />
           ) : (
-            <TraceCanvas key={`${char.id}-trace`} char={char.char} size={canvasSize} />
+            <TraceCanvas key={`${char.id}-trace`} char={char.char} charName={char.name} size={canvasSize} />
           )
         )}
       </View>

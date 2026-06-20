@@ -15,21 +15,23 @@ const GHOST_COLOR     = 'rgba(255,255,255,0.15)';
 const HIT_COLOR       = 'rgba(46,204,113,0.40)';
 const MISS_COLOR      = 'rgba(231,76,60,0.38)';
 
-function speak(text: string) {
+function speak(text: string, lang = 'th-TH') {
   if (Platform.OS !== 'web') return;
   const w = window as any;
   if (!w.speechSynthesis) return;
   w.speechSynthesis.cancel();
   const u = new w.SpeechSynthesisUtterance(text);
-  u.lang = 'th-TH'; u.rate = 0.7;
-  const thai = (w.speechSynthesis.getVoices?.() ?? [])
-    .find((v: any) => /th(-|_)?/i.test(v.lang));
-  if (thai) u.voice = thai;
+  u.lang = lang; u.rate = 0.7;
+  if (lang.startsWith('th')) {
+    const thai = (w.speechSynthesis.getVoices?.() ?? [])
+      .find((v: any) => /th(-|_)?/i.test(v.lang));
+    if (thai) u.voice = thai;
+  }
   w.speechSynthesis.speak(u);
 }
 
-export default function TraceCanvas({ char, size }: { char: string; size?: number }) {
-  if (Platform.OS === 'web') return <WebTrace char={char} fixedSize={size} />;
+export default function TraceCanvas({ char, charName, size }: { char: string; charName?: string; size?: number }) {
+  if (Platform.OS === 'web') return <WebTrace char={char} charName={charName} fixedSize={size} />;
   return <NativeTrace char={char} size={size} />;
 }
 
@@ -37,7 +39,7 @@ export default function TraceCanvas({ char, size }: { char: string; size?: numbe
 
 type ScanState = 'idle' | 'scanning' | 'done';
 
-function WebTrace({ char, fixedSize }: { char: string; fixedSize?: number }) {
+function WebTrace({ char, charName, fixedSize }: { char: string; charName?: string; fixedSize?: number }) {
   const [measured, setMeasured]     = useState(0);
   const [showGuide, setShowGuide]   = useState(true);
   const [hasStrokes, setHasStrokes] = useState(false);
@@ -79,12 +81,16 @@ function WebTrace({ char, fixedSize }: { char: string; fixedSize?: number }) {
     ctx.beginPath(); ctx.moveTo(w / 2, 0); ctx.lineTo(w / 2, w); ctx.stroke();
     ctx.setLineDash([]);
 
-    // ghost
+    // ghost — auto-scale font so wide vowels (เอะ etc.) don't overflow
     if (showRef.current) {
       ctx.fillStyle = GHOST_COLOR;
-      ctx.font = `300 ${w * 0.66}px ${FONT}`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
+      let ghostSize = w * 0.66;
+      ctx.font = `300 ${ghostSize}px ${FONT}`;
+      const gw = ctx.measureText(char).width;
+      if (gw > w * 0.85) ghostSize = Math.floor(ghostSize * (w * 0.85) / gw);
+      ctx.font = `300 ${ghostSize}px ${FONT}`;
       ctx.fillText(char, w / 2, w / 2);
     }
 
@@ -188,10 +194,14 @@ function WebTrace({ char, fixedSize }: { char: string; fixedSize?: number }) {
     const refCtx = refCv.getContext('2d')!;
     refCtx.fillStyle   = '#fff';
     refCtx.strokeStyle = '#fff';
-    refCtx.lineWidth   = STROKE * dpr * 3.0; // very generous acceptance zone (finger tracing)
-    refCtx.font = `300 ${w * 0.66}px ${FONT}`;
     refCtx.textAlign = 'center';
     refCtx.textBaseline = 'middle';
+    let refFontSize = w * 0.66;
+    refCtx.font = `300 ${refFontSize}px ${FONT}`;
+    const refTW = refCtx.measureText(char).width;
+    if (refTW > w * 0.85) refFontSize = Math.floor(refFontSize * (w * 0.85) / refTW);
+    refCtx.font = `300 ${refFontSize}px ${FONT}`;
+    refCtx.lineWidth = STROKE * dpr * 3.0; // very generous acceptance zone (finger tracing)
     refCtx.strokeText(char, w / 2, w / 2);
     refCtx.fillText(char, w / 2, w / 2);
     const refData = refCtx.getImageData(0, 0, w, w).data;
@@ -329,7 +339,7 @@ function WebTrace({ char, fixedSize }: { char: string; fixedSize?: number }) {
             accent
           />
         )}
-        <Tool label="Listen" icon="🔊" onPress={() => speak(char)} />
+        <Tool label="Listen" icon="🔊" onPress={() => speak(charName ?? char, charName ? 'en-US' : 'th-TH')} />
       </View>
     </View>
   );

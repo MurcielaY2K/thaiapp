@@ -59,7 +59,7 @@ export default function StrokeAnimation({ charId, char, size: fixedSize }: Props
     return (
       <View style={cardStyle} onLayout={onLayout}>
         <View style={styles.ghostWrap}>
-          <Text style={[styles.ghost, size ? { fontSize: size * 0.6 } : {}]}>{char}</Text>
+          <Text style={[styles.ghost, size ? { fontSize: size * 0.5 } : {}]}>{char}</Text>
         </View>
       </View>
     );
@@ -113,7 +113,14 @@ function RevealCanvas({
     const ctx = cv.getContext('2d')!;
     const cx = w / 2;
     const cy = w / 2;
-    const fontSpec = `400 ${w * 0.66}px ${FONT}`;
+    // Auto-scale: multi-codepoint vowels (e.g. เอะ) can exceed canvas width at 0.66em
+    let fontSize = w * 0.66;
+    ctx.font = `400 ${fontSize}px ${FONT}`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    const measuredW = ctx.measureText(char).width;
+    if (measuredW > w * 0.85) fontSize = Math.floor(fontSize * (w * 0.85) / measuredW);
+    const fontSpec = `400 ${fontSize}px ${FONT}`;
     let start = 0;
 
     const frame = (now: number) => {
