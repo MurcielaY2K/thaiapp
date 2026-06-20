@@ -5,6 +5,7 @@ import { VOCABULARY, type Word } from '../data/vocabulary';
 const SESSION_SIZE = 20;
 const STORAGE_KEY = '@thaiapp_progress';
 const WRITING_KEY = '@thaiapp_writing';
+const STREAK_KEY  = '@thaiapp_streak';
 const MIN_EASE = 1.3;
 
 export interface WordProgress {
@@ -26,11 +27,14 @@ interface SrsStore {
   writing: Record<string, number>; // char id -> times practiced
   currentSession: Word[];
   isLoading: boolean;
+  streak: number;       // consecutive days with a completed session
+  lastStudyDay: string; // ISO date string "YYYY-MM-DD"
 
   load: () => Promise<void>;
   startSession: () => void;
   recordAnswer: (wordId: string, correct: boolean) => void;
   markWritten: (charId: string) => void;
+  bumpStreak: () => void;
   getStats: () => Stats;
 }
 
@@ -39,16 +43,22 @@ export const useSrsStore = create<SrsStore>((set, get) => ({
   writing: {},
   currentSession: [],
   isLoading: true,
+  streak: 0,
+  lastStudyDay: '',
 
   load: async () => {
     try {
-      const [json, wjson] = await Promise.all([
+      const [json, wjson, sjson] = await Promise.all([
         AsyncStorage.getItem(STORAGE_KEY),
         AsyncStorage.getItem(WRITING_KEY),
+        AsyncStorage.getItem(STREAK_KEY),
       ]);
+      const streakData = sjson ? JSON.parse(sjson) : { streak: 0, lastStudyDay: '' };
       set({
         progress: json ? JSON.parse(json) : {},
         writing: wjson ? JSON.parse(wjson) : {},
+        streak: streakData.streak ?? 0,
+        lastStudyDay: streakData.lastStudyDay ?? '',
         isLoading: false,
       });
     } catch {
@@ -98,6 +108,16 @@ export const useSrsStore = create<SrsStore>((set, get) => ({
     };
     set({ progress: updated });
     AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+  },
+
+  bumpStreak: () => {
+    const { streak, lastStudyDay } = get();
+    const today = new Date().toISOString().slice(0, 10);
+    if (lastStudyDay === today) return; // already bumped today
+    const yesterday = new Date(Date.now() - 86_400_000).toISOString().slice(0, 10);
+    const newStreak = lastStudyDay === yesterday ? streak + 1 : 1;
+    set({ streak: newStreak, lastStudyDay: today });
+    AsyncStorage.setItem(STREAK_KEY, JSON.stringify({ streak: newStreak, lastStudyDay: today }));
   },
 
   markWritten: (charId) => {

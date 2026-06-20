@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity, SafeAreaView, Platform,
+  Animated, Easing,
 } from 'react-native';
 import { router } from 'expo-router';
 import * as Haptics from 'expo-haptics';
@@ -12,6 +13,19 @@ import { SPRITES } from '../data/sprites';
 
 const ALL_ENGLISH = VOCABULARY.map(w => w.en);
 
+function speak(text: string) {
+  if (Platform.OS !== 'web') return;
+  const w = window as any;
+  if (!w.speechSynthesis) return;
+  w.speechSynthesis.cancel();
+  const u = new w.SpeechSynthesisUtterance(text);
+  u.lang = 'th-TH'; u.rate = 0.75;
+  const thai = (w.speechSynthesis.getVoices?.() ?? [])
+    .find((v: any) => /th(-|_)?/i.test(v.lang));
+  if (thai) u.voice = thai;
+  w.speechSynthesis.speak(u);
+}
+
 function makeOptions(correct: string): string[] {
   const others = ALL_ENGLISH
     .filter(e => e !== correct)
@@ -21,7 +35,7 @@ function makeOptions(correct: string): string[] {
 }
 
 export default function SessionScreen() {
-  const { currentSession, recordAnswer } = useSrsStore();
+  const { currentSession, recordAnswer, bumpStreak } = useSrsStore();
 
   const [index, setIndex] = useState(0);
   const [options, setOptions] = useState<string[]>(() =>
@@ -29,7 +43,25 @@ export default function SessionScreen() {
   );
   const [selected, setSelected] = useState<string | null>(null);
   const [score, setScore] = useState(0);
+  const [combo, setCombo] = useState(0);
   const [done, setDone] = useState(false);
+
+  const cardScale = useRef(new Animated.Value(0.92)).current;
+  const comboScale = useRef(new Animated.Value(1)).current;
+
+  const animateCard = () => {
+    cardScale.setValue(0.92);
+    Animated.spring(cardScale, {
+      toValue: 1, useNativeDriver: true, tension: 120, friction: 8,
+    }).start();
+  };
+
+  const animateCombo = () => {
+    comboScale.setValue(1.5);
+    Animated.spring(comboScale, {
+      toValue: 1, useNativeDriver: true, tension: 200, friction: 6,
+    }).start();
+  };
 
   useEffect(() => {
     if (currentSession.length === 0) router.replace('/');
@@ -40,6 +72,10 @@ export default function SessionScreen() {
     if (w) {
       setOptions(makeOptions(w.en));
       setSelected(null);
+      animateCard();
+      // Auto-speak the Thai word after a short delay for the animation
+      const t = setTimeout(() => speak(w.th), 400);
+      return () => clearTimeout(t);
     }
   }, [index]);
 
@@ -61,36 +97,46 @@ export default function SessionScreen() {
     }
 
     recordAnswer(word.id, correct);
-    if (correct) setScore(s => s + 1);
+    if (correct) {
+      setScore(s => s + 1);
+      setCombo(c => { const next = c + 1; if (next > 1) animateCombo(); return next; });
+    } else {
+      setCombo(0);
+    }
 
     setTimeout(() => {
       if (index + 1 >= currentSession.length) {
+        bumpStreak();
         setDone(true);
       } else {
         setIndex(i => i + 1);
       }
-    }, 700);
+    }, 800);
   };
 
   if (done) {
     const wrong = currentSession.length - score;
+    const pct = Math.round((score / currentSession.length) * 100);
     const perfect = wrong === 0;
+    const stars = pct >= 90 ? 3 : pct >= 60 ? 2 : pct >= 30 ? 1 : 0;
     return (
       <SafeAreaView style={styles.safe}>
         <View style={styles.done}>
           <PixelSprite sprite={perfect ? SPRITES.garuda : SPRITES.naga} size={120} />
+          <Text style={styles.starsRow}>{'⭐'.repeat(stars)}{'☆'.repeat(3 - stars)}</Text>
           <Text style={styles.doneTitle}>
-            {perfect ? 'Perfect!' : 'Session done!'}
+            {perfect ? 'Perfect! 🎉' : pct >= 60 ? 'Great work!' : 'Keep going!'}
           </Text>
           <View style={styles.doneScoreRow}>
             <Text style={styles.doneCorrect}>{score} correct</Text>
             {wrong > 0 && <Text style={styles.doneWrong}>  ·  {wrong} missed</Text>}
           </View>
+          <Text style={styles.donePct}>{pct}%</Text>
           {wrong > 0 && (
             <Text style={styles.doneHint}>Missed words will come back sooner.</Text>
           )}
           <TouchableOpacity style={styles.doneBtn} onPress={() => router.replace('/')}>
-            <Text style={styles.doneBtnText}>Done</Text>
+            <Text style={styles.doneBtnText}>Done  →</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -101,16 +147,32 @@ export default function SessionScreen() {
 
   return (
     <SafeAreaView style={styles.safe}>
-      {/* Progress bar */}
-      <View style={styles.progressBar}>
-        <View style={[styles.progressFill, { width: `${progress * 100}%` as any }]} />
+      {/* Top bar with progress and close */}
+      <View style={styles.topBar}>
+        <TouchableOpacity style={styles.closeBtn} onPress={() => router.replace('/')} activeOpacity={0.7}>
+          <Text style={styles.closeBtnText}>✕</Text>
+        </TouchableOpacity>
+        <View style={styles.progressBar}>
+          <Animated.View style={[styles.progressFill, { width: `${progress * 100}%` as any }]} />
+        </View>
+        <Text style={styles.progressText}>{index + 1}/{currentSession.length}</Text>
       </View>
-      <Text style={styles.progressText}>{index + 1} / {currentSession.length}</Text>
 
-      {/* Thai word */}
-      <View style={styles.wordArea}>
+      {/* Combo streak */}
+      {combo >= 2 && (
+        <Animated.View style={[styles.comboWrap, { transform: [{ scale: comboScale }] }]}>
+          <Text style={styles.comboText}>🔥 {combo} streak</Text>
+        </Animated.View>
+      )}
+
+      {/* Thai word card */}
+      <Animated.View style={[styles.wordArea, { transform: [{ scale: cardScale }] }]}>
+        <Text style={styles.categoryTag}>{word.category.toUpperCase()}</Text>
         <Text style={styles.thaiWord}>{word.th}</Text>
-      </View>
+        <TouchableOpacity style={styles.speakBtn} onPress={() => speak(word.th)} activeOpacity={0.7}>
+          <Text style={styles.speakBtnText}>🔊 tap to hear</Text>
+        </TouchableOpacity>
+      </Animated.View>
 
       {/* Answer options */}
       <View style={styles.options}>
@@ -137,7 +199,7 @@ export default function SessionScreen() {
                 showCorrect && styles.optionTextCorrect,
                 showWrong && styles.optionTextWrong,
               ]}>
-                {opt}
+                {showCorrect ? '✓  ' : showWrong ? '✗  ' : ''}{opt}
               </Text>
             </TouchableOpacity>
           );
@@ -149,44 +211,93 @@ export default function SessionScreen() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: Colors.bg },
+
+  topBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: 6,
+  },
+  closeBtn: {
+    width: 34, height: 34, borderRadius: 17,
+    backgroundColor: Colors.card, alignItems: 'center', justifyContent: 'center',
+    borderWidth: 1, borderColor: Colors.border,
+  },
+  closeBtnText: { color: Colors.textDim, fontSize: 14 },
   progressBar: {
-    height: 4,
+    flex: 1,
+    height: 6,
     backgroundColor: Colors.border,
+    borderRadius: 3,
+    overflow: 'hidden',
   },
   progressFill: {
     height: '100%',
     backgroundColor: Colors.accent,
+    borderRadius: 3,
   },
   progressText: {
     color: Colors.textDim,
-    fontSize: 13,
+    fontSize: 12,
+    letterSpacing: 0.5,
+    width: 40,
     textAlign: 'right',
-    paddingHorizontal: 24,
-    paddingTop: 10,
-    letterSpacing: 1,
   },
+
+  comboWrap: {
+    alignSelf: 'center',
+    backgroundColor: 'rgba(255,159,67,0.15)',
+    borderRadius: 20,
+    paddingVertical: 5,
+    paddingHorizontal: 16,
+    borderWidth: 1,
+    borderColor: Colors.accent,
+    marginTop: 4,
+  },
+  comboText: { color: Colors.accent, fontSize: 14, fontWeight: '700' },
+
   wordArea: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 32,
+    gap: 12,
+  },
+  categoryTag: {
+    color: Colors.textDim,
+    fontSize: 10,
+    letterSpacing: 2.5,
+    fontWeight: '600',
   },
   thaiWord: {
     color: Colors.text,
-    fontSize: 60,
-    fontWeight: '300',
+    fontSize: 72,
+    fontWeight: '200',
     textAlign: 'center',
-    letterSpacing: 3,
+    letterSpacing: 2,
+    lineHeight: 90,
   },
+  speakBtn: {
+    paddingVertical: 7,
+    paddingHorizontal: 18,
+    borderRadius: 20,
+    backgroundColor: Colors.card,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  speakBtnText: { color: Colors.textDim, fontSize: 13 },
+
   options: {
     paddingHorizontal: 20,
     paddingBottom: 36,
-    gap: 12,
+    gap: 10,
   },
   option: {
     backgroundColor: Colors.card,
     borderRadius: 16,
-    paddingVertical: 19,
+    paddingVertical: 17,
     paddingHorizontal: 20,
     borderWidth: 1.5,
     borderColor: Colors.border,
@@ -202,52 +313,55 @@ const styles = StyleSheet.create({
   },
   optionText: {
     color: Colors.text,
-    fontSize: 17,
+    fontSize: 16,
     fontWeight: '500',
   },
-  optionTextCorrect: { color: Colors.correct },
+  optionTextCorrect: { color: Colors.correct, fontWeight: '700' },
   optionTextWrong: { color: Colors.wrong },
+
   // Done screen
   done: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 16,
+    gap: 12,
     paddingHorizontal: 32,
-    backgroundColor: Colors.bg,
   },
-  doneEmoji: { fontSize: 72, marginBottom: 8 },
+  starsRow: { fontSize: 32, letterSpacing: 4 },
   doneTitle: {
     color: Colors.text,
-    fontSize: 30,
+    fontSize: 28,
     fontWeight: '700',
     textAlign: 'center',
+  },
+  donePct: {
+    color: Colors.accent,
+    fontSize: 48,
+    fontWeight: '200',
+    letterSpacing: 2,
   },
   doneScoreRow: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  doneCorrect: { color: Colors.correct, fontSize: 18, fontWeight: '600' },
-  doneWrong: { color: Colors.textDim, fontSize: 18 },
+  doneCorrect: { color: Colors.correct, fontSize: 17, fontWeight: '600' },
+  doneWrong: { color: Colors.textDim, fontSize: 17 },
   doneHint: {
     color: Colors.textDim,
-    fontSize: 14,
+    fontSize: 13,
     textAlign: 'center',
   },
   doneBtn: {
     backgroundColor: Colors.accent,
     borderRadius: 16,
-    paddingVertical: 20,
+    paddingVertical: 18,
     paddingHorizontal: 56,
-    marginTop: 12,
-    shadowColor: Colors.accent,
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    elevation: 4,
+    marginTop: 8,
   },
   doneBtnText: {
     color: Colors.bg,
-    fontSize: 18,
+    fontSize: 17,
     fontWeight: '700',
+    letterSpacing: 0.5,
   },
 });

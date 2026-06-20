@@ -44,6 +44,23 @@ export default function StrokeAnimation({ charId, char, size: fixedSize }: Props
   const [measured, setMeasured] = useState(0);
   const [tick, setTick] = useState(0);
   const [done, setDone] = useState(false);
+  const autoReplayRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Auto-replay once after a 1.8s pause so learners see the stroke path loop
+  const handleDone = React.useCallback(() => {
+    setDone(true);
+    autoReplayRef.current = setTimeout(() => {
+      setDone(false);
+      setTick(t => t + 1);
+    }, 1800);
+  }, []);
+
+  // Clear timer when char changes
+  React.useEffect(() => {
+    setDone(false);
+    setTick(0);
+    return () => { if (autoReplayRef.current) clearTimeout(autoReplayRef.current); };
+  }, [charId]);
 
   const size = fixedSize && fixedSize > 0 ? Math.round(fixedSize) : measured;
 
@@ -73,23 +90,25 @@ export default function StrokeAnimation({ charId, char, size: fixedSize }: Props
             key={`${charId}-${tick}`}
             char={char}
             size={size}
-            onDone={() => setDone(true)}
+            onDone={handleDone}
           />
         )}
       </View>
       <View style={[styles.toolbar, fixedSize ? { width: size } : null]}>
         <View style={styles.badge}>
-          <Text style={styles.badgeText}>watch &amp; learn</Text>
+          <Text style={styles.badgeText}>{done ? '↺  looping…' : 'watch & learn'}</Text>
         </View>
-        {done && (
-          <TouchableOpacity
-            style={styles.replayBtn}
-            onPress={() => { setDone(false); setTick(t => t + 1); }}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.replayText}>↺  Replay</Text>
-          </TouchableOpacity>
-        )}
+        <TouchableOpacity
+          style={styles.replayBtn}
+          onPress={() => {
+            if (autoReplayRef.current) clearTimeout(autoReplayRef.current);
+            setDone(false);
+            setTick(t => t + 1);
+          }}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.replayText}>↺  Replay</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );

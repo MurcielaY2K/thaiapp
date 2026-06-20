@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import {
   View, Text, StyleSheet, PanResponder, LayoutChangeEvent,
-  TouchableOpacity, Platform, GestureResponderEvent,
+  TouchableOpacity, Platform, GestureResponderEvent, Animated, Easing,
 } from 'react-native';
 import { Colors } from '../constants/colors';
 
@@ -301,6 +301,21 @@ function WebTrace({ char, charName, fixedSize }: { char: string; charName?: stri
     style: { display: 'block', borderRadius: 20, touchAction: 'none' },
   });
 
+  const celebAnim = useRef(new Animated.Value(0)).current;
+  const prevAccuracy = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (accuracy !== null && accuracy >= 65 && prevAccuracy.current === null) {
+      celebAnim.setValue(0);
+      Animated.sequence([
+        Animated.timing(celebAnim, { toValue: 1, duration: 400, easing: Easing.out(Easing.back(2)), useNativeDriver: true }),
+        Animated.delay(800),
+        Animated.timing(celebAnim, { toValue: 0, duration: 300, useNativeDriver: true }),
+      ]).start();
+    }
+    prevAccuracy.current = accuracy;
+  }, [accuracy]);
+
   const scoreColor =
     accuracy == null ? Colors.text :
     accuracy >= 65   ? Colors.correct :
@@ -321,9 +336,19 @@ function WebTrace({ char, charName, fixedSize }: { char: string; charName?: stri
           <View style={styles.scoreBadge}>
             <Text style={[styles.scoreNum, { color: scoreColor }]}>{accuracy}%</Text>
             <Text style={styles.scoreLabel}>
-              {accuracy >= 65 ? 'Great!' : accuracy >= 35 ? 'Good effort' : 'Keep practicing'}
+              {accuracy >= 65 ? '🎉 Great!' : accuracy >= 35 ? '👍 Good effort' : '💪 Keep practicing'}
             </Text>
           </View>
+        )}
+
+        {/* Celebration burst */}
+        {accuracy !== null && accuracy >= 65 && (
+          <Animated.Text style={[styles.celebEmoji, {
+            opacity: celebAnim,
+            transform: [{ scale: celebAnim.interpolate({ inputRange: [0, 1], outputRange: [0.3, 1.4] }) }],
+          }]}>
+            ✨
+          </Animated.Text>
         )}
       </View>
 
@@ -449,6 +474,13 @@ const styles = StyleSheet.create({
   },
   scoreNum: { fontSize: 20, fontWeight: '700' },
   scoreLabel: { color: Colors.textDim, fontSize: 14 },
+  celebEmoji: {
+    position: 'absolute',
+    bottom: 20,
+    alignSelf: 'center',
+    fontSize: 52,
+    textAlign: 'center',
+  },
   tools: { flexDirection: 'row', justifyContent: 'center', gap: 10, marginTop: 14, flexWrap: 'wrap' },
   tool: {
     alignItems: 'center', gap: 5, paddingVertical: 8, paddingHorizontal: 14,

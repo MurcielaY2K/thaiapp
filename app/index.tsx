@@ -13,7 +13,7 @@ import { SPRITES } from '../data/sprites';
 const SCREEN_W = Dimensions.get('window').width;
 
 export default function HomeScreen() {
-  const { load, isLoading, startSession, getStats, writing } = useSrsStore();
+  const { load, isLoading, startSession, getStats, writing, streak } = useSrsStore();
   const bob = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -54,6 +54,15 @@ export default function HomeScreen() {
           <Text style={styles.title}>ภาษาไทย</Text>
           <Text style={styles.subtitle}>T H A I</Text>
         </View>
+
+        {/* ── Streak banner ──────────────────────────────────────── */}
+        {streak > 0 && (
+          <View style={styles.streakBanner}>
+            <Text style={styles.streakFire}>🔥</Text>
+            <Text style={styles.streakCount}>{streak}</Text>
+            <Text style={styles.streakLabel}>day streak</Text>
+          </View>
+        )}
 
         {/* ── Stats ──────────────────────────────────────────────── */}
         <View style={styles.statsRow}>
@@ -168,6 +177,23 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   subtitle: { color: Colors.textDim, fontSize: 11, letterSpacing: 7 },
+
+  // ── Streak ───────────────────────────────────────────────────────
+  streakBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: 'rgba(255,159,67,0.10)',
+    borderRadius: 14,
+    paddingVertical: 10,
+    paddingHorizontal: 18,
+    borderWidth: 1,
+    borderColor: 'rgba(255,159,67,0.35)',
+    marginBottom: 12,
+  },
+  streakFire:  { fontSize: 22 },
+  streakCount: { color: Colors.accent, fontSize: 26, fontWeight: '700' },
+  streakLabel: { color: Colors.textDim, fontSize: 13, letterSpacing: 0.5 },
 
   // ── Stats ─────────────────────────────────────────────────────────
   statsRow: {

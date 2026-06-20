@@ -1,6 +1,6 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import {
-  View, Text, StyleSheet, TouchableOpacity, SafeAreaView, LayoutChangeEvent,
+  View, Text, StyleSheet, TouchableOpacity, SafeAreaView, LayoutChangeEvent, Platform,
 } from 'react-native';
 import { router } from 'expo-router';
 import { useSrsStore } from '../store/srsStore';
@@ -8,6 +8,21 @@ import { CHAR_GROUPS, type CharType } from '../data/alphabet';
 import { Colors } from '../constants/colors';
 import TraceCanvas from '../components/TraceCanvas';
 import StrokeAnimation from '../components/StrokeAnimation';
+
+function speak(text: string, lang = 'th-TH') {
+  if (Platform.OS !== 'web') return;
+  const w = window as any;
+  if (!w.speechSynthesis) return;
+  w.speechSynthesis.cancel();
+  const u = new w.SpeechSynthesisUtterance(text);
+  u.lang = lang; u.rate = 0.75;
+  if (lang.startsWith('th')) {
+    const thai = (w.speechSynthesis.getVoices?.() ?? [])
+      .find((v: any) => /th(-|_)?/i.test(v.lang));
+    if (thai) u.voice = thai;
+  }
+  w.speechSynthesis.speak(u);
+}
 
 type Mode = 'watch' | 'trace';
 
@@ -29,6 +44,12 @@ export default function WriteScreen() {
   const chars  = group.chars;
   const char   = chars[index];
   const practiced = writing[char.id] ?? 0;
+
+  // Auto-speak character name whenever index or groupKey changes
+  useEffect(() => {
+    const t = setTimeout(() => speak(char.name, 'en-US'), 300);
+    return () => clearTimeout(t);
+  }, [char.id]);
 
   const switchGroup = (key: CharType) => {
     setGroupKey(key);
