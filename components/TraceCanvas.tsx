@@ -28,21 +28,23 @@ function speak(text: string) {
   w.speechSynthesis.speak(u);
 }
 
-export default function TraceCanvas({ char }: { char: string }) {
-  if (Platform.OS === 'web') return <WebTrace char={char} />;
-  return <NativeTrace char={char} />;
+export default function TraceCanvas({ char, size }: { char: string; size?: number }) {
+  if (Platform.OS === 'web') return <WebTrace char={char} fixedSize={size} />;
+  return <NativeTrace char={char} size={size} />;
 }
 
 // ── Web: canvas + pointer capture + accuracy scanner ─────────────────────────
 
 type ScanState = 'idle' | 'scanning' | 'done';
 
-function WebTrace({ char }: { char: string }) {
-  const [size, setSize]             = useState(0);
+function WebTrace({ char, fixedSize }: { char: string; fixedSize?: number }) {
+  const [measured, setMeasured]     = useState(0);
   const [showGuide, setShowGuide]   = useState(true);
   const [hasStrokes, setHasStrokes] = useState(false);
   const [scanState, setScanState]   = useState<ScanState>('idle');
   const [accuracy, setAccuracy]     = useState<number | null>(null);
+
+  const size = fixedSize && fixedSize > 0 ? Math.round(fixedSize) : measured;
 
   const canvasRef   = useRef<HTMLCanvasElement | null>(null);
   const strokesRef  = useRef<Point[][]>([]);
@@ -50,8 +52,9 @@ function WebTrace({ char }: { char: string }) {
   const showRef     = useRef(true);
   const scanRafRef  = useRef(0);
 
-  const onLayout = (e: LayoutChangeEvent) =>
-    setSize(Math.round(e.nativeEvent.layout.width));
+  const onLayout = (e: LayoutChangeEvent) => {
+    if (!fixedSize) setMeasured(Math.round(e.nativeEvent.layout.width));
+  };
 
   // ── draw everything onto main canvas ───────────────────────────────────────
   const redraw = useCallback(() => {
@@ -185,7 +188,7 @@ function WebTrace({ char }: { char: string }) {
     const refCtx = refCv.getContext('2d')!;
     refCtx.fillStyle   = '#fff';
     refCtx.strokeStyle = '#fff';
-    refCtx.lineWidth   = STROKE * dpr * 2.2; // generous acceptance zone
+    refCtx.lineWidth   = STROKE * dpr * 3.0; // very generous acceptance zone (finger tracing)
     refCtx.font = `300 ${w * 0.66}px ${FONT}`;
     refCtx.textAlign = 'center';
     refCtx.textBaseline = 'middle';
@@ -232,7 +235,10 @@ function WebTrace({ char }: { char: string }) {
       refCols++;
       if (hasInk) { colResult[x] = 'hit'; hitCols++; } else colResult[x] = 'miss';
     }
-    const finalAccuracy = refCols > 0 ? Math.round((hitCols / refCols) * 100) : 0;
+    // Forgiving curve: tracing with a finger on glass is imprecise, so reward
+    // coverage generously rather than demanding pixel-perfect overlap.
+    const raw = refCols > 0 ? (hitCols / refCols) * 100 : 0;
+    const finalAccuracy = Math.min(100, Math.round(raw * 1.18 + 8));
 
     // Animate the scan
     const SPEED = Math.ceil(cols / 55); // finish in ~55 frames
@@ -287,25 +293,29 @@ function WebTrace({ char }: { char: string }) {
 
   const scoreColor =
     accuracy == null ? Colors.text :
-    accuracy >= 75   ? Colors.correct :
-    accuracy >= 45   ? Colors.accent  :
+    accuracy >= 65   ? Colors.correct :
+    accuracy >= 35   ? Colors.accent  :
     Colors.wrong;
 
-  return (
-    <View>
-      <View style={styles.canvas} onLayout={onLayout}>
-        {size > 0 && canvasEl}
-      </View>
+  const canvasBoxStyle = fixedSize
+    ? [styles.canvas, { width: size, height: size }]
+    : styles.canvas;
 
-      {/* Score badge */}
-      {accuracy !== null && (
-        <View style={styles.scoreBadge}>
-          <Text style={[styles.scoreNum, { color: scoreColor }]}>{accuracy}%</Text>
-          <Text style={styles.scoreLabel}>
-            {accuracy >= 75 ? 'Great!' : accuracy >= 45 ? 'Good effort' : 'Keep practicing'}
-          </Text>
-        </View>
-      )}
+  return (
+    <View style={styles.wrap}>
+      <View style={canvasBoxStyle} onLayout={onLayout}>
+        {size > 0 && canvasEl}
+
+        {/* Score badge — overlays the canvas so layout height never shifts */}
+        {accuracy !== null && (
+          <View style={styles.scoreBadge}>
+            <Text style={[styles.scoreNum, { color: scoreColor }]}>{accuracy}%</Text>
+            <Text style={styles.scoreLabel}>
+              {accuracy >= 65 ? 'Great!' : accuracy >= 35 ? 'Good effort' : 'Keep practicing'}
+            </Text>
+          </View>
+        )}
+      </View>
 
       {/* Tools */}
       <View style={styles.tools}>
@@ -326,7 +336,7 @@ function WebTrace({ char }: { char: string }) {
 }
 
 // ── Native fallback ───────────────────────────────────────────────────────────
-function NativeTrace({ char }: { char: string }) {
+function NativeTrace({ char, size }: { char: string; size?: number }) {
   const strokesRef = useRef<Point[][]>([]);
   const [, force] = useReducer((x: number) => x + 1, 0);
   const [showGuide, toggleGuide] = useReducer((x: boolean) => !x, true);
@@ -353,8 +363,8 @@ function NativeTrace({ char }: { char: string }) {
   for (const s of strokesRef.current) for (const p of s) dots.push(p);
 
   return (
-    <View>
-      <View style={styles.canvas}>
+    <View style={styles.wrap}>
+      <View style={[styles.canvas, size ? { width: size, height: size } : null]}>
         <View style={[styles.gridLine, { top: '25%' }]} />
         <View style={[styles.gridLineDashed, { top: '50%' }]} />
         <View style={[styles.gridLine, { top: '75%' }]} />
@@ -394,6 +404,7 @@ function Tool({
 }
 
 const styles = StyleSheet.create({
+  wrap: { alignItems: 'center' },
   canvas: {
     width: '100%',
     aspectRatio: 1,
@@ -413,19 +424,20 @@ const styles = StyleSheet.create({
   ghost: { fontSize: 200, lineHeight: 240, color: GHOST_COLOR, fontWeight: '300' },
   dot: { position: 'absolute', width: STROKE, height: STROKE, borderRadius: STROKE / 2, backgroundColor: Colors.accent },
   scoreBadge: {
+    position: 'absolute',
+    top: 10,
+    alignSelf: 'center',
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    gap: 10,
-    marginTop: 12,
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 12,
-    backgroundColor: Colors.card,
+    gap: 8,
+    paddingVertical: 6,
+    paddingHorizontal: 14,
+    borderRadius: 20,
+    backgroundColor: 'rgba(13,13,26,0.82)',
     borderWidth: 1,
     borderColor: Colors.border,
   },
-  scoreNum: { fontSize: 22, fontWeight: '700' },
+  scoreNum: { fontSize: 20, fontWeight: '700' },
   scoreLabel: { color: Colors.textDim, fontSize: 14 },
   tools: { flexDirection: 'row', justifyContent: 'center', gap: 10, marginTop: 14, flexWrap: 'wrap' },
   tool: {

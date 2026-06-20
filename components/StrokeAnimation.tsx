@@ -21,6 +21,7 @@ const INK_COLOR       = '#ff9f43';
 interface Props {
   charId: string;
   char: string;
+  size?: number;
 }
 
 function drawGrid(ctx: CanvasRenderingContext2D, size: number) {
@@ -39,17 +40,24 @@ function drawGrid(ctx: CanvasRenderingContext2D, size: number) {
   ctx.setLineDash([]);
 }
 
-export default function StrokeAnimation({ charId, char }: Props) {
-  const [size, setSize] = useState(0);
+export default function StrokeAnimation({ charId, char, size: fixedSize }: Props) {
+  const [measured, setMeasured] = useState(0);
   const [tick, setTick] = useState(0);
   const [done, setDone] = useState(false);
 
-  const onLayout = (e: LayoutChangeEvent) =>
-    setSize(Math.round(e.nativeEvent.layout.width));
+  const size = fixedSize && fixedSize > 0 ? Math.round(fixedSize) : measured;
+
+  const onLayout = (e: LayoutChangeEvent) => {
+    if (!fixedSize) setMeasured(Math.round(e.nativeEvent.layout.width));
+  };
+
+  const cardStyle = fixedSize
+    ? [styles.canvasCard, { width: size, height: size }]
+    : styles.canvasCard;
 
   if (Platform.OS !== 'web') {
     return (
-      <View style={styles.canvasCard} onLayout={onLayout}>
+      <View style={cardStyle} onLayout={onLayout}>
         <View style={styles.ghostWrap}>
           <Text style={[styles.ghost, size ? { fontSize: size * 0.6 } : {}]}>{char}</Text>
         </View>
@@ -59,7 +67,7 @@ export default function StrokeAnimation({ charId, char }: Props) {
 
   return (
     <View style={styles.canvasOuter}>
-      <View style={styles.canvasCard} onLayout={onLayout}>
+      <View style={cardStyle} onLayout={onLayout}>
         {size > 0 && (
           <RevealCanvas
             key={`${charId}-${tick}`}
@@ -69,7 +77,7 @@ export default function StrokeAnimation({ charId, char }: Props) {
           />
         )}
       </View>
-      <View style={styles.toolbar}>
+      <View style={[styles.toolbar, fixedSize ? { width: size } : null]}>
         <View style={styles.badge}>
           <Text style={styles.badgeText}>watch &amp; learn</Text>
         </View>
@@ -161,7 +169,7 @@ function RevealCanvas({
 }
 
 const styles = StyleSheet.create({
-  canvasOuter: { width: '100%' },
+  canvasOuter: { width: '100%', alignItems: 'center' },
   canvasCard: {
     width: '100%',
     aspectRatio: 1,
