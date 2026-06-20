@@ -169,6 +169,9 @@ export default function SessionScreen() {
       <Animated.View style={[styles.wordArea, { transform: [{ scale: cardScale }] }]}>
         <Text style={styles.categoryTag}>{word.category.toUpperCase()}</Text>
         <Text style={styles.thaiWord}>{word.th}</Text>
+        <Text style={[styles.romText, selected && styles.romTextRevealed]}>
+          {word.rom}
+        </Text>
         <TouchableOpacity style={styles.speakBtn} onPress={() => speak(word.th)} activeOpacity={0.7}>
           <Text style={styles.speakBtnText}>🔊 tap to hear</Text>
         </TouchableOpacity>
@@ -279,6 +282,15 @@ const styles = StyleSheet.create({
     letterSpacing: 2,
     lineHeight: 90,
   },
+  romText: {
+    color: 'transparent',
+    fontSize: 18,
+    letterSpacing: 0.5,
+    fontStyle: 'italic',
+    marginTop: -4,
+  },
+  romTextRevealed: { color: Colors.accent },
+
   speakBtn: {
     paddingVertical: 7,
     paddingHorizontal: 18,
