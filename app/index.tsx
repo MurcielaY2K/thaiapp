@@ -2,21 +2,22 @@ import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, Platform } from 'react-native';
 import { useSrsStore } from '../store/srsStore';
 import { useProgressStore } from '../store/progressStore';
+import { useUserStore } from '../store/userStore';
 import { Colors } from '../constants/colors';
 import { STRIPE_SUCCESS_PARAM } from '../constants/stripe';
 import BottomTabBar, { TabId } from '../components/BottomTabBar';
 import LearnTab from '../components/tabs/LearnTab';
 import PracticeTab from '../components/tabs/PracticeTab';
 import DatabaseTab from '../components/tabs/DatabaseTab';
+import LeaderboardTab from '../components/tabs/LeaderboardTab';
 import ProfileTab from '../components/tabs/ProfileTab';
+import RewardToast from '../components/RewardToast';
 
 function consumeStripeSuccess(): boolean {
   if (Platform.OS !== 'web' || typeof window === 'undefined') return false;
   const params = new URLSearchParams(window.location.search);
   if (params.get(STRIPE_SUCCESS_PARAM) === '1') {
-    // Remove the param so a reload doesn't re-trigger
-    const clean = window.location.pathname;
-    window.history.replaceState({}, '', clean);
+    window.history.replaceState({}, '', window.location.pathname);
     return true;
   }
   return false;
@@ -24,22 +25,40 @@ function consumeStripeSuccess(): boolean {
 
 export default function HomeScreen() {
   const [activeTab, setActiveTab] = useState<TabId>('learn');
-  const { load: loadSrs } = useSrsStore();
-  const { load: loadProgress, unlockPremium, isLoaded } = useProgressStore();
+  const { load: loadSrs, getStats, streak } = useSrsStore();
+  const { load: loadProgress, unlockPremium, isLoaded: progressLoaded, xp } = useProgressStore();
+  const { load: loadUser, isLoaded: userLoaded, checkRewards, syncScore, newRewards, clearNewRewards, profileId } = useUserStore();
 
   useEffect(() => {
     loadSrs();
     loadProgress();
+    loadUser();
   }, []);
 
-  // Stripe payment redirect: ?payment_success=1
+  // Stripe payment redirect
   useEffect(() => {
-    if (!isLoaded) return;
+    if (!progressLoaded) return;
     if (consumeStripeSuccess()) {
       unlockPremium();
-      setActiveTab('profile'); // show the user their new premium status
+      setActiveTab('profile');
     }
-  }, [isLoaded]);
+  }, [progressLoaded]);
+
+  // Check and unlock rewards whenever XP or streak changes
+  useEffect(() => {
+    if (!progressLoaded || !userLoaded) return;
+    const stats = getStats();
+    const rewardStats = {
+      xp,
+      streak,
+      wordsMastered: stats.mastered,
+      lessonsCompleted: Object.values(useProgressStore.getState().lessonProgress).filter(s => s === 'complete').length,
+    };
+    checkRewards(rewardStats);
+
+    // Sync score to Supabase whenever progress changes
+    if (profileId) syncScore(rewardStats);
+  }, [xp, streak, progressLoaded, userLoaded]);
 
   return (
     <View style={styles.root}>
@@ -47,9 +66,14 @@ export default function HomeScreen() {
         {activeTab === 'learn'    && <LearnTab />}
         {activeTab === 'practice' && <PracticeTab />}
         {activeTab === 'database' && <DatabaseTab />}
+        {activeTab === 'ranking'  && <LeaderboardTab />}
         {activeTab === 'profile'  && <ProfileTab />}
       </View>
       <BottomTabBar active={activeTab} onPress={setActiveTab} />
+
+      {newRewards.length > 0 && (
+        <RewardToast rewardIds={newRewards} onDone={clearNewRewards} />
+      )}
     </View>
   );
 }

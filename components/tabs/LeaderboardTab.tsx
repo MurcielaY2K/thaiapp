@@ -1,0 +1,206 @@
+import React, { useEffect } from 'react';
+import {
+  View, Text, StyleSheet, FlatList, TouchableOpacity,
+  SafeAreaView, ActivityIndicator, RefreshControl,
+} from 'react-native';
+import { useUserStore, LeaderboardEntry } from '../../store/userStore';
+import { Colors } from '../../constants/colors';
+import { SUPABASE_CONFIGURED } from '../../constants/supabase';
+import { FRAME_STYLES, FrameId } from '../../data/rewards';
+
+const RANK_COLORS: Record<number, string> = { 1: '#ffd700', 2: '#9ca3af', 3: '#cd7f32' };
+
+function RankBadge({ rank }: { rank: number }) {
+  const color = RANK_COLORS[rank] ?? Colors.textDim;
+  const label = rank <= 3 ? ['🥇', '🥈', '🥉'][rank - 1] : `#${rank}`;
+  return (
+    <View style={[styles.rankBadge, { borderColor: color + '60', backgroundColor: color + '12' }]}>
+      <Text style={[styles.rankText, { color }]}>{label}</Text>
+    </View>
+  );
+}
+
+function EntryRow({ entry, isMe }: { entry: LeaderboardEntry; isMe: boolean }) {
+  const frame = (entry.profileFrame ?? 'default') as FrameId;
+  const { border } = FRAME_STYLES[frame];
+  return (
+    <View style={[styles.row, isMe && styles.rowMe]}>
+      <RankBadge rank={entry.rank} />
+      <View style={[styles.avatar, { borderColor: border }]}>
+        <Text style={styles.avatarEmoji}>{entry.avatarEmoji}</Text>
+      </View>
+      <View style={styles.info}>
+        <View style={styles.nameRow}>
+          <Text style={[styles.displayName, isMe && styles.nameMe]} numberOfLines={1}>
+            {entry.displayName || entry.username}
+          </Text>
+          <Text style={styles.flag}>{entry.countryFlag}</Text>
+          {isMe && <View style={styles.meBadge}><Text style={styles.meBadgeText}>YOU</Text></View>}
+        </View>
+        <Text style={styles.username}>@{entry.username}</Text>
+      </View>
+      <View style={styles.scores}>
+        <Text style={styles.xpScore}>{entry.xp.toLocaleString()} XP</Text>
+        <Text style={styles.streakScore}>🔥{entry.streak}</Text>
+      </View>
+    </View>
+  );
+}
+
+export default function LeaderboardTab() {
+  const { leaderboard, myRank, profileId, isLoadingLeaderboard, fetchLeaderboard, isSetup } = useUserStore();
+
+  useEffect(() => {
+    if (SUPABASE_CONFIGURED && isSetup) fetchLeaderboard();
+  }, [isSetup]);
+
+  if (!SUPABASE_CONFIGURED) {
+    return (
+      <SafeAreaView style={styles.safe}>
+        <View style={styles.center}>
+          <Text style={styles.offlineIcon}>🌐</Text>
+          <Text style={styles.offlineTitle}>Connect to see rankings</Text>
+          <Text style={styles.offlineSub}>
+            Add your Supabase credentials in{'\n'}
+            <Text style={styles.code}>constants/supabase.ts</Text>
+            {'\n'}to enable global leaderboard.
+          </Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (!isSetup) {
+    return (
+      <SafeAreaView style={styles.safe}>
+        <View style={styles.center}>
+          <Text style={styles.offlineIcon}>👤</Text>
+          <Text style={styles.offlineTitle}>Set up your profile first</Text>
+          <Text style={styles.offlineSub}>Go to the Profile tab to create your username and appear on the leaderboard.</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  return (
+    <SafeAreaView style={styles.safe}>
+      {/* Header */}
+      <View style={styles.header}>
+        <View>
+          <Text style={styles.heading}>Global Ranking</Text>
+          {myRank && <Text style={styles.myRankText}>Your rank: #{myRank}</Text>}
+        </View>
+        <TouchableOpacity
+          style={styles.refreshBtn}
+          onPress={fetchLeaderboard}
+          disabled={isLoadingLeaderboard}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.refreshText}>↺</Text>
+        </TouchableOpacity>
+      </View>
+
+      {isLoadingLeaderboard && leaderboard.length === 0 ? (
+        <View style={styles.center}>
+          <ActivityIndicator color={Colors.accent} size="large" />
+          <Text style={styles.loadingText}>Loading rankings…</Text>
+        </View>
+      ) : leaderboard.length === 0 ? (
+        <View style={styles.center}>
+          <Text style={styles.offlineIcon}>🏆</Text>
+          <Text style={styles.offlineTitle}>No players yet</Text>
+          <Text style={styles.offlineSub}>Be the first on the leaderboard!</Text>
+        </View>
+      ) : (
+        <FlatList
+          data={leaderboard}
+          keyExtractor={e => e.profileId}
+          renderItem={({ item }) => (
+            <EntryRow entry={item} isMe={item.profileId === profileId} />
+          )}
+          ItemSeparatorComponent={() => <View style={styles.sep} />}
+          contentContainerStyle={styles.list}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={isLoadingLeaderboard}
+              onRefresh={fetchLeaderboard}
+              tintColor={Colors.accent}
+            />
+          }
+        />
+      )}
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  safe: { flex: 1, backgroundColor: Colors.bg },
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32, gap: 12 },
+
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 12,
+  },
+  heading: { color: Colors.text, fontSize: 26, fontWeight: '800' },
+  myRankText: { color: Colors.accent, fontSize: 13, fontWeight: '600', marginTop: 2 },
+  refreshBtn: {
+    width: 38, height: 38, borderRadius: 10,
+    backgroundColor: Colors.card, borderWidth: 1, borderColor: Colors.border,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  refreshText: { color: Colors.textDim, fontSize: 20 },
+
+  list: { paddingHorizontal: 16, paddingBottom: 24 },
+  sep: { height: 1, backgroundColor: Colors.border, marginHorizontal: 4 },
+
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 4,
+    borderRadius: 14,
+  },
+  rowMe: { backgroundColor: 'rgba(255,159,67,0.07)' },
+
+  rankBadge: {
+    width: 44, height: 34, borderRadius: 8,
+    borderWidth: 1, alignItems: 'center', justifyContent: 'center',
+  },
+  rankText: { fontSize: 13, fontWeight: '800' },
+
+  avatar: {
+    width: 44, height: 44, borderRadius: 22,
+    borderWidth: 2, backgroundColor: Colors.card,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  avatarEmoji: { fontSize: 24 },
+
+  info: { flex: 1, gap: 2 },
+  nameRow: { flexDirection: 'row', alignItems: 'center', gap: 5, flexWrap: 'wrap' },
+  displayName: { color: Colors.text, fontSize: 14, fontWeight: '700' },
+  nameMe: { color: Colors.accent },
+  flag: { fontSize: 14 },
+  meBadge: {
+    backgroundColor: Colors.accent, borderRadius: 6,
+    paddingHorizontal: 5, paddingVertical: 1,
+  },
+  meBadgeText: { color: '#fff', fontSize: 9, fontWeight: '800' },
+  username: { color: Colors.textDim, fontSize: 11 },
+
+  scores: { alignItems: 'flex-end', gap: 2 },
+  xpScore: { color: Colors.text, fontSize: 13, fontWeight: '700' },
+  streakScore: { color: Colors.textDim, fontSize: 11 },
+
+  // Offline states
+  offlineIcon: { fontSize: 52 },
+  offlineTitle: { color: Colors.text, fontSize: 20, fontWeight: '700', textAlign: 'center' },
+  offlineSub: { color: Colors.textDim, fontSize: 14, textAlign: 'center', lineHeight: 21 },
+  code: { fontFamily: 'monospace', color: Colors.accent },
+  loadingText: { color: Colors.textDim, fontSize: 14, marginTop: 8 },
+});
