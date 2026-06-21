@@ -86,10 +86,10 @@ function WebTrace({ char, charName, fixedSize }: { char: string; charName?: stri
       ctx.fillStyle = GHOST_COLOR;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      let ghostSize = w * 0.66;
+      let ghostSize = w * 0.82;
       ctx.font = `300 ${ghostSize}px ${FONT}`;
       const gw = ctx.measureText(char).width;
-      if (gw > w * 0.85) ghostSize = Math.floor(ghostSize * (w * 0.85) / gw);
+      if (gw > w * 0.88) ghostSize = Math.floor(ghostSize * (w * 0.88) / gw);
       ctx.font = `300 ${ghostSize}px ${FONT}`;
       ctx.fillText(char, w / 2, w / 2);
     }
@@ -196,10 +196,10 @@ function WebTrace({ char, charName, fixedSize }: { char: string; charName?: stri
     refCtx.strokeStyle = '#fff';
     refCtx.textAlign = 'center';
     refCtx.textBaseline = 'middle';
-    let refFontSize = w * 0.66;
+    let refFontSize = w * 0.82;
     refCtx.font = `300 ${refFontSize}px ${FONT}`;
     const refTW = refCtx.measureText(char).width;
-    if (refTW > w * 0.85) refFontSize = Math.floor(refFontSize * (w * 0.85) / refTW);
+    if (refTW > w * 0.88) refFontSize = Math.floor(refFontSize * (w * 0.88) / refTW);
     refCtx.font = `300 ${refFontSize}px ${FONT}`;
     refCtx.lineWidth = STROKE * dpr * 3.0; // very generous acceptance zone (finger tracing)
     refCtx.strokeText(char, w / 2, w / 2);
@@ -364,7 +364,7 @@ function WebTrace({ char, charName, fixedSize }: { char: string; charName?: stri
             accent
           />
         )}
-        <Tool label="Listen" icon="🔊" onPress={() => speak(charName ?? char, charName ? 'en-US' : 'th-TH')} />
+        <Tool label="Listen" icon="🔊" onPress={() => speak(charName ?? char)} />
       </View>
     </View>
   );

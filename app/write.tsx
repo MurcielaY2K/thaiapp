@@ -45,9 +45,9 @@ export default function WriteScreen() {
   const char   = chars[index];
   const practiced = writing[char.id] ?? 0;
 
-  // Auto-speak character name whenever index or groupKey changes
+  // Auto-speak character name (in Thai, with a Thai voice) on change
   useEffect(() => {
-    const t = setTimeout(() => speak(char.name, 'en-US'), 300);
+    const t = setTimeout(() => speak(char.thName), 350);
     return () => clearTimeout(t);
   }, [char.id]);
 
@@ -149,7 +149,7 @@ export default function WriteScreen() {
           mode === 'watch' ? (
             <StrokeAnimation key={`${char.id}-watch`} charId={char.id} char={char.char} size={canvasSize} />
           ) : (
-            <TraceCanvas key={`${char.id}-trace`} char={char.char} charName={char.name} size={canvasSize} />
+            <TraceCanvas key={`${char.id}-trace`} char={char.char} charName={char.thName} size={canvasSize} />
           )
         )}
       </View>

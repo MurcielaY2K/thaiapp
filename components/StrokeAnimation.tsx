@@ -133,12 +133,12 @@ function RevealCanvas({
     const cx = w / 2;
     const cy = w / 2;
     // Auto-scale: multi-codepoint vowels (e.g. เอะ) can exceed canvas width at 0.66em
-    let fontSize = w * 0.66;
+    let fontSize = w * 0.82;
     ctx.font = `400 ${fontSize}px ${FONT}`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     const measuredW = ctx.measureText(char).width;
-    if (measuredW > w * 0.85) fontSize = Math.floor(fontSize * (w * 0.85) / measuredW);
+    if (measuredW > w * 0.88) fontSize = Math.floor(fontSize * (w * 0.88) / measuredW);
     const fontSpec = `400 ${fontSize}px ${FONT}`;
     let start = 0;
 

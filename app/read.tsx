@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useRef, useEffect } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity, SafeAreaView, ScrollView, Platform,
 } from 'react-native';
@@ -9,19 +9,48 @@ import { SPRITES } from '../data/sprites';
 import { READING_LESSONS, type Sentence, type Token } from '../data/reading';
 import { PHRASE_CATEGORIES } from '../data/phrases';
 
-function speak(text: string) {
+function thaiVoice() {
+  const w = window as any;
+  return (w.speechSynthesis.getVoices?.() ?? [])
+    .find((v: any) => /th(-|_)?/i.test(v.lang));
+}
+
+function speak(text: string, rate = 0.75) {
   if (Platform.OS !== 'web') return;
   const w = window as any;
   if (!w.speechSynthesis) return;
   w.speechSynthesis.cancel();
   const u = new w.SpeechSynthesisUtterance(text);
   u.lang = 'th-TH';
-  u.rate = 0.75;
-  const thai = (w.speechSynthesis.getVoices?.() ?? [])
-    .find((v: any) => /th(-|_)?/i.test(v.lang));
+  u.rate = rate;
+  const thai = thaiVoice();
   if (thai) u.voice = thai;
   w.speechSynthesis.speak(u);
 }
+
+// Speak a single token and resolve when it finishes — used to drive the
+// word-by-word highlight during "Read all".
+function speakAsync(text: string, rate: number): Promise<void> {
+  return new Promise(resolve => {
+    if (Platform.OS !== 'web') return resolve();
+    const w = window as any;
+    if (!w.speechSynthesis) return resolve();
+    const u = new w.SpeechSynthesisUtterance(text);
+    u.lang = 'th-TH';
+    u.rate = rate;
+    const thai = thaiVoice();
+    if (thai) u.voice = thai;
+    u.onend = () => resolve();
+    u.onerror = () => resolve();
+    w.speechSynthesis.speak(u);
+  });
+}
+
+const SPEEDS = [
+  { label: '0.5×', rate: 0.5 },
+  { label: '0.75×', rate: 0.75 },
+  { label: '1×', rate: 1.0 },
+];
 
 type Selected = { s: number; t: number } | null;
 // 'stories' for the illustrated lessons, otherwise a category key
@@ -33,6 +62,10 @@ export default function ReadScreen() {
   const [showPhonemic, setShowPhonemic] = useState(true);
   const [showTranslate, setShowTranslate] = useState(false);
   const [selected, setSelected] = useState<Selected>(null);
+  const [speedIdx, setSpeedIdx] = useState(1); // default 0.75×
+  const [playing, setPlaying] = useState(false);
+  const playRef = useRef(false);
+  const rate = SPEEDS[speedIdx].rate;
 
   const lesson = READING_LESSONS[lessonIdx];
   const category = useMemo(
@@ -58,13 +91,37 @@ export default function ReadScreen() {
   };
 
   const tapWord = (s: number, t: number, token: Token) => {
+    if (playing) stopReading();
     setSelected({ s, t });
-    speak(token.th);
+    speak(token.th, rate);
   };
 
-  const readAll = () => {
-    speak(sentences.map(se => se.tokens.map(tk => tk.th).join('')).join(' '));
+  const stopReading = () => {
+    playRef.current = false;
+    if (Platform.OS === 'web') (window as any).speechSynthesis?.cancel();
+    setPlaying(false);
   };
+
+  // Read every sentence word-by-word, highlighting each token as it's spoken.
+  const readAll = async () => {
+    if (playing) { stopReading(); return; }
+    setPlaying(true);
+    playRef.current = true;
+    for (let s = 0; s < sentences.length; s++) {
+      const toks = sentences[s].tokens;
+      for (let t = 0; t < toks.length; t++) {
+        if (!playRef.current) return;
+        setSelected({ s, t });
+        await speakAsync(toks[t].th, rate);
+      }
+    }
+    playRef.current = false;
+    setPlaying(false);
+  };
+
+  // Stop any playback when switching tab / lesson / leaving the screen.
+  useEffect(() => () => stopReading(), []);
+  useEffect(() => { stopReading(); }, [tab, lessonIdx]);
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -152,8 +209,21 @@ export default function ReadScreen() {
         <View style={styles.toggles}>
           <Toggle label="Phonetic" on={showPhonemic} onPress={() => setShowPhonemic(v => !v)} />
           <Toggle label="Translate" on={showTranslate} onPress={() => setShowTranslate(v => !v)} />
-          <TouchableOpacity style={styles.readAll} onPress={readAll} activeOpacity={0.8}>
-            <Text style={styles.readAllText}>🔊  Read all</Text>
+          <TouchableOpacity
+            style={styles.speedBtn}
+            onPress={() => setSpeedIdx(i => (i + 1) % SPEEDS.length)}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.speedBtnText}>🐢 {SPEEDS[speedIdx].label}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.readAll, playing && styles.readAllStop]}
+            onPress={readAll}
+            activeOpacity={0.8}
+          >
+            <Text style={[styles.readAllText, playing && styles.readAllStopText]}>
+              {playing ? '■  Stop' : '▶  Read all'}
+            </Text>
           </TouchableOpacity>
         </View>
 
@@ -181,7 +251,7 @@ export default function ReadScreen() {
               showTranslate={showTranslate}
               selected={selected}
               onTapWord={tapWord}
-              onSpeak={() => speak(sentence.tokens.map(tk => tk.th).join(''))}
+              onSpeak={() => { if (playing) stopReading(); speak(sentence.tokens.map(tk => tk.th).join(''), rate); }}
             />
           ))}
         </View>
@@ -324,7 +394,15 @@ const styles = StyleSheet.create({
     paddingBottom: 18,
   },
 
-  toggles: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 16 },
+  toggles: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 16, flexWrap: 'wrap', rowGap: 10 },
+  speedBtn: {
+    marginLeft: 'auto',
+    paddingVertical: 9, paddingHorizontal: 14, borderRadius: 12,
+    backgroundColor: Colors.card, borderWidth: 1, borderColor: Colors.border,
+  },
+  speedBtnText: { color: Colors.textDim, fontSize: 13, fontWeight: '700' },
+  readAllStop: { backgroundColor: Colors.wrong },
+  readAllStopText: { color: '#fff' },
   toggle: {
     flexDirection: 'row', alignItems: 'center', gap: 8,
     paddingVertical: 9, paddingHorizontal: 14, borderRadius: 12,
@@ -336,7 +414,6 @@ const styles = StyleSheet.create({
   toggleLabel: { color: Colors.textDim, fontSize: 13, fontWeight: '600' },
   toggleLabelOn: { color: Colors.accent },
   readAll: {
-    marginLeft: 'auto',
     paddingVertical: 9, paddingHorizontal: 14, borderRadius: 12,
     backgroundColor: Colors.accent,
   },
