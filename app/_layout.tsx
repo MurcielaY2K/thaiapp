@@ -9,6 +9,7 @@ export default function RootLayout() {
       <StatusBar style="light" backgroundColor="#0d0d1a" />
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="index" options={{ animation: 'fade' }} />
+        <Stack.Screen name="lesson" options={{ animation: 'slide_from_bottom' }} />
         <Stack.Screen name="session" options={{ animation: 'slide_from_bottom' }} />
         <Stack.Screen name="write" options={{ animation: 'slide_from_bottom' }} />
         <Stack.Screen name="read" options={{ animation: 'slide_from_bottom' }} />
