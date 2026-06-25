@@ -46,5 +46,5 @@ const styles = StyleSheet.create({
   heart: { fontSize: 18 },
   infinityHeart: { fontSize: 20 },
   empty: { opacity: 0.3 },
-  timer: { color: '#e74c3c', fontSize: 11, fontWeight: '700', marginLeft: 6 },
+  timer: { color: '#f87171', fontSize: 11, fontWeight: '700', marginLeft: 6 },
 });

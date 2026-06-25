@@ -1,12 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
-  Dimensions, Animated,
+  Dimensions, Animated, Platform,
 } from 'react-native';
 import { router } from 'expo-router';
 import { WORLDS, ALL_LESSONS, Lesson, World } from '../../data/worlds';
 import { useProgressStore, LessonState } from '../../store/progressStore';
 import { Colors } from '../../constants/colors';
+import { Fonts } from '../../constants/typography';
 import HeartsBar from '../HeartsBar';
 import XPBar from '../XPBar';
 import PremiumModal from '../PremiumModal';
@@ -14,7 +15,6 @@ import PremiumModal from '../PremiumModal';
 const SCREEN_W = Dimensions.get('window').width;
 const NODE_SIZE = 64;
 
-// Zigzag horizontal positions (fraction of screen width)
 const ZIGZAG = [0.08, 0.32, 0.56, 0.32];
 
 interface NodeItem {
@@ -68,8 +68,8 @@ function LessonNode({
     if (state !== 'available') return;
     const anim = Animated.loop(
       Animated.sequence([
-        Animated.timing(pulse, { toValue: 1.12, duration: 700, useNativeDriver: true }),
-        Animated.timing(pulse, { toValue: 1, duration: 700, useNativeDriver: true }),
+        Animated.timing(pulse, { toValue: 1.1, duration: 800, useNativeDriver: true }),
+        Animated.timing(pulse, { toValue: 1, duration: 800, useNativeDriver: true }),
       ])
     );
     anim.start();
@@ -83,18 +83,12 @@ function LessonNode({
   const isPremLocked = state === 'premium-locked';
   const isCheckpoint = lesson.type === 'checkpoint';
 
-  const bg = isComplete
-    ? world.color
-    : isAvailable
-      ? world.color
-      : Colors.card;
-
-  const borderColor = isComplete || isAvailable ? world.color : Colors.border;
+  const bg = isComplete || isAvailable ? world.color : Colors.card;
+  const borderColor = isComplete || isAvailable ? world.color : Colors.borderGlow;
 
   return (
-    <View style={[styles.nodeRow, { height: NODE_SIZE + 28 }]}>
-      {/* Connecting line */}
-      <View style={[styles.connLine, { borderColor: borderColor, opacity: 0.3 }]} />
+    <View style={[styles.nodeRow, { height: NODE_SIZE + 32 }]}>
+      <View style={[styles.connLine, { borderColor: Colors.borderGlow }]} />
 
       <Animated.View style={[
         { transform: [{ scale: isAvailable ? pulse : 1 }] },
@@ -107,8 +101,11 @@ function LessonNode({
             {
               backgroundColor: bg,
               borderColor,
-              opacity: isLocked && !isPremLocked ? 0.45 : 1,
+              opacity: isLocked && !isPremLocked ? 0.35 : 1,
             },
+            Platform.OS === 'web' && isAvailable ? {
+              boxShadow: `0 0 20px ${world.color}70`,
+            } as any : {},
           ]}
           onPress={onPress}
           activeOpacity={0.8}
@@ -127,7 +124,8 @@ function LessonNode({
         </TouchableOpacity>
         <Text style={[
           styles.nodeLabel,
-          { color: isAvailable || isComplete ? Colors.text : Colors.textDim },
+          { color: isAvailable || isComplete ? Colors.text : Colors.textMuted },
+          { fontFamily: Fonts.body },
         ]} numberOfLines={1}>
           {lesson.title}
         </Text>
@@ -143,13 +141,19 @@ function LessonNode({
 
 function WorldHeader({ world }: { world: World }) {
   return (
-    <View style={[styles.worldHeader, { borderColor: world.color + '40' }]}>
-      <View style={[styles.worldEmoji, { backgroundColor: world.color + '20' }]}>
+    <View style={[
+      styles.worldHeader,
+      { borderColor: world.color + '30' },
+      Platform.OS === 'web' ? {
+        boxShadow: `0 2px 16px ${world.color}18`,
+      } as any : {},
+    ]}>
+      <View style={[styles.worldEmoji, { backgroundColor: world.color + '18' }]}>
         <Text style={styles.worldEmojiText}>{world.emoji}</Text>
       </View>
       <View style={styles.worldText}>
         <View style={styles.worldTitleRow}>
-          <Text style={styles.worldTitle}>{world.title}</Text>
+          <Text style={[styles.worldTitle, { color: world.color }]}>{world.title}</Text>
           {world.isPremium && (
             <View style={styles.premiumBadge}>
               <Text style={styles.premiumBadgeText}>👑 PREMIUM</Text>
@@ -186,11 +190,10 @@ export default function LearnTab() {
 
   return (
     <View style={styles.container}>
-      {/* Top bar */}
       <View style={styles.topBar}>
         <View style={styles.topLeft}>
           <Text style={styles.topTitle}>ภาษาไทย</Text>
-          <Text style={styles.topSub}>Thai</Text>
+          <Text style={styles.topSub}>SPIRIT REALM</Text>
         </View>
         <HeartsBar />
       </View>
@@ -240,16 +243,25 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     paddingBottom: 8,
   },
-  topLeft: { gap: 1 },
-  topTitle: { color: Colors.text, fontSize: 22, fontWeight: '800', letterSpacing: 1 },
-  topSub: { color: Colors.textDim, fontSize: 11, letterSpacing: 3 },
+  topLeft: { gap: 2 },
+  topTitle: {
+    color: Colors.lavender,
+    fontSize: 24,
+    fontFamily: Fonts.body,
+    fontWeight: '700',
+  },
+  topSub: {
+    color: Colors.textDim,
+    fontSize: 9,
+    fontFamily: Fonts.hud,
+    letterSpacing: 3,
+  },
 
   xpWrap: { paddingHorizontal: 20, paddingBottom: 12 },
 
   scroll: { flex: 1 },
   scrollContent: { paddingTop: 8, paddingBottom: 24 },
 
-  // World header
   worldHeader: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -259,78 +271,76 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     padding: 14,
     backgroundColor: Colors.card,
-    borderRadius: 16,
+    borderRadius: 8,
     borderWidth: 1,
   },
   worldEmoji: {
-    width: 48, height: 48, borderRadius: 14,
+    width: 48, height: 48, borderRadius: 6,
     alignItems: 'center', justifyContent: 'center',
   },
   worldEmojiText: { fontSize: 26 },
   worldText: { flex: 1, gap: 3 },
   worldTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  worldTitle: { color: Colors.text, fontSize: 16, fontWeight: '700' },
-  worldSub: { color: Colors.textDim, fontSize: 12 },
+  worldTitle: { fontSize: 15, fontFamily: Fonts.display, fontWeight: '700' },
+  worldSub: { color: Colors.textDim, fontSize: 12, fontFamily: Fonts.body },
   premiumBadge: {
-    backgroundColor: 'rgba(255,215,0,0.15)',
-    borderRadius: 6,
+    backgroundColor: 'rgba(251,191,36,0.12)',
+    borderRadius: 4,
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderWidth: 1,
-    borderColor: 'rgba(255,215,0,0.35)',
+    borderColor: 'rgba(251,191,36,0.3)',
   },
-  premiumBadgeText: { color: '#ffd700', fontSize: 10, fontWeight: '700' },
+  premiumBadgeText: {
+    color: Colors.gold,
+    fontSize: 9,
+    fontFamily: Fonts.hud,
+    letterSpacing: 0.5,
+  },
 
-  // Nodes
-  nodeRow: {
-    position: 'relative',
-    width: '100%',
-  },
+  nodeRow: { position: 'relative', width: '100%' },
   connLine: {
     position: 'absolute',
     left: '50%',
-    top: 0,
-    bottom: 0,
+    top: 0, bottom: 0,
     width: 0,
-    borderLeftWidth: 2,
+    borderLeftWidth: 1,
     borderStyle: 'dashed',
-    borderColor: Colors.border,
+    opacity: 0.2,
   },
   node: {
-    width: NODE_SIZE, height: NODE_SIZE, borderRadius: NODE_SIZE / 2,
-    borderWidth: 3,
+    width: NODE_SIZE, height: NODE_SIZE, borderRadius: 4,
+    borderWidth: 2,
     alignItems: 'center', justifyContent: 'center',
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
   },
   nodeCheckpoint: {
     width: NODE_SIZE + 12,
     height: NODE_SIZE + 12,
-    borderRadius: (NODE_SIZE + 12) / 2,
+    borderRadius: 6,
   },
   glowRing: {
     position: 'absolute',
-    width: NODE_SIZE + 16,
-    height: NODE_SIZE + 16,
-    borderRadius: (NODE_SIZE + 16) / 2,
+    width: NODE_SIZE + 16, height: NODE_SIZE + 16,
+    borderRadius: 6,
     borderWidth: 2,
-    opacity: 0.5,
+    opacity: 0.4,
     top: -8, left: -8,
   },
   nodeIcon: { fontSize: 26 },
   nodeCheckMark: { color: '#fff', fontSize: 28, fontWeight: '800' },
   nodeLabel: {
-    marginTop: 6, fontSize: 11, fontWeight: '600',
+    marginTop: 6, fontSize: 11,
     textAlign: 'center', width: NODE_SIZE + 30,
     marginLeft: -15,
   },
   startBubble: {
-    marginTop: 4, borderRadius: 8,
+    marginTop: 4, borderRadius: 4,
     paddingHorizontal: 10, paddingVertical: 3,
     alignSelf: 'center',
   },
-  startText: { color: '#fff', fontSize: 10, fontWeight: '800', letterSpacing: 1 },
+  startText: {
+    color: '#fff', fontSize: 9,
+    fontFamily: Fonts.hud,
+    letterSpacing: 1,
+  },
 });
