@@ -2,15 +2,24 @@ import React from 'react';
 import { View, TouchableOpacity, Text, StyleSheet, Platform } from 'react-native';
 import { Colors } from '../constants/colors';
 import { Fonts } from '../constants/typography';
+import SanukSprite, { SanukSpriteName } from './SanukSprite';
 
 export type TabId = 'learn' | 'practice' | 'database' | 'ranking' | 'profile';
 
-const TABS: { id: TabId; icon: string; label: string }[] = [
-  { id: 'learn',    icon: '🌿', label: 'Learn' },
-  { id: 'practice', icon: '✍️', label: 'Practice' },
-  { id: 'database', icon: '📚', label: 'Words' },
-  { id: 'ranking',  icon: '👑', label: 'Ranking' },
-  { id: 'profile',  icon: '👻', label: 'Profile' },
+interface TabDef {
+  id: TabId;
+  icon: SanukSpriteName;
+  label: string;
+  glow: string;
+  glowColor: string;
+}
+
+const TABS: TabDef[] = [
+  { id: 'learn',    icon: 'lotus',  label: 'LEARN',    glow: 'mint',     glowColor: Colors.mint },
+  { id: 'practice', icon: 'pencil', label: 'PRACTICE', glow: 'ember',    glowColor: Colors.ember },
+  { id: 'database', icon: 'book',   label: 'WORDS',    glow: 'cyan',     glowColor: Colors.cyan },
+  { id: 'ranking',  icon: 'crown',  label: 'RANKING',  glow: 'gold',     glowColor: Colors.gold },
+  { id: 'profile',  icon: 'ghost',  label: 'PROFILE',  glow: 'lavender', glowColor: Colors.lavender },
 ];
 
 interface Props {
@@ -23,6 +32,11 @@ export default function BottomTabBar({ active, onPress }: Props) {
     <View style={styles.bar}>
       {TABS.map(tab => {
         const isActive = tab.id === active;
+        const indicatorGlow = Platform.OS === 'web'
+          ? { boxShadow: `0 0 8px ${tab.glowColor}cc` } as any
+          : {};
+        const labelColor = isActive ? tab.glowColor : Colors.textMuted;
+
         return (
           <TouchableOpacity
             key={tab.id}
@@ -30,9 +44,18 @@ export default function BottomTabBar({ active, onPress }: Props) {
             onPress={() => onPress(tab.id)}
             activeOpacity={0.7}
           >
-            {isActive && <View style={styles.indicator} />}
-            <Text style={[styles.icon, isActive && styles.iconActive]}>{tab.icon}</Text>
-            <Text style={[styles.label, isActive && styles.labelActive]}>{tab.label}</Text>
+            {isActive && (
+              <View style={[styles.indicator, { backgroundColor: tab.glowColor }, indicatorGlow]} />
+            )}
+            <View style={[styles.iconWrap, isActive && {
+              opacity: 1,
+              ...(Platform.OS === 'web' ? {
+                filter: `drop-shadow(0 0 6px ${tab.glowColor}99)`,
+              } as any : {}),
+            }, !isActive && styles.iconDim]}>
+              <SanukSprite name={tab.icon} size={22} />
+            </View>
+            <Text style={[styles.label, { color: labelColor }]}>{tab.label}</Text>
           </TouchableOpacity>
         );
       })}
@@ -45,28 +68,24 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     backgroundColor: Colors.card,
     borderTopWidth: 1,
-    borderTopColor: Colors.borderGlow,
+    borderTopColor: Colors.border,
     paddingBottom: 20,
     paddingTop: 10,
-    ...(Platform.OS === 'web' ? { boxShadow: '0 -4px 20px rgba(196,181,244,0.08)' } as any : {}),
+    ...(Platform.OS === 'web' ? { boxShadow: '0 -4px 20px rgba(0,0,0,0.4)' } as any : {}),
   },
   tab: { flex: 1, alignItems: 'center', gap: 3, position: 'relative', paddingTop: 6 },
-  icon: { fontSize: 20, opacity: 0.5 },
-  iconActive: { opacity: 1 },
-  label: {
-    color: Colors.textDim,
-    fontSize: 10,
-    fontFamily: Fonts.hud,
-    letterSpacing: 0.5,
-  },
-  labelActive: { color: Colors.lavender },
   indicator: {
     position: 'absolute',
     top: 0,
     width: 32,
     height: 2,
-    backgroundColor: Colors.lavender,
     borderRadius: 1,
-    ...(Platform.OS === 'web' ? { boxShadow: '0 0 8px rgba(196,181,244,0.8)' } as any : {}),
+  },
+  iconWrap: { width: 24, height: 24, alignItems: 'center', justifyContent: 'center' },
+  iconDim: { opacity: 0.4 },
+  label: {
+    fontSize: 9,
+    fontFamily: Fonts.hud,
+    letterSpacing: 0.8,
   },
 });

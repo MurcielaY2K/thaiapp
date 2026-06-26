@@ -155,7 +155,7 @@ export default function LessonScreen() {
           <Animated.View style={[
             styles.progressFill,
             { width: `${Math.round(progress * 100)}%` as any },
-            Platform.OS === 'web' ? { boxShadow: `0 0 8px ${Colors.lavender}` } as any : {},
+            Platform.OS === 'web' ? { boxShadow: `0 0 8px ${Colors.ember}80` } as any : {},
           ]} />
         </View>
         <Animated.View style={{ transform: [{ translateX: heartShake }] }}>
@@ -171,7 +171,7 @@ export default function LessonScreen() {
           styles.questionCard,
           { transform: [{ scale: cardScale }] },
           Platform.OS === 'web' ? {
-            boxShadow: `0 0 32px rgba(196,181,244,0.08)`,
+            boxShadow: `0 0 32px rgba(143,232,255,0.06)`,
           } as any : {},
         ]}>
           <Text style={styles.questionPrompt}>WHAT DOES THIS MEAN?</Text>
@@ -300,7 +300,9 @@ function DoneScreen({ lesson, correct, total }: { lesson: Lesson; correct: numbe
         <TouchableOpacity
           style={[
             styles.continueBtn,
-            Platform.OS === 'web' ? { boxShadow: `0 0 20px ${Colors.lavender}50` } as any : {},
+            Platform.OS === 'web' ? {
+              boxShadow: `0 5px 0 0 ${Colors.emberDeep}, 0 0 20px ${Colors.ember}50`,
+            } as any : {},
           ]}
           onPress={() => router.back()}
           activeOpacity={0.85}
@@ -332,7 +334,7 @@ const styles = StyleSheet.create({
   },
   progressFill: {
     height: '100%',
-    backgroundColor: Colors.lavender,
+    backgroundColor: Colors.ember,
     borderRadius: 2,
   },
   hearts: {
@@ -347,10 +349,10 @@ const styles = StyleSheet.create({
 
   questionCard: {
     backgroundColor: Colors.card,
-    borderRadius: 8,
+    borderRadius: 14,
     padding: 28,
     borderWidth: 1,
-    borderColor: Colors.borderGlow,
+    borderColor: Colors.border,
     alignItems: 'center',
     gap: 10,
   },
@@ -367,7 +369,7 @@ const styles = StyleSheet.create({
     fontWeight: '300',
     letterSpacing: 4,
   },
-  romText: { color: Colors.lavender, fontSize: 18, fontFamily: Fonts.body },
+  romText: { color: Colors.cyan, fontSize: 18, fontFamily: Fonts.body },
   speakerHint: { color: Colors.textMuted, fontSize: 11, fontFamily: Fonts.body, marginTop: 4 },
 
   choices: { gap: 10 },
@@ -375,10 +377,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    borderRadius: 6,
+    borderRadius: 10,
     paddingVertical: 16,
     paddingHorizontal: 20,
-    borderWidth: 2,
+    borderWidth: 1.5,
   },
   choiceText: { fontSize: 15, fontFamily: Fonts.body, fontWeight: '600', flex: 1 },
   choiceMark: { color: Colors.correct, fontSize: 18, fontWeight: '700' },
@@ -400,7 +402,7 @@ const styles = StyleSheet.create({
   spriteGlow: {
     position: 'absolute',
     width: 120, height: 120, borderRadius: 60,
-    backgroundColor: Colors.lavender,
+    backgroundColor: Colors.jade,
     ...(Platform.OS === 'web' ? { filter: 'blur(24px)' } as any : {}),
   },
   doneStars: {
@@ -429,7 +431,7 @@ const styles = StyleSheet.create({
   },
   doneStat: { flex: 1, alignItems: 'center', gap: 6 },
   doneStatValue: {
-    color: Colors.lavender,
+    color: Colors.mint,
     fontSize: 26,
     fontFamily: Fonts.hud,
   },
@@ -441,8 +443,8 @@ const styles = StyleSheet.create({
   },
   doneStatDiv: { width: 1, backgroundColor: Colors.borderGlow },
   continueBtn: {
-    backgroundColor: Colors.lavender,
-    borderRadius: 4,
+    backgroundColor: Colors.ember,
+    borderRadius: 10,
     paddingVertical: 16,
     paddingHorizontal: 48,
     width: '100%',
@@ -451,7 +453,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   continueBtnText: {
-    color: Colors.bg,
+    color: Colors.onBrand,
     fontSize: 14,
     fontFamily: Fonts.hud,
     fontWeight: '700',

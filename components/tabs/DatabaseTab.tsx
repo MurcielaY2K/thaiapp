@@ -24,8 +24,8 @@ const CAT_COLORS: Record<string, string> = {
   places:     Colors.gold,
   colors:     Colors.blush,
   family:     Colors.peach,
-  verbs:      Colors.mintDim,
-  adjectives: Colors.lavenderDim,
+  verbs:      Colors.mintDark,
+  adjectives: Colors.lavenderDark,
 };
 
 function catColor(cat: string): string {

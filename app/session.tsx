@@ -170,7 +170,7 @@ export default function SessionScreen() {
       <Animated.View style={[styles.wordArea, { transform: [{ scale: cardScale }] }]}>
         <Text style={styles.categoryTag}>{word.category.toUpperCase()}</Text>
         <Text style={styles.thaiWord}>{word.th}</Text>
-        <Text style={[styles.romText, selected && styles.romTextRevealed]}>
+        <Text style={[styles.romText, selected ? styles.romTextRevealed : undefined]}>
           {word.rom}
         </Text>
         <TouchableOpacity style={styles.speakBtn} onPress={() => speak(word.th)} activeOpacity={0.7}>
@@ -239,7 +239,7 @@ const styles = StyleSheet.create({
   },
   progressFill: {
     height: '100%',
-    backgroundColor: Colors.lavender,
+    backgroundColor: Colors.ember,
     borderRadius: 2,
   },
   progressText: {
@@ -291,7 +291,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
     marginTop: -4,
   },
-  romTextRevealed: { color: Colors.lavender },
+  romTextRevealed: { color: Colors.cyan },
 
   speakBtn: {
     paddingVertical: 7,
@@ -310,11 +310,11 @@ const styles = StyleSheet.create({
   },
   option: {
     backgroundColor: Colors.card,
-    borderRadius: 6,
+    borderRadius: 10,
     paddingVertical: 17,
     paddingHorizontal: 20,
     borderWidth: 1.5,
-    borderColor: Colors.borderGlow,
+    borderColor: Colors.borderStrong,
     alignItems: 'center',
   },
   optionCorrect: {
@@ -369,14 +369,15 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   doneBtn: {
-    backgroundColor: Colors.lavender,
-    borderRadius: 4,
+    backgroundColor: Colors.ember,
+    borderRadius: 10,
     paddingVertical: 16,
     paddingHorizontal: 56,
     marginTop: 8,
+    ...(Platform.OS === 'web' ? { boxShadow: `0 5px 0 0 ${Colors.emberDeep}` } as any : {}),
   },
   doneBtnText: {
-    color: Colors.bg,
+    color: Colors.onBrand,
     fontSize: 14,
     fontFamily: Fonts.hud,
     fontWeight: '700',

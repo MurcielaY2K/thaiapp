@@ -15,8 +15,9 @@ export interface World {
   id: string;
   title: string;
   subtitle: string;
-  color: string;       // background accent
+  color: string;       // accent tint for nodes / highlights
   darkColor: string;   // darker shade
+  realmTint: string;   // world header background tint
   emoji: string;
   isPremium: boolean;
   lessons: Lesson[];
@@ -27,8 +28,9 @@ export const WORLDS: World[] = [
     id: 'w1',
     title: 'Survival Thai',
     subtitle: 'Essential words for day one',
-    color: '#2dd4bf',
-    darkColor: '#0d9488',
+    color: '#9ef5d4',
+    darkColor: '#5fd9ac',
+    realmTint: '#2a3a4a',
     emoji: '🙏',
     isPremium: false,
     lessons: [
@@ -68,8 +70,9 @@ export const WORLDS: World[] = [
     id: 'w2',
     title: 'Food & Flavors',
     subtitle: 'Eat like a local',
-    color: '#86efac',
-    darkColor: '#4ade80',
+    color: '#ffb3d1',
+    darkColor: '#f57aa8',
+    realmTint: '#3a2a44',
     emoji: '🍜',
     isPremium: false,
     lessons: [
@@ -109,8 +112,9 @@ export const WORLDS: World[] = [
     id: 'w3',
     title: 'Bangkok Life',
     subtitle: 'Get around the city',
-    color: '#c4b5f4',
-    darkColor: '#a78bfa',
+    color: '#8fe8ff',
+    darkColor: '#4fc4e8',
+    realmTint: '#1f3340',
     emoji: '🏙️',
     isPremium: true,
     lessons: [
@@ -150,8 +154,9 @@ export const WORLDS: World[] = [
     id: 'w4',
     title: 'Social Thai',
     subtitle: 'Talk like a local',
-    color: '#f9a8d4',
-    darkColor: '#f472b6',
+    color: '#9ef5d4',
+    darkColor: '#5fd9ac',
+    realmTint: '#213a30',
     emoji: '🗣️',
     isPremium: true,
     lessons: [
@@ -191,8 +196,9 @@ export const WORLDS: World[] = [
     id: 'w5',
     title: 'Fluency Path',
     subtitle: 'Master Thai expressions',
-    color: '#fbbf24',
-    darkColor: '#d97706',
+    color: '#ffd700',
+    darkColor: '#e0ab00',
+    realmTint: '#3a3320',
     emoji: '🏆',
     isPremium: true,
     lessons: [

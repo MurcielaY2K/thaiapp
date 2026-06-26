@@ -3,6 +3,7 @@ import {
   View, Text, StyleSheet, ScrollView, SafeAreaView,
   TouchableOpacity, TextInput, ActivityIndicator, Platform,
 } from 'react-native';
+
 import { useUserStore } from '../../store/userStore';
 import { useProgressStore } from '../../store/progressStore';
 import { useSrsStore } from '../../store/srsStore';
@@ -343,15 +344,15 @@ const styles = StyleSheet.create({
   content: { padding: 20, paddingTop: 16, gap: 0 },
 
   profileCard: {
-    backgroundColor: Colors.card, borderRadius: 8, padding: 20,
+    backgroundColor: Colors.card, borderRadius: 14, padding: 20,
     alignItems: 'center', gap: 6,
-    borderWidth: 1, borderColor: Colors.borderGlow, marginBottom: 16, position: 'relative',
+    borderWidth: 1, borderColor: Colors.border, marginBottom: 16, position: 'relative',
   },
   editBtn: {
     position: 'absolute', top: 14, right: 14,
-    backgroundColor: Colors.bg, borderRadius: 4,
+    backgroundColor: Colors.bgInset, borderRadius: 6,
     paddingHorizontal: 10, paddingVertical: 5,
-    borderWidth: 1, borderColor: Colors.borderGlow,
+    borderWidth: 1, borderColor: Colors.borderStrong,
   },
   editBtnText: { color: Colors.textDim, fontSize: 11, fontFamily: Fonts.hud },
   avatarWrap: {
@@ -422,10 +423,11 @@ const styles = StyleSheet.create({
   setupFlagEmoji: { fontSize: 46 },
   setupAvatarEdit: { color: Colors.lavender, fontSize: 11, fontFamily: Fonts.hud },
   setupBtn: {
-    backgroundColor: Colors.lavender, borderRadius: 4, paddingVertical: 15,
+    backgroundColor: Colors.ember, borderRadius: 10, paddingVertical: 15,
     alignItems: 'center', marginTop: 16,
+    ...(Platform.OS === 'web' ? { boxShadow: `0 5px 0 0 ${Colors.emberDeep}` } as any : {}),
   },
-  setupBtnText: { color: Colors.bg, fontSize: 14, fontFamily: Fonts.hud, fontWeight: '700', letterSpacing: 1 },
+  setupBtnText: { color: Colors.onBrand, fontSize: 14, fontFamily: Fonts.hud, fontWeight: '700', letterSpacing: 1 },
 
   editSheet: {
     position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 100,
@@ -456,8 +458,8 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.bg, borderWidth: 1, borderColor: Colors.border,
   },
   cancelBtnText: { color: Colors.textDim, fontSize: 14, fontFamily: Fonts.body },
-  saveBtn: { flex: 2, borderRadius: 4, paddingVertical: 13, alignItems: 'center', backgroundColor: Colors.lavender },
-  saveBtnText: { color: Colors.bg, fontSize: 14, fontFamily: Fonts.hud, fontWeight: '700' },
+  saveBtn: { flex: 2, borderRadius: 10, paddingVertical: 13, alignItems: 'center', backgroundColor: Colors.ember },
+  saveBtnText: { color: Colors.onBrand, fontSize: 14, fontFamily: Fonts.hud, fontWeight: '700' },
 
   fieldGroup: { marginBottom: 16 },
   fieldLabel: {

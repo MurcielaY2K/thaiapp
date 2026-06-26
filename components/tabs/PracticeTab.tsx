@@ -25,7 +25,7 @@ export default function PracticeTab() {
           <StatBox
             value={stats.dueToday}
             label="due"
-            color={stats.dueToday > 0 ? Colors.peach : Colors.textDim}
+            color={stats.dueToday > 0 ? Colors.blush : Colors.textDim}
           />
           <View style={styles.divider} />
           <StatBox value={stats.mastered} label="mastered" color={Colors.mint} />
@@ -35,7 +35,7 @@ export default function PracticeTab() {
 
         <View style={styles.cards}>
           <PracticeCard
-            color={hasSession ? Colors.teal : Colors.textMuted}
+            color={hasSession ? Colors.jade : Colors.textMuted}
             icon="📖"
             title={hasSession ? 'SRS Flashcards' : 'All caught up!'}
             sub={hasSession
@@ -129,30 +129,30 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.card,
-    borderRadius: 6,
+    borderRadius: 14,
     paddingVertical: 16,
     borderWidth: 1,
-    borderColor: Colors.borderGlow,
+    borderColor: Colors.border,
     marginBottom: 20,
   },
   statBox: { flex: 1, alignItems: 'center', gap: 6 },
   statValue: { fontSize: 26 },
   statLabel: { color: Colors.textDim, fontSize: 10, fontFamily: Fonts.hud, letterSpacing: 1 },
-  divider: { width: 1, height: 32, backgroundColor: Colors.borderGlow },
+  divider: { width: 1, height: 32, backgroundColor: Colors.borderStrong },
 
   cards: { gap: 10 },
   card: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 14,
-    borderRadius: 6,
+    borderRadius: 14,
     paddingVertical: 16,
     paddingHorizontal: 16,
     borderWidth: 1,
     borderColor: Colors.border,
     borderLeftWidth: 3,
   },
-  cardIcon: { width: 46, height: 46, borderRadius: 4, alignItems: 'center', justifyContent: 'center' },
+  cardIcon: { width: 46, height: 46, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
   cardIconText: { fontSize: 22 },
   cardBody: { flex: 1, gap: 3 },
   cardTitle: { color: Colors.text, fontSize: 15, fontFamily: Fonts.body, fontWeight: '700' },

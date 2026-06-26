@@ -95,8 +95,8 @@ function LessonNode({
   const isPremLocked = state === 'premium-locked';
   const isCheckpoint = lesson.type === 'checkpoint';
 
-  const bg = isComplete || isAvailable ? world.color : Colors.card;
-  const borderColor = isComplete || isAvailable ? world.color : Colors.borderGlow;
+  const bg = isComplete ? Colors.gold + '20' : isAvailable ? Colors.mint + '20' : Colors.card;
+  const borderColor = isComplete ? Colors.gold : isAvailable ? Colors.mint : Colors.border;
 
   return (
     <View style={[styles.nodeRow, { height: NODE_SIZE + 32 }]}>
@@ -116,7 +116,9 @@ function LessonNode({
               opacity: isLocked && !isPremLocked ? 0.35 : 1,
             },
             Platform.OS === 'web' && isAvailable ? {
-              boxShadow: `0 0 20px ${world.color}70`,
+              boxShadow: `0 0 20px rgba(158,245,212,0.5)`,
+            } as any : Platform.OS === 'web' && isComplete ? {
+              boxShadow: `0 0 16px rgba(255,215,0,0.4)`,
             } as any : {},
           ]}
           onPress={onPress}
@@ -131,7 +133,10 @@ function LessonNode({
             <Text style={styles.nodeIcon}>{lesson.icon}</Text>
           )}
           {isAvailable && (
-            <View style={[styles.glowRing, { borderColor: world.color }]} />
+            <View style={[styles.glowRing, { borderColor: Colors.mint }]} />
+          )}
+          {isComplete && (
+            <View style={[styles.glowRing, { borderColor: Colors.gold }]} />
           )}
         </TouchableOpacity>
         <Text style={[
@@ -142,8 +147,8 @@ function LessonNode({
           {lesson.title}
         </Text>
         {isAvailable && (
-          <View style={[styles.startBubble, { backgroundColor: world.color }]}>
-            <Text style={styles.startText}>START</Text>
+          <View style={[styles.startBubble, { backgroundColor: Colors.mint }]}>
+            <Text style={[styles.startText, { color: '#0d3320' }]}>START</Text>
           </View>
         )}
       </Animated.View>
@@ -157,12 +162,12 @@ function WorldHeader({ world }: { world: World }) {
   return (
     <View style={[
       styles.worldHeader,
-      { borderColor: world.color + '30' },
+      { backgroundColor: world.realmTint, borderColor: world.color + '40' },
       Platform.OS === 'web' ? {
-        boxShadow: `0 2px 16px ${world.color}18`,
+        boxShadow: `0 2px 16px rgba(0,0,0,0.3)`,
       } as any : {},
     ]}>
-      <View style={[styles.worldEmoji, { backgroundColor: world.color + '18' }]}>
+      <View style={[styles.worldEmoji, { backgroundColor: world.color + '25' }]}>
         {sprite
           ? <PixelSprite sprite={sprite} size={36} />
           : <Text style={styles.worldEmojiText}>{world.emoji}</Text>}
@@ -262,7 +267,7 @@ const styles = StyleSheet.create({
   },
   topLeft: { gap: 2 },
   topTitle: {
-    color: Colors.lavender,
+    color: Colors.mint,
     fontSize: 24,
     fontFamily: Fonts.body,
     fontWeight: '700',
@@ -288,7 +293,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     padding: 14,
     backgroundColor: Colors.card,
-    borderRadius: 8,
+    borderRadius: 14,
     borderWidth: 1,
   },
   worldEmoji: {
