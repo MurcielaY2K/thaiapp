@@ -3,6 +3,7 @@ import {
   Modal, View, Text, TouchableOpacity, StyleSheet, Pressable, Linking, Platform,
 } from 'react-native';
 import { Colors } from '../constants/colors';
+import { Fonts } from '../constants/typography';
 import { STRIPE_PAYMENT_LINK } from '../constants/stripe';
 
 interface Props {
@@ -85,12 +86,12 @@ const styles = StyleSheet.create({
   },
   card: {
     backgroundColor: Colors.card,
-    borderRadius: 24,
+    borderRadius: 8,
     padding: 28,
     width: '100%',
     maxWidth: 380,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: Colors.borderGlow,
     alignItems: 'center',
     gap: 14,
   },
@@ -103,18 +104,18 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(255,215,0,0.3)',
   },
-  badgeText: { color: '#ffd700', fontSize: 12, fontWeight: '800', letterSpacing: 1 },
+  badgeText: { color: Colors.gold, fontSize: 11, fontFamily: Fonts.hud, letterSpacing: 1.5 },
 
   title: {
     color: Colors.text,
-    fontSize: 30,
-    fontWeight: '800',
+    fontSize: 28,
+    fontFamily: Fonts.display,
+    fontWeight: '700',
     textAlign: 'center',
-    lineHeight: 36,
   },
 
   priceRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  price: { color: Colors.accent, fontSize: 44, fontWeight: '800' },
+  price: { color: Colors.gold, fontSize: 44, fontFamily: Fonts.hud },
   priceMeta: { gap: 2 },
   pricePer: { color: Colors.textDim, fontSize: 16, fontWeight: '600' },
   priceSub: { color: Colors.textDim, fontSize: 11 },
@@ -124,7 +125,7 @@ const styles = StyleSheet.create({
   perks: { width: '100%', gap: 10 },
   perkRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   perkIcon: { fontSize: 20, width: 28, textAlign: 'center' },
-  perkText: { color: Colors.text, fontSize: 14, flex: 1 },
+  perkText: { color: Colors.text, fontSize: 14, fontFamily: Fonts.body, flex: 1 },
 
   stripeBtn: {
     flexDirection: 'row',

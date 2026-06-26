@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, SafeAreaView,
-  TouchableOpacity, TextInput, ActivityIndicator,
+  TouchableOpacity, TextInput, ActivityIndicator, Platform,
 } from 'react-native';
 import { useUserStore } from '../../store/userStore';
 import { useProgressStore } from '../../store/progressStore';
 import { useSrsStore } from '../../store/srsStore';
 import { Colors } from '../../constants/colors';
+import { Fonts } from '../../constants/typography';
 import { REWARDS, FRAME_STYLES, FrameId, BONUS_PACKS } from '../../data/rewards';
 import { SUPABASE_CONFIGURED } from '../../constants/supabase';
 import AvatarPicker from '../AvatarPicker';
@@ -18,13 +19,14 @@ function Avatar({ emoji, frame, size = 72 }: { emoji: string; frame: FrameId; si
     <View style={[
       styles.avatarWrap,
       {
-        width: size, height: size, borderRadius: size / 2,
+        width: size, height: size, borderRadius: 6,
         borderColor: border,
         shadowColor: glow,
         shadowOffset: { width: 0, height: 0 },
         shadowOpacity: 1,
         shadowRadius: 12,
       },
+      Platform.OS === 'web' ? { boxShadow: `0 0 16px ${glow}` } as any : {},
     ]}>
       <Text style={{ fontSize: size * 0.5 }}>{emoji}</Text>
     </View>
@@ -32,7 +34,7 @@ function Avatar({ emoji, frame, size = 72 }: { emoji: string; frame: FrameId; si
 }
 
 function ProfileSetup() {
-  const { setupProfile, getUnlockedAvatars, avatarEmoji, countryFlag } = useUserStore();
+  const { setupProfile, getUnlockedAvatars } = useUserStore();
   const [username, setUsername]       = useState('');
   const [displayName, setDisplayName] = useState('');
   const [bio, setBio]                 = useState('');
@@ -57,10 +59,9 @@ function ProfileSetup() {
   return (
     <SafeAreaView style={styles.safe}>
       <ScrollView contentContainerStyle={styles.setupContent}>
-        <Text style={styles.setupTitle}>Create Your Profile</Text>
+        <Text style={styles.setupTitle}>Create Profile</Text>
         <Text style={styles.setupSub}>Your name appears on the global leaderboard</Text>
 
-        {/* Avatar + flag pick */}
         <View style={styles.setupAvatarRow}>
           <TouchableOpacity onPress={() => setAvatarOpen(true)} style={styles.setupAvatarBtn}>
             <Text style={styles.setupAvatarEmoji}>{avatar}</Text>
@@ -73,7 +74,7 @@ function ProfileSetup() {
         </View>
 
         <View style={styles.fieldGroup}>
-          <Text style={styles.fieldLabel}>Username *</Text>
+          <Text style={styles.fieldLabel}>USERNAME *</Text>
           <TextInput
             style={styles.input}
             value={username}
@@ -88,7 +89,7 @@ function ProfileSetup() {
         </View>
 
         <View style={styles.fieldGroup}>
-          <Text style={styles.fieldLabel}>Display Name</Text>
+          <Text style={styles.fieldLabel}>DISPLAY NAME</Text>
           <TextInput
             style={styles.input}
             value={displayName}
@@ -100,7 +101,7 @@ function ProfileSetup() {
         </View>
 
         <View style={styles.fieldGroup}>
-          <Text style={styles.fieldLabel}>Bio</Text>
+          <Text style={styles.fieldLabel}>BIO</Text>
           <TextInput
             style={[styles.input, styles.inputMulti]}
             value={bio}
@@ -124,7 +125,10 @@ function ProfileSetup() {
         {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
         <TouchableOpacity style={styles.setupBtn} onPress={handleSubmit} disabled={loading} activeOpacity={0.85}>
-          {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.setupBtnText}>Create Profile</Text>}
+          {loading
+            ? <ActivityIndicator color={Colors.bg} />
+            : <Text style={styles.setupBtnText}>Create Profile</Text>
+          }
         </TouchableOpacity>
       </ScrollView>
 
@@ -171,7 +175,7 @@ function ProfileEdit({ onDone }: { onDone: () => void }) {
       </TouchableOpacity>
 
       <View style={styles.fieldGroup}>
-        <Text style={styles.fieldLabel}>Display Name</Text>
+        <Text style={styles.fieldLabel}>DISPLAY NAME</Text>
         <TextInput
           style={styles.input} value={displayName} onChangeText={setDisplayName}
           placeholderTextColor={Colors.textDim} maxLength={40}
@@ -179,7 +183,7 @@ function ProfileEdit({ onDone }: { onDone: () => void }) {
       </View>
 
       <View style={styles.fieldGroup}>
-        <Text style={styles.fieldLabel}>Bio</Text>
+        <Text style={styles.fieldLabel}>BIO</Text>
         <TextInput
           style={[styles.input, styles.inputMulti]} value={bio} onChangeText={setBio}
           placeholder="Say something…" placeholderTextColor={Colors.textDim} multiline maxLength={140}
@@ -187,13 +191,16 @@ function ProfileEdit({ onDone }: { onDone: () => void }) {
         <Text style={styles.fieldHint}>{bio.length}/140</Text>
       </View>
 
-      {/* Frame picker */}
-      <Text style={[styles.fieldLabel, { paddingHorizontal: 0, marginBottom: 8 }]}>Profile Frame</Text>
+      <Text style={[styles.fieldLabel, { paddingHorizontal: 0, marginBottom: 8 }]}>PROFILE FRAME</Text>
       <View style={styles.frameRow}>
         {unlockedFrames.map(f => (
           <TouchableOpacity
             key={f}
-            style={[styles.frameOpt, frame === f && styles.frameOptActive, { borderColor: FRAME_STYLES[f].border }]}
+            style={[
+              styles.frameOpt,
+              frame === f && styles.frameOptActive,
+              { borderColor: FRAME_STYLES[f].border },
+            ]}
             onPress={() => setFrame(f)}
           >
             <Text style={styles.frameOptText}>{FRAME_STYLES[f].label}</Text>
@@ -202,9 +209,14 @@ function ProfileEdit({ onDone }: { onDone: () => void }) {
       </View>
 
       <View style={styles.editActions}>
-        <TouchableOpacity style={styles.cancelBtn} onPress={onDone}><Text style={styles.cancelBtnText}>Cancel</Text></TouchableOpacity>
+        <TouchableOpacity style={styles.cancelBtn} onPress={onDone}>
+          <Text style={styles.cancelBtnText}>Cancel</Text>
+        </TouchableOpacity>
         <TouchableOpacity style={styles.saveBtn} onPress={save} disabled={saving}>
-          {saving ? <ActivityIndicator color="#fff" size="small" /> : <Text style={styles.saveBtnText}>Save</Text>}
+          {saving
+            ? <ActivityIndicator color={Colors.bg} size="small" />
+            : <Text style={styles.saveBtnText}>Save</Text>
+          }
         </TouchableOpacity>
       </View>
 
@@ -236,7 +248,6 @@ export default function ProfileTab() {
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
 
-        {/* Profile card */}
         <View style={styles.profileCard}>
           <TouchableOpacity style={styles.editBtn} onPress={() => setEditing(true)}>
             <Text style={styles.editBtnText}>✏️ Edit</Text>
@@ -250,27 +261,27 @@ export default function ProfileTab() {
           <Text style={styles.username}>@{store.username}</Text>
           {store.bio ? <Text style={styles.bio}>{store.bio}</Text> : null}
 
-          {/* Level bar */}
           <View style={styles.levelRow}>
             <Text style={styles.levelText}>Lv.{level}</Text>
             <View style={styles.xpTrack}>
-              <View style={[styles.xpFill, { width: `${Math.round(levelPct * 100)}%` as any }]} />
+              <View style={[
+                styles.xpFill,
+                { width: `${Math.round(levelPct * 100)}%` as any },
+              ]} />
             </View>
             <Text style={styles.xpLabel}>{xpThisLevel}/100</Text>
           </View>
         </View>
 
-        {/* Stats grid */}
         <View style={styles.statsGrid}>
-          <StatCard icon="🔥" value={streak} label="Streak" color="#ff9f43" />
-          <StatCard icon="⭐" value={xp} label="Total XP" color="#fbbf24" />
-          <StatCard icon="❤️" value={isPremium ? '∞' : hearts} label="Hearts" color="#e74c3c" />
-          <StatCard icon="✅" value={stats.mastered} label="Mastered" color="#34d399" />
-          <StatCard icon="💎" value={gems} label="Gems" color="#60a5fa" />
-          <StatCard icon="📅" value={dailyXp.earned} label={`/${dailyGoal} today`} color={Colors.accent} />
+          <StatCard icon="🔥" value={streak} label="Streak" color={Colors.streak} />
+          <StatCard icon="⚡" value={xp} label="Total XP" color={Colors.xp} />
+          <StatCard icon="❤️" value={isPremium ? '∞' : hearts} label="Hearts" color={Colors.hearts} />
+          <StatCard icon="✅" value={stats.mastered} label="Mastered" color={Colors.mint} />
+          <StatCard icon="💎" value={gems} label="Gems" color={Colors.sky} />
+          <StatCard icon="📅" value={dailyXp.earned} label={`/${dailyGoal} today`} color={Colors.lavender} />
         </View>
 
-        {/* Unlocked bonus packs */}
         {unlockedContent.length > 0 && (
           <>
             <Text style={styles.sectionTitle}>🎁 Bonus Content</Text>
@@ -290,7 +301,6 @@ export default function ProfileTab() {
           </>
         )}
 
-        {/* Rewards progress */}
         <Text style={styles.sectionTitle}>🏅 Rewards</Text>
         <View style={styles.rewardsGrid}>
           {REWARDS.map(r => {
@@ -320,9 +330,9 @@ export default function ProfileTab() {
 
 function StatCard({ icon, value, label, color }: { icon: string; value: number | string; label: string; color: string }) {
   return (
-    <View style={[styles.statCard, { borderColor: color + '30' }]}>
+    <View style={[styles.statCard, { borderColor: color + '25' }]}>
       <Text style={styles.statIcon}>{icon}</Text>
-      <Text style={[styles.statValue, { color }]}>{value}</Text>
+      <Text style={[styles.statValue, { color, fontFamily: Fonts.hud }]}>{value}</Text>
       <Text style={styles.statLabel}>{label}</Text>
     </View>
   );
@@ -332,131 +342,140 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: Colors.bg },
   content: { padding: 20, paddingTop: 16, gap: 0 },
 
-  // Profile card
   profileCard: {
-    backgroundColor: Colors.card, borderRadius: 20, padding: 20,
+    backgroundColor: Colors.card, borderRadius: 8, padding: 20,
     alignItems: 'center', gap: 6,
-    borderWidth: 1, borderColor: Colors.border, marginBottom: 16, position: 'relative',
+    borderWidth: 1, borderColor: Colors.borderGlow, marginBottom: 16, position: 'relative',
   },
   editBtn: {
     position: 'absolute', top: 14, right: 14,
-    backgroundColor: Colors.bg, borderRadius: 10,
+    backgroundColor: Colors.bg, borderRadius: 4,
     paddingHorizontal: 10, paddingVertical: 5,
-    borderWidth: 1, borderColor: Colors.border,
+    borderWidth: 1, borderColor: Colors.borderGlow,
   },
-  editBtnText: { color: Colors.textDim, fontSize: 12, fontWeight: '600' },
+  editBtnText: { color: Colors.textDim, fontSize: 11, fontFamily: Fonts.hud },
   avatarWrap: {
     borderWidth: 3, alignItems: 'center', justifyContent: 'center',
     backgroundColor: Colors.bg, marginBottom: 4,
   },
   nameRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  displayName: { color: Colors.text, fontSize: 22, fontWeight: '800' },
-  flagEmoji: { fontSize: 22 },
-  username: { color: Colors.textDim, fontSize: 13 },
-  bio: { color: Colors.textDim, fontSize: 13, textAlign: 'center', lineHeight: 19, paddingHorizontal: 8 },
+  displayName: { color: Colors.text, fontSize: 20, fontFamily: Fonts.display, fontWeight: '700' },
+  flagEmoji: { fontSize: 20 },
+  username: { color: Colors.textDim, fontSize: 12, fontFamily: Fonts.mono },
+  bio: { color: Colors.textDim, fontSize: 13, fontFamily: Fonts.body, textAlign: 'center', lineHeight: 19, paddingHorizontal: 8 },
   levelRow: { flexDirection: 'row', alignItems: 'center', gap: 10, width: '100%', marginTop: 4 },
-  levelText: { color: Colors.accent, fontSize: 13, fontWeight: '700', width: 36 },
-  xpTrack: { flex: 1, height: 8, borderRadius: 4, backgroundColor: Colors.border, overflow: 'hidden' },
-  xpFill: { height: '100%', backgroundColor: Colors.accent, borderRadius: 4 },
-  xpLabel: { color: Colors.textDim, fontSize: 11, width: 40, textAlign: 'right' },
+  levelText: { color: Colors.lavender, fontSize: 11, fontFamily: Fonts.hud, width: 36 },
+  xpTrack: { flex: 1, height: 6, borderRadius: 2, backgroundColor: Colors.border, overflow: 'hidden' },
+  xpFill: { height: '100%', backgroundColor: Colors.xp, borderRadius: 2 },
+  xpLabel: { color: Colors.textDim, fontSize: 10, fontFamily: Fonts.mono, width: 40, textAlign: 'right' },
 
-  // Stats
   statsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 20 },
   statCard: {
-    flex: 1, minWidth: '30%', backgroundColor: Colors.card, borderRadius: 14, borderWidth: 1,
+    flex: 1, minWidth: '30%', backgroundColor: Colors.card, borderRadius: 6, borderWidth: 1,
     paddingVertical: 12, alignItems: 'center', gap: 4,
   },
-  statIcon: { fontSize: 20 },
-  statValue: { fontSize: 20, fontWeight: '800' },
-  statLabel: { color: Colors.textDim, fontSize: 10, textAlign: 'center' },
+  statIcon: { fontSize: 18 },
+  statValue: { fontSize: 20 },
+  statLabel: { color: Colors.textDim, fontSize: 9, fontFamily: Fonts.hud, textAlign: 'center', letterSpacing: 0.5 },
 
-  // Sections
-  sectionTitle: { color: Colors.text, fontSize: 17, fontWeight: '700', marginBottom: 10 },
+  sectionTitle: {
+    color: Colors.text, fontSize: 15,
+    fontFamily: Fonts.display, fontWeight: '700',
+    marginBottom: 10,
+  },
 
-  // Bonus packs
   bonusGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 20 },
   bonusCard: {
-    flex: 1, minWidth: '45%', backgroundColor: 'rgba(255,159,67,0.08)', borderRadius: 14,
+    flex: 1, minWidth: '45%', backgroundColor: 'rgba(196,181,244,0.06)', borderRadius: 6,
     padding: 14, alignItems: 'center', gap: 4,
-    borderWidth: 1, borderColor: 'rgba(255,159,67,0.2)',
+    borderWidth: 1, borderColor: 'rgba(196,181,244,0.15)',
   },
   bonusIcon: { fontSize: 28 },
-  bonusTitle: { color: Colors.text, fontSize: 13, fontWeight: '700' },
-  bonusCount: { color: Colors.textDim, fontSize: 11 },
+  bonusTitle: { color: Colors.text, fontSize: 12, fontFamily: Fonts.body, fontWeight: '700' },
+  bonusCount: { color: Colors.textDim, fontSize: 10, fontFamily: Fonts.mono },
 
-  // Rewards
   rewardsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, paddingBottom: 30 },
   rewardCard: {
-    width: '47%', backgroundColor: Colors.card, borderRadius: 14,
+    width: '47%', backgroundColor: Colors.card, borderRadius: 6,
     borderWidth: 1, borderColor: Colors.border, padding: 14, gap: 3, alignItems: 'center',
   },
-  rewardLocked: { opacity: 0.45 },
+  rewardLocked: { opacity: 0.4 },
   rewardIcon: { fontSize: 28 },
-  rewardTitle: { color: Colors.text, fontSize: 13, fontWeight: '700', textAlign: 'center' },
-  rewardDesc: { color: Colors.textDim, fontSize: 11, textAlign: 'center' },
+  rewardTitle: { color: Colors.text, fontSize: 12, fontFamily: Fonts.body, fontWeight: '700', textAlign: 'center' },
+  rewardDesc: { color: Colors.textDim, fontSize: 10, fontFamily: Fonts.body, textAlign: 'center' },
   rewardUnlocks: { gap: 2, marginTop: 4, alignItems: 'center' },
-  rewardUnlockText: { color: '#ff9f43', fontSize: 10, fontWeight: '600' },
+  rewardUnlockText: { color: Colors.gold, fontSize: 10, fontFamily: Fonts.hud },
   lockText: { fontSize: 16, marginTop: 2 },
   dim: { color: Colors.textDim },
 
-  // Setup form
   setupContent: { padding: 24, paddingTop: 32, gap: 0 },
-  setupTitle: { color: Colors.text, fontSize: 28, fontWeight: '800', marginBottom: 6 },
-  setupSub: { color: Colors.textDim, fontSize: 14, marginBottom: 28 },
+  setupTitle: {
+    color: Colors.text, fontSize: 24,
+    fontFamily: Fonts.display, fontWeight: '700',
+    marginBottom: 6,
+  },
+  setupSub: { color: Colors.textDim, fontSize: 13, fontFamily: Fonts.body, marginBottom: 28 },
   setupAvatarRow: { flexDirection: 'row', gap: 16, marginBottom: 24, justifyContent: 'center' },
   setupAvatarBtn: { alignItems: 'center', gap: 4 },
   setupAvatarEmoji: { fontSize: 56 },
   setupFlagBtn: { alignItems: 'center', gap: 4 },
   setupFlagEmoji: { fontSize: 46 },
-  setupAvatarEdit: { color: Colors.accent, fontSize: 12, fontWeight: '600' },
+  setupAvatarEdit: { color: Colors.lavender, fontSize: 11, fontFamily: Fonts.hud },
   setupBtn: {
-    backgroundColor: Colors.accent, borderRadius: 14, paddingVertical: 15,
+    backgroundColor: Colors.lavender, borderRadius: 4, paddingVertical: 15,
     alignItems: 'center', marginTop: 16,
   },
-  setupBtnText: { color: '#fff', fontSize: 16, fontWeight: '800' },
+  setupBtnText: { color: Colors.bg, fontSize: 14, fontFamily: Fonts.hud, fontWeight: '700', letterSpacing: 1 },
 
-  // Edit profile
   editSheet: {
     position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 100,
     backgroundColor: Colors.card,
-    borderTopLeftRadius: 24, borderTopRightRadius: 24,
+    borderTopLeftRadius: 8, borderTopRightRadius: 8,
     padding: 20, paddingBottom: 40,
-    borderTopWidth: 1, borderColor: Colors.border,
+    borderTopWidth: 1, borderColor: Colors.borderGlow,
     maxHeight: '90%',
   },
-  editHandle: { width: 36, height: 4, borderRadius: 2, backgroundColor: Colors.border, alignSelf: 'center', marginBottom: 16 },
-  editTitle: { color: Colors.text, fontSize: 20, fontWeight: '800', marginBottom: 16, textAlign: 'center' },
+  editHandle: { width: 36, height: 3, borderRadius: 2, backgroundColor: Colors.borderGlow, alignSelf: 'center', marginBottom: 16 },
+  editTitle: {
+    color: Colors.text, fontSize: 18,
+    fontFamily: Fonts.display, fontWeight: '700',
+    marginBottom: 16, textAlign: 'center',
+  },
   editAvatarBtn: { alignItems: 'center', gap: 4, marginBottom: 16 },
-  editAvatarHint: { color: Colors.accent, fontSize: 12, fontWeight: '600' },
+  editAvatarHint: { color: Colors.lavender, fontSize: 11, fontFamily: Fonts.hud },
   frameRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 16 },
   frameOpt: {
-    paddingHorizontal: 12, paddingVertical: 7, borderRadius: 10,
+    paddingHorizontal: 12, paddingVertical: 7, borderRadius: 4,
     borderWidth: 2, borderColor: Colors.border,
   },
-  frameOptActive: { backgroundColor: 'rgba(255,159,67,0.12)' },
-  frameOptText: { color: Colors.text, fontSize: 12, fontWeight: '600' },
+  frameOptActive: { backgroundColor: 'rgba(196,181,244,0.12)' },
+  frameOptText: { color: Colors.text, fontSize: 11, fontFamily: Fonts.body, fontWeight: '600' },
   editActions: { flexDirection: 'row', gap: 10, marginTop: 8 },
   cancelBtn: {
-    flex: 1, borderRadius: 12, paddingVertical: 13, alignItems: 'center',
+    flex: 1, borderRadius: 4, paddingVertical: 13, alignItems: 'center',
     backgroundColor: Colors.bg, borderWidth: 1, borderColor: Colors.border,
   },
-  cancelBtnText: { color: Colors.textDim, fontSize: 15, fontWeight: '600' },
-  saveBtn: { flex: 2, borderRadius: 12, paddingVertical: 13, alignItems: 'center', backgroundColor: Colors.accent },
-  saveBtnText: { color: '#fff', fontSize: 15, fontWeight: '800' },
+  cancelBtnText: { color: Colors.textDim, fontSize: 14, fontFamily: Fonts.body },
+  saveBtn: { flex: 2, borderRadius: 4, paddingVertical: 13, alignItems: 'center', backgroundColor: Colors.lavender },
+  saveBtnText: { color: Colors.bg, fontSize: 14, fontFamily: Fonts.hud, fontWeight: '700' },
 
-  // Shared form fields
   fieldGroup: { marginBottom: 16 },
-  fieldLabel: { color: Colors.textDim, fontSize: 12, fontWeight: '700', letterSpacing: 0.8, marginBottom: 6, paddingHorizontal: 4 },
+  fieldLabel: {
+    color: Colors.textDim, fontSize: 9,
+    fontFamily: Fonts.hud, letterSpacing: 1.5,
+    marginBottom: 6, paddingHorizontal: 4,
+  },
   input: {
-    backgroundColor: Colors.card, borderRadius: 12, borderWidth: 1, borderColor: Colors.border,
-    paddingHorizontal: 14, paddingVertical: 12, color: Colors.text, fontSize: 15,
+    backgroundColor: Colors.bg, borderRadius: 4, borderWidth: 1, borderColor: Colors.borderGlow,
+    paddingHorizontal: 14, paddingVertical: 12, color: Colors.text,
+    fontSize: 15, fontFamily: Fonts.body,
   },
   inputMulti: { height: 80, textAlignVertical: 'top' },
-  fieldHint: { color: Colors.textDim, fontSize: 11, marginTop: 4, paddingHorizontal: 4 },
+  fieldHint: { color: Colors.textDim, fontSize: 10, fontFamily: Fonts.mono, marginTop: 4, paddingHorizontal: 4 },
   offlineNote: {
-    backgroundColor: 'rgba(255,159,67,0.08)', borderRadius: 10, padding: 12,
-    borderWidth: 1, borderColor: 'rgba(255,159,67,0.2)', marginBottom: 12,
+    backgroundColor: 'rgba(196,181,244,0.06)', borderRadius: 6, padding: 12,
+    borderWidth: 1, borderColor: 'rgba(196,181,244,0.15)', marginBottom: 12,
   },
-  offlineNoteText: { color: Colors.textDim, fontSize: 12, lineHeight: 17 },
-  errorText: { color: Colors.wrong, fontSize: 13, marginBottom: 8, textAlign: 'center' },
+  offlineNoteText: { color: Colors.textDim, fontSize: 12, fontFamily: Fonts.body, lineHeight: 17 },
+  errorText: { color: Colors.wrong, fontSize: 12, fontFamily: Fonts.body, marginBottom: 8, textAlign: 'center' },
 });

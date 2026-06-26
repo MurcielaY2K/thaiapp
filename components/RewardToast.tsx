@@ -1,7 +1,8 @@
 import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Animated } from 'react-native';
+import { View, Text, StyleSheet, Animated, Platform } from 'react-native';
 import { REWARDS } from '../data/rewards';
 import { Colors } from '../constants/colors';
+import { Fonts } from '../constants/typography';
 
 interface Props {
   rewardIds: string[];
@@ -33,10 +34,16 @@ export default function RewardToast({ rewardIds, onDone }: Props) {
   if (!reward) return null;
 
   return (
-    <Animated.View style={[styles.toast, { transform: [{ translateY: slide }] }]}>
+    <Animated.View style={[
+      styles.toast,
+      { transform: [{ translateY: slide }] },
+      Platform.OS === 'web' ? {
+        boxShadow: '0 0 24px rgba(251,191,36,0.4)',
+      } as any : {},
+    ]}>
       <Text style={styles.icon}>{reward.icon}</Text>
       <View style={styles.text}>
-        <Text style={styles.title}>Reward Unlocked!</Text>
+        <Text style={styles.title}>REWARD UNLOCKED</Text>
         <Text style={styles.name}>{reward.title}</Text>
         <Text style={styles.unlocks} numberOfLines={1}>
           {reward.unlocks.map(u => u.label).join(' · ')}
@@ -55,22 +62,36 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    backgroundColor: '#1a1a2e',
-    borderRadius: 18,
+    backgroundColor: Colors.card,
+    borderRadius: 6,
     padding: 16,
     borderWidth: 1,
-    borderColor: '#ff9f43',
-    shadowColor: '#ff9f43',
+    borderColor: Colors.gold,
+    shadowColor: Colors.gold,
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
+    shadowOpacity: 0.4,
     shadowRadius: 12,
     elevation: 8,
     marginTop: 50,
   },
   icon: { fontSize: 32 },
   text: { flex: 1, gap: 2 },
-  title: { color: Colors.accent, fontSize: 11, fontWeight: '800', letterSpacing: 1.2, textTransform: 'uppercase' },
-  name: { color: Colors.text, fontSize: 16, fontWeight: '700' },
-  unlocks: { color: Colors.textDim, fontSize: 11 },
+  title: {
+    color: Colors.gold,
+    fontSize: 9,
+    fontFamily: Fonts.hud,
+    letterSpacing: 1.5,
+  },
+  name: {
+    color: Colors.text,
+    fontSize: 15,
+    fontFamily: Fonts.display,
+    fontWeight: '700',
+  },
+  unlocks: {
+    color: Colors.textDim,
+    fontSize: 11,
+    fontFamily: Fonts.body,
+  },
   star: { fontSize: 20 },
 });

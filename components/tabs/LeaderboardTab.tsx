@@ -1,21 +1,26 @@
 import React, { useEffect } from 'react';
 import {
   View, Text, StyleSheet, FlatList, TouchableOpacity,
-  SafeAreaView, ActivityIndicator, RefreshControl,
+  SafeAreaView, ActivityIndicator, RefreshControl, Platform,
 } from 'react-native';
 import { useUserStore, LeaderboardEntry } from '../../store/userStore';
 import { Colors } from '../../constants/colors';
+import { Fonts } from '../../constants/typography';
 import { SUPABASE_CONFIGURED } from '../../constants/supabase';
 import { FRAME_STYLES, FrameId } from '../../data/rewards';
 
-const RANK_COLORS: Record<number, string> = { 1: '#ffd700', 2: '#9ca3af', 3: '#cd7f32' };
+const RANK_COLORS: Record<number, string> = {
+  1: Colors.gold,
+  2: '#9ca3af',
+  3: '#cd7f32',
+};
 
 function RankBadge({ rank }: { rank: number }) {
   const color = RANK_COLORS[rank] ?? Colors.textDim;
   const label = rank <= 3 ? ['🥇', '🥈', '🥉'][rank - 1] : `#${rank}`;
   return (
-    <View style={[styles.rankBadge, { borderColor: color + '60', backgroundColor: color + '12' }]}>
-      <Text style={[styles.rankText, { color }]}>{label}</Text>
+    <View style={[styles.rankBadge, { borderColor: color + '50', backgroundColor: color + '10' }]}>
+      <Text style={[styles.rankText, { color, fontFamily: Fonts.hud }]}>{label}</Text>
     </View>
   );
 }
@@ -24,7 +29,13 @@ function EntryRow({ entry, isMe }: { entry: LeaderboardEntry; isMe: boolean }) {
   const frame = (entry.profileFrame ?? 'default') as FrameId;
   const { border } = FRAME_STYLES[frame];
   return (
-    <View style={[styles.row, isMe && styles.rowMe]}>
+    <View style={[
+      styles.row,
+      isMe && styles.rowMe,
+      Platform.OS === 'web' && isMe ? {
+        boxShadow: `0 0 12px rgba(196,181,244,0.15)`,
+      } as any : {},
+    ]}>
       <RankBadge rank={entry.rank} />
       <View style={[styles.avatar, { borderColor: border }]}>
         <Text style={styles.avatarEmoji}>{entry.avatarEmoji}</Text>
@@ -35,13 +46,17 @@ function EntryRow({ entry, isMe }: { entry: LeaderboardEntry; isMe: boolean }) {
             {entry.displayName || entry.username}
           </Text>
           <Text style={styles.flag}>{entry.countryFlag}</Text>
-          {isMe && <View style={styles.meBadge}><Text style={styles.meBadgeText}>YOU</Text></View>}
+          {isMe && (
+            <View style={styles.meBadge}>
+              <Text style={styles.meBadgeText}>YOU</Text>
+            </View>
+          )}
         </View>
         <Text style={styles.username}>@{entry.username}</Text>
       </View>
       <View style={styles.scores}>
         <Text style={styles.xpScore}>{entry.xp.toLocaleString()} XP</Text>
-        <Text style={styles.streakScore}>🔥{entry.streak}</Text>
+        <Text style={styles.streakScore}>🔥 {entry.streak}</Text>
       </View>
     </View>
   );
@@ -74,9 +89,11 @@ export default function LeaderboardTab() {
     return (
       <SafeAreaView style={styles.safe}>
         <View style={styles.center}>
-          <Text style={styles.offlineIcon}>👤</Text>
+          <Text style={styles.offlineIcon}>👻</Text>
           <Text style={styles.offlineTitle}>Set up your profile first</Text>
-          <Text style={styles.offlineSub}>Go to the Profile tab to create your username and appear on the leaderboard.</Text>
+          <Text style={styles.offlineSub}>
+            Go to the Profile tab to create your username and appear on the leaderboard.
+          </Text>
         </View>
       </SafeAreaView>
     );
@@ -84,11 +101,12 @@ export default function LeaderboardTab() {
 
   return (
     <SafeAreaView style={styles.safe}>
-      {/* Header */}
       <View style={styles.header}>
         <View>
           <Text style={styles.heading}>Global Ranking</Text>
-          {myRank && <Text style={styles.myRankText}>Your rank: #{myRank}</Text>}
+          {myRank != null && (
+            <Text style={styles.myRankText}>Your rank: #{myRank}</Text>
+          )}
         </View>
         <TouchableOpacity
           style={styles.refreshBtn}
@@ -102,12 +120,12 @@ export default function LeaderboardTab() {
 
       {isLoadingLeaderboard && leaderboard.length === 0 ? (
         <View style={styles.center}>
-          <ActivityIndicator color={Colors.accent} size="large" />
+          <ActivityIndicator color={Colors.lavender} size="large" />
           <Text style={styles.loadingText}>Loading rankings…</Text>
         </View>
       ) : leaderboard.length === 0 ? (
         <View style={styles.center}>
-          <Text style={styles.offlineIcon}>🏆</Text>
+          <Text style={styles.offlineIcon}>👑</Text>
           <Text style={styles.offlineTitle}>No players yet</Text>
           <Text style={styles.offlineSub}>Be the first on the leaderboard!</Text>
         </View>
@@ -125,7 +143,7 @@ export default function LeaderboardTab() {
             <RefreshControl
               refreshing={isLoadingLeaderboard}
               onRefresh={fetchLeaderboard}
-              tintColor={Colors.accent}
+              tintColor={Colors.lavender}
             />
           }
         />
@@ -145,12 +163,24 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 20,
     paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.borderGlow,
   },
-  heading: { color: Colors.text, fontSize: 26, fontWeight: '800' },
-  myRankText: { color: Colors.accent, fontSize: 13, fontWeight: '600', marginTop: 2 },
+  heading: {
+    color: Colors.text,
+    fontSize: 22,
+    fontFamily: Fonts.display,
+    fontWeight: '700',
+  },
+  myRankText: {
+    color: Colors.lavender,
+    fontSize: 12,
+    fontFamily: Fonts.hud,
+    marginTop: 2,
+  },
   refreshBtn: {
-    width: 38, height: 38, borderRadius: 10,
-    backgroundColor: Colors.card, borderWidth: 1, borderColor: Colors.border,
+    width: 38, height: 38, borderRadius: 4,
+    backgroundColor: Colors.card, borderWidth: 1, borderColor: Colors.borderGlow,
     alignItems: 'center', justifyContent: 'center',
   },
   refreshText: { color: Colors.textDim, fontSize: 20 },
@@ -163,19 +193,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 12,
     paddingVertical: 12,
-    paddingHorizontal: 4,
-    borderRadius: 14,
+    paddingHorizontal: 8,
+    borderRadius: 6,
   },
-  rowMe: { backgroundColor: 'rgba(255,159,67,0.07)' },
+  rowMe: { backgroundColor: 'rgba(196,181,244,0.07)', borderRadius: 8 },
 
   rankBadge: {
-    width: 44, height: 34, borderRadius: 8,
+    width: 44, height: 34, borderRadius: 4,
     borderWidth: 1, alignItems: 'center', justifyContent: 'center',
   },
-  rankText: { fontSize: 13, fontWeight: '800' },
+  rankText: { fontSize: 12 },
 
   avatar: {
-    width: 44, height: 44, borderRadius: 22,
+    width: 44, height: 44, borderRadius: 4,
     borderWidth: 2, backgroundColor: Colors.card,
     alignItems: 'center', justifyContent: 'center',
   },
@@ -183,24 +213,37 @@ const styles = StyleSheet.create({
 
   info: { flex: 1, gap: 2 },
   nameRow: { flexDirection: 'row', alignItems: 'center', gap: 5, flexWrap: 'wrap' },
-  displayName: { color: Colors.text, fontSize: 14, fontWeight: '700' },
-  nameMe: { color: Colors.accent },
+  displayName: {
+    color: Colors.text,
+    fontSize: 14,
+    fontFamily: Fonts.body,
+    fontWeight: '700',
+  },
+  nameMe: { color: Colors.lavender },
   flag: { fontSize: 14 },
   meBadge: {
-    backgroundColor: Colors.accent, borderRadius: 6,
+    backgroundColor: Colors.lavender,
+    borderRadius: 3,
     paddingHorizontal: 5, paddingVertical: 1,
   },
-  meBadgeText: { color: '#fff', fontSize: 9, fontWeight: '800' },
-  username: { color: Colors.textDim, fontSize: 11 },
+  meBadgeText: { color: Colors.bg, fontSize: 9, fontFamily: Fonts.hud, fontWeight: '700' },
+  username: { color: Colors.textDim, fontSize: 11, fontFamily: Fonts.mono },
 
   scores: { alignItems: 'flex-end', gap: 2 },
-  xpScore: { color: Colors.text, fontSize: 13, fontWeight: '700' },
-  streakScore: { color: Colors.textDim, fontSize: 11 },
+  xpScore: { color: Colors.xp, fontSize: 13, fontFamily: Fonts.hud },
+  streakScore: { color: Colors.streak, fontSize: 11, fontFamily: Fonts.hud },
 
-  // Offline states
   offlineIcon: { fontSize: 52 },
-  offlineTitle: { color: Colors.text, fontSize: 20, fontWeight: '700', textAlign: 'center' },
-  offlineSub: { color: Colors.textDim, fontSize: 14, textAlign: 'center', lineHeight: 21 },
-  code: { fontFamily: 'monospace', color: Colors.accent },
-  loadingText: { color: Colors.textDim, fontSize: 14, marginTop: 8 },
+  offlineTitle: {
+    color: Colors.text, fontSize: 18,
+    fontFamily: Fonts.display,
+    fontWeight: '700', textAlign: 'center',
+  },
+  offlineSub: {
+    color: Colors.textDim, fontSize: 14,
+    fontFamily: Fonts.body,
+    textAlign: 'center', lineHeight: 21,
+  },
+  code: { fontFamily: Fonts.mono, color: Colors.lavender },
+  loadingText: { color: Colors.textDim, fontSize: 13, fontFamily: Fonts.body, marginTop: 8 },
 });

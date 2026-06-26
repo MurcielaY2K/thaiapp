@@ -75,7 +75,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.border,
   },
   cellActive: {
-    borderColor: '#ff9f43',
+    borderColor: Colors.lavender,
     backgroundColor: 'rgba(255,159,67,0.12)',
   },
   emoji: { fontSize: 32 },

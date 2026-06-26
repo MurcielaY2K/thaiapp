@@ -5,6 +5,7 @@ import {
 } from 'react-native';
 import { VOCABULARY, Word } from '../../data/vocabulary';
 import { Colors } from '../../constants/colors';
+import { Fonts } from '../../constants/typography';
 
 const CATEGORIES = ['all', 'greetings', 'numbers', 'time', 'food', 'places', 'colors', 'family', 'verbs', 'adjectives'];
 
@@ -13,6 +14,23 @@ const CAT_EMOJI: Record<string, string> = {
   food: '🍜', places: '📍', colors: '🎨', family: '👨‍👩‍👧',
   verbs: '🏃', adjectives: '⚖️',
 };
+
+// Spirit Realm category colors
+const CAT_COLORS: Record<string, string> = {
+  greetings:  Colors.teal,
+  numbers:    Colors.lavender,
+  time:       Colors.sky,
+  food:       Colors.mint,
+  places:     Colors.gold,
+  colors:     Colors.blush,
+  family:     Colors.peach,
+  verbs:      Colors.mintDim,
+  adjectives: Colors.lavenderDim,
+};
+
+function catColor(cat: string): string {
+  return CAT_COLORS[cat] ?? Colors.textDim;
+}
 
 function speak(text: string) {
   if (typeof window === 'undefined' || !window.speechSynthesis) return;
@@ -27,6 +45,7 @@ function speak(text: string) {
 }
 
 function WordRow({ word }: { word: Word }) {
+  const color = catColor(word.category);
   return (
     <TouchableOpacity style={styles.row} onPress={() => speak(word.th)} activeOpacity={0.7}>
       <View style={styles.rowLeft}>
@@ -35,8 +54,8 @@ function WordRow({ word }: { word: Word }) {
       </View>
       <View style={styles.rowRight}>
         <Text style={styles.en}>{word.en}</Text>
-        <View style={[styles.catBadge, { backgroundColor: catColor(word.category) + '20' }]}>
-          <Text style={[styles.catText, { color: catColor(word.category) }]}>
+        <View style={[styles.catBadge, { backgroundColor: color + '18' }]}>
+          <Text style={[styles.catText, { color }]}>
             {CAT_EMOJI[word.category] ?? '•'} {word.category}
           </Text>
         </View>
@@ -44,15 +63,6 @@ function WordRow({ word }: { word: Word }) {
       <Text style={styles.speaker}>🔊</Text>
     </TouchableOpacity>
   );
-}
-
-function catColor(cat: string) {
-  const MAP: Record<string, string> = {
-    greetings: '#ff9f43', numbers: '#a78bfa', time: '#60a5fa',
-    food: '#34d399', places: '#f59e0b', colors: '#ec4899',
-    family: '#fb923c', verbs: '#6ee7b7', adjectives: '#c4b5fd',
-  };
-  return MAP[cat] ?? Colors.textDim;
 }
 
 export default function DatabaseTab() {
@@ -104,17 +114,27 @@ export default function DatabaseTab() {
         showsHorizontalScrollIndicator={false}
         keyExtractor={c => c}
         contentContainerStyle={styles.cats}
-        renderItem={({ item: c }) => (
-          <TouchableOpacity
-            style={[styles.catChip, cat === c && styles.catChipActive]}
-            onPress={() => setCat(c)}
-            activeOpacity={0.75}
-          >
-            <Text style={[styles.catChipText, cat === c && styles.catChipTextActive]}>
-              {CAT_EMOJI[c]} {c === 'all' ? 'All' : c}
-            </Text>
-          </TouchableOpacity>
-        )}
+        renderItem={({ item: c }) => {
+          const isActive = cat === c;
+          const color = catColor(c);
+          return (
+            <TouchableOpacity
+              style={[
+                styles.catChip,
+                isActive && { backgroundColor: color + '20', borderColor: color },
+              ]}
+              onPress={() => setCat(c)}
+              activeOpacity={0.75}
+            >
+              <Text style={[
+                styles.catChipText,
+                isActive && { color, fontFamily: Fonts.hud },
+              ]}>
+                {CAT_EMOJI[c]} {c === 'all' ? 'All' : c}
+              </Text>
+            </TouchableOpacity>
+          );
+        }}
         style={styles.catBar}
       />
 
@@ -145,8 +165,13 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     paddingBottom: 10,
   },
-  heading: { color: Colors.text, fontSize: 26, fontWeight: '800' },
-  count: { color: Colors.textDim, fontSize: 14 },
+  heading: {
+    color: Colors.text,
+    fontSize: 22,
+    fontFamily: Fonts.display,
+    fontWeight: '700',
+  },
+  count: { color: Colors.textDim, fontSize: 13, fontFamily: Fonts.mono },
 
   searchWrap: {
     flexDirection: 'row',
@@ -155,26 +180,24 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     marginBottom: 10,
     backgroundColor: Colors.card,
-    borderRadius: 14,
+    borderRadius: 6,
     paddingHorizontal: 14,
     paddingVertical: 11,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: Colors.borderGlow,
   },
-  searchIcon: { fontSize: 16 },
-  input: { flex: 1, color: Colors.text, fontSize: 15 },
-  clear: { color: Colors.textDim, fontSize: 16, paddingHorizontal: 4 },
+  searchIcon: { fontSize: 14 },
+  input: { flex: 1, color: Colors.text, fontSize: 15, fontFamily: Fonts.body },
+  clear: { color: Colors.textDim, fontSize: 14, paddingHorizontal: 4 },
 
   catBar: { flexGrow: 0, marginBottom: 6 },
   cats: { paddingHorizontal: 20, gap: 8, paddingBottom: 4 },
   catChip: {
     paddingHorizontal: 12, paddingVertical: 6,
-    borderRadius: 20, backgroundColor: Colors.card,
+    borderRadius: 4, backgroundColor: Colors.card,
     borderWidth: 1, borderColor: Colors.border,
   },
-  catChipActive: { backgroundColor: Colors.accent + '22', borderColor: Colors.accent },
-  catChipText: { color: Colors.textDim, fontSize: 12, fontWeight: '600' },
-  catChipTextActive: { color: Colors.accent },
+  catChipText: { color: Colors.textDim, fontSize: 11, fontFamily: Fonts.body },
 
   list: { paddingHorizontal: 20, paddingBottom: 24, paddingTop: 4 },
   sep: { height: 1, backgroundColor: Colors.border, marginVertical: 2 },
@@ -185,13 +208,13 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   rowLeft: { width: 110, gap: 3 },
-  thai: { color: Colors.text, fontSize: 20, fontWeight: '500' },
-  rom: { color: Colors.textDim, fontSize: 12 },
+  thai: { color: Colors.text, fontSize: 20, fontFamily: Fonts.body, fontWeight: '500' },
+  rom: { color: Colors.textDim, fontSize: 11, fontFamily: Fonts.mono },
   rowRight: { flex: 1, gap: 4 },
-  en: { color: Colors.text, fontSize: 14, fontWeight: '600' },
-  catBadge: { alignSelf: 'flex-start', borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2 },
-  catText: { fontSize: 10, fontWeight: '600' },
-  speaker: { fontSize: 18, opacity: 0.6 },
+  en: { color: Colors.text, fontSize: 14, fontFamily: Fonts.body, fontWeight: '600' },
+  catBadge: { alignSelf: 'flex-start', borderRadius: 3, paddingHorizontal: 6, paddingVertical: 2 },
+  catText: { fontSize: 10, fontFamily: Fonts.hud },
+  speaker: { fontSize: 18, opacity: 0.5 },
   empty: { paddingTop: 60, alignItems: 'center' },
-  emptyText: { color: Colors.textDim, fontSize: 16 },
+  emptyText: { color: Colors.textDim, fontSize: 15, fontFamily: Fonts.body },
 });

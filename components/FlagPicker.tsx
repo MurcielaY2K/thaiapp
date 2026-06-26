@@ -64,6 +64,6 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
     backgroundColor: Colors.bg, borderWidth: 2, borderColor: Colors.border,
   },
-  cellActive: { borderColor: '#ff9f43', backgroundColor: 'rgba(255,159,67,0.12)' },
+  cellActive: { borderColor: Colors.lavender, backgroundColor: 'rgba(196,181,244,0.12)' },
   flag: { fontSize: 28 },
 });
