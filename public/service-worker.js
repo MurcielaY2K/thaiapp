@@ -1,6 +1,6 @@
 // Minimal service worker that claims /thaiapp/ scope so it takes priority
 // over any broader-scoped SW installed by the root site.
-const CACHE = 'thaiapp-v1';
+const CACHE = 'thaiapp-v2-spirit-realm';
 
 self.addEventListener('install', e => {
   self.skipWaiting();

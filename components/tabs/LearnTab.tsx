@@ -11,6 +11,18 @@ import { Fonts } from '../../constants/typography';
 import HeartsBar from '../HeartsBar';
 import XPBar from '../XPBar';
 import PremiumModal from '../PremiumModal';
+import PixelSprite from '../PixelSprite';
+import SpiritHero from '../SpiritHero';
+import { SPRITES, type SpriteName } from '../../data/sprites';
+
+// Each world gets a pixel-art guardian in its header.
+const WORLD_SPRITE: Record<string, SpriteName> = {
+  w1: 'naga',
+  w2: 'lotus',
+  w3: 'chedi',
+  w4: 'garuda',
+  w5: 'hanuman',
+};
 
 const SCREEN_W = Dimensions.get('window').width;
 const NODE_SIZE = 64;
@@ -140,6 +152,8 @@ function LessonNode({
 }
 
 function WorldHeader({ world }: { world: World }) {
+  const spriteName = WORLD_SPRITE[world.id];
+  const sprite = spriteName ? SPRITES[spriteName] : null;
   return (
     <View style={[
       styles.worldHeader,
@@ -149,7 +163,9 @@ function WorldHeader({ world }: { world: World }) {
       } as any : {},
     ]}>
       <View style={[styles.worldEmoji, { backgroundColor: world.color + '18' }]}>
-        <Text style={styles.worldEmojiText}>{world.emoji}</Text>
+        {sprite
+          ? <PixelSprite sprite={sprite} size={36} />
+          : <Text style={styles.worldEmojiText}>{world.emoji}</Text>}
       </View>
       <View style={styles.worldText}>
         <View style={styles.worldTitleRow}>
@@ -207,6 +223,7 @@ export default function LearnTab() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
+        <SpiritHero width={SCREEN_W} />
         {LIST_ITEMS.map((item, idx) => {
           if (item.type === 'header') {
             return <WorldHeader key={`h-${item.world.id}`} world={item.world} />;
@@ -260,7 +277,7 @@ const styles = StyleSheet.create({
   xpWrap: { paddingHorizontal: 20, paddingBottom: 12 },
 
   scroll: { flex: 1 },
-  scrollContent: { paddingTop: 8, paddingBottom: 24 },
+  scrollContent: { paddingTop: 0, paddingBottom: 24 },
 
   worldHeader: {
     flexDirection: 'row',
