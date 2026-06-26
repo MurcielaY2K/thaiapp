@@ -8,6 +8,7 @@ import * as Haptics from 'expo-haptics';
 import { useSrsStore } from '../store/srsStore';
 import { VOCABULARY } from '../data/vocabulary';
 import { Colors } from '../constants/colors';
+import { Fonts } from '../constants/typography';
 import PixelSprite from '../components/PixelSprite';
 import { SPRITES } from '../data/sprites';
 
@@ -123,7 +124,7 @@ export default function SessionScreen() {
       <SafeAreaView style={styles.safe}>
         <View style={styles.done}>
           <PixelSprite sprite={perfect ? SPRITES.garuda : SPRITES.naga} size={120} />
-          <Text style={styles.starsRow}>{'⭐'.repeat(stars)}{'☆'.repeat(3 - stars)}</Text>
+          <Text style={styles.starsRow}>{'★'.repeat(stars)}{'☆'.repeat(3 - stars)}</Text>
           <Text style={styles.doneTitle}>
             {perfect ? 'Perfect! 🎉' : pct >= 60 ? 'Great work!' : 'Keep going!'}
           </Text>
@@ -224,42 +225,42 @@ const styles = StyleSheet.create({
     paddingBottom: 6,
   },
   closeBtn: {
-    width: 34, height: 34, borderRadius: 17,
+    width: 34, height: 34, borderRadius: 4,
     backgroundColor: Colors.card, alignItems: 'center', justifyContent: 'center',
-    borderWidth: 1, borderColor: Colors.border,
+    borderWidth: 1, borderColor: Colors.borderGlow,
   },
-  closeBtnText: { color: Colors.textDim, fontSize: 14 },
+  closeBtnText: { color: Colors.textDim, fontSize: 13 },
   progressBar: {
     flex: 1,
     height: 6,
     backgroundColor: Colors.border,
-    borderRadius: 3,
+    borderRadius: 2,
     overflow: 'hidden',
   },
   progressFill: {
     height: '100%',
-    backgroundColor: Colors.accent,
-    borderRadius: 3,
+    backgroundColor: Colors.lavender,
+    borderRadius: 2,
   },
   progressText: {
     color: Colors.textDim,
-    fontSize: 12,
-    letterSpacing: 0.5,
+    fontSize: 11,
+    fontFamily: Fonts.hud,
     width: 40,
     textAlign: 'right',
   },
 
   comboWrap: {
     alignSelf: 'center',
-    backgroundColor: 'rgba(255,159,67,0.15)',
-    borderRadius: 20,
+    backgroundColor: 'rgba(251,146,60,0.12)',
+    borderRadius: 4,
     paddingVertical: 5,
     paddingHorizontal: 16,
     borderWidth: 1,
-    borderColor: Colors.accent,
+    borderColor: Colors.streak,
     marginTop: 4,
   },
-  comboText: { color: Colors.accent, fontSize: 14, fontWeight: '700' },
+  comboText: { color: Colors.streak, fontSize: 13, fontFamily: Fonts.hud },
 
   wordArea: {
     flex: 1,
@@ -270,13 +271,14 @@ const styles = StyleSheet.create({
   },
   categoryTag: {
     color: Colors.textDim,
-    fontSize: 10,
+    fontSize: 9,
+    fontFamily: Fonts.hud,
     letterSpacing: 2.5,
-    fontWeight: '600',
   },
   thaiWord: {
     color: Colors.text,
     fontSize: 72,
+    fontFamily: Fonts.body,
     fontWeight: '200',
     textAlign: 'center',
     letterSpacing: 2,
@@ -285,21 +287,21 @@ const styles = StyleSheet.create({
   romText: {
     color: 'transparent',
     fontSize: 18,
+    fontFamily: Fonts.body,
     letterSpacing: 0.5,
-    fontStyle: 'italic',
     marginTop: -4,
   },
-  romTextRevealed: { color: Colors.accent },
+  romTextRevealed: { color: Colors.lavender },
 
   speakBtn: {
     paddingVertical: 7,
     paddingHorizontal: 18,
-    borderRadius: 20,
+    borderRadius: 4,
     backgroundColor: Colors.card,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: Colors.borderGlow,
   },
-  speakBtnText: { color: Colors.textDim, fontSize: 13 },
+  speakBtnText: { color: Colors.textDim, fontSize: 12, fontFamily: Fonts.body },
 
   options: {
     paddingHorizontal: 20,
@@ -308,27 +310,28 @@ const styles = StyleSheet.create({
   },
   option: {
     backgroundColor: Colors.card,
-    borderRadius: 16,
+    borderRadius: 6,
     paddingVertical: 17,
     paddingHorizontal: 20,
     borderWidth: 1.5,
-    borderColor: Colors.border,
+    borderColor: Colors.borderGlow,
     alignItems: 'center',
   },
   optionCorrect: {
-    backgroundColor: 'rgba(46,204,113,0.12)',
+    backgroundColor: Colors.correctBg,
     borderColor: Colors.correct,
   },
   optionWrong: {
-    backgroundColor: 'rgba(231,76,60,0.12)',
+    backgroundColor: Colors.wrongBg,
     borderColor: Colors.wrong,
   },
   optionText: {
     color: Colors.text,
-    fontSize: 16,
-    fontWeight: '500',
+    fontSize: 15,
+    fontFamily: Fonts.body,
+    fontWeight: '600',
   },
-  optionTextCorrect: { color: Colors.correct, fontWeight: '700' },
+  optionTextCorrect: { color: Colors.correct },
   optionTextWrong: { color: Colors.wrong },
 
   // Done screen
@@ -339,41 +342,44 @@ const styles = StyleSheet.create({
     gap: 12,
     paddingHorizontal: 32,
   },
-  starsRow: { fontSize: 32, letterSpacing: 4 },
+  starsRow: { fontSize: 32, letterSpacing: 6, color: Colors.gold, fontFamily: Fonts.hud },
   doneTitle: {
     color: Colors.text,
-    fontSize: 28,
+    fontSize: 26,
+    fontFamily: Fonts.display,
     fontWeight: '700',
     textAlign: 'center',
   },
   donePct: {
-    color: Colors.accent,
+    color: Colors.lavender,
     fontSize: 48,
-    fontWeight: '200',
+    fontFamily: Fonts.hud,
     letterSpacing: 2,
   },
   doneScoreRow: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  doneCorrect: { color: Colors.correct, fontSize: 17, fontWeight: '600' },
-  doneWrong: { color: Colors.textDim, fontSize: 17 },
+  doneCorrect: { color: Colors.correct, fontSize: 16, fontFamily: Fonts.hud },
+  doneWrong: { color: Colors.textDim, fontSize: 16, fontFamily: Fonts.hud },
   doneHint: {
     color: Colors.textDim,
-    fontSize: 13,
+    fontSize: 12,
+    fontFamily: Fonts.body,
     textAlign: 'center',
   },
   doneBtn: {
-    backgroundColor: Colors.accent,
-    borderRadius: 16,
-    paddingVertical: 18,
+    backgroundColor: Colors.lavender,
+    borderRadius: 4,
+    paddingVertical: 16,
     paddingHorizontal: 56,
     marginTop: 8,
   },
   doneBtnText: {
     color: Colors.bg,
-    fontSize: 17,
+    fontSize: 14,
+    fontFamily: Fonts.hud,
     fontWeight: '700',
-    letterSpacing: 0.5,
+    letterSpacing: 1.5,
   },
 });
