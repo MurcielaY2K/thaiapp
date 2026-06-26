@@ -5,7 +5,7 @@
 //   3. After-payment: set "Don't show confirmation page" →
 //      Redirect to: https://murcielay2k.github.io/thaiapp/?payment_success=1
 //   4. Replace the URL below with your generated link.
-export const STRIPE_PAYMENT_LINK = 'https://buy.stripe.com/REPLACE_WITH_YOUR_LINK';
+export const STRIPE_PAYMENT_LINK = 'https://buy.stripe.com/fZuaEPai75mJ5d6asJ77O03';
 
 // The URL param Stripe appends on redirect-back success
 export const STRIPE_SUCCESS_PARAM = 'payment_success';
