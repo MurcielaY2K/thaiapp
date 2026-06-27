@@ -7,7 +7,7 @@ import { VOCABULARY, Word } from '../../data/vocabulary';
 import { Colors } from '../../constants/colors';
 import { Fonts } from '../../constants/typography';
 
-const CATEGORIES = ['all', 'greetings', 'numbers', 'time', 'food', 'places', 'colors', 'family', 'verbs', 'adjectives', 'personal', 'weather', 'feelings', 'jobs', 'transport', 'car', 'travel', 'home', 'kitchen', 'bedroom', 'bathroom', 'garden', 'housework'];
+const CATEGORIES = ['all', 'greetings', 'numbers', 'time', 'food', 'places', 'colors', 'family', 'verbs', 'adjectives', 'personal', 'weather', 'feelings', 'jobs', 'transport', 'car', 'travel', 'home', 'kitchen', 'bedroom', 'bathroom', 'garden', 'housework', 'shopping'];
 
 const CAT_EMOJI: Record<string, string> = {
   all: '🔍', greetings: '🙏', numbers: '🔢', time: '⏰',
@@ -15,7 +15,7 @@ const CAT_EMOJI: Record<string, string> = {
   verbs: '🏃', adjectives: '⚖️', personal: '🪪', weather: '🌦️',
   feelings: '😊', jobs: '💼', transport: '🚕', car: '🚗', travel: '✈️',
   home: '🏠', kitchen: '🍳', bedroom: '🛏️', bathroom: '🛁',
-  garden: '🪴', housework: '🧹',
+  garden: '🪴', housework: '🧹', shopping: '🛒',
 };
 
 // Spirit Realm category colors
@@ -42,6 +42,7 @@ const CAT_COLORS: Record<string, string> = {
   bathroom:   Colors.cyan,
   garden:     Colors.mint,
   housework:  Colors.gold,
+  shopping:   Colors.ember,
 };
 
 function catColor(cat: string): string {
