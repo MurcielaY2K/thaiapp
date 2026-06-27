@@ -176,16 +176,34 @@ adds `.nojekyll`, copies the service worker, and rewrites asset paths to the
 `/thaiapp` base (GitHub Pages subpath). The base path is configured in
 `app.json` via `experiments.baseUrl: "/thaiapp"`.
 
-**Deploy** (publishes `dist/` to the `gh-pages` branch via subtree split):
+**Deploy** (publishes `dist/` to the `gh-pages` branch via subtree split).
+
+`dist/` is **git-ignored** — it is build output and is never committed to the
+source branch. The deploy uses a *throwaway* build commit purely so
+`git subtree split` has the directory in its tree, then drops it again:
 
 ```bash
 npm run build:web
-git add -A && git commit -m "..."
-git subtree split --prefix dist HEAD -b gh-pages-split-vN
-git push origin "gh-pages-split-vN:gh-pages" --force
+
+# 1. commit your real source changes first (data, components, etc.)
+git add data/ components/ && git commit -m "vocab: ..."
+
+# 2. throwaway build commit (force-add the ignored dist/), then split & push
+git add -f dist && git commit -m "build (temporary, will be dropped)"
+SPLIT="gh-pages-split-v$(date +%s)"
+git subtree split --prefix dist HEAD -b "$SPLIT"
+git push origin "$SPLIT:gh-pages" --force
+
+# 3. drop the throwaway build commit so source stays clean, then push source
+git reset --hard HEAD~1
+git branch -D "$SPLIT"
+git push origin main
 ```
 
-Active development branch: `claude/petagotchi-mobile-app-uxmMy`.
+After deploy, hard-refresh on mobile to bust the service-worker cache.
+
+Active development branch: `main` (the cleaned, canonical project). The earlier
+`claude/petagotchi-mobile-app-uxmMy` branch has been superseded by `main`.
 
 ---
 
@@ -203,18 +221,26 @@ Active development branch: `claude/petagotchi-mobile-app-uxmMy`.
   watch/scan/celebrate experience is implemented on `<canvas>`.
 - **Romanization** is hand-written with tone marks and is approximate; it's a
   learning aid, not a strict phonemic transcription standard.
-- `data/strokes.ts` is legacy (the old path-based approach) and can be removed.
-- The package name is still `petagotchi` (project's earlier identity).
+- The old path-based stroke data (`data/strokes.ts`) has been removed; the
+  writing trainer now reveals the real font glyph instead.
 
 ---
 
 ## 8. Content inventory
 
-- **180** vocabulary words across 9 categories (greetings, numbers, time,
-  food, places, colors, family, verbs, adjectives)
+- **1,253** vocabulary words across **37** categories, transcribed from a Thai
+  phrasebook (basics, numbers, time, family, transport/car/travel, home &
+  rooms, housework, and the full "At the Shops" set: food, fruit, vegetables,
+  seafood, meat, bakery, dairy, pharmacy, beauty, baby, stationery, department
+  store, clothing, tools, …)
 - **78** alphabet characters (44 consonants, 24 vowels, 10 numerals), each with
   traditional name (romanized + Thai script), meaning, and practical sound
 - **16** phrase categories of glossed context sentences (incl. contemporary:
   slang, movies/series, online/social)
 - **5** illustrated reading lessons
 - **~40** pixel-art sprites
+
+> Each vocabulary category must be registered in **3** places in
+> `components/tabs/DatabaseTab.tsx`: the `CATEGORIES` array, `CAT_EMOJI`, and
+> `CAT_COLORS`. Before every build, validate the dataset (no duplicate `id`,
+> `th`, or `en`; no Latin letters inside `th`) and run `npx tsc --noEmit`.
