@@ -7,12 +7,12 @@ import { VOCABULARY, Word } from '../../data/vocabulary';
 import { Colors } from '../../constants/colors';
 import { Fonts } from '../../constants/typography';
 
-const CATEGORIES = ['all', 'greetings', 'numbers', 'time', 'food', 'places', 'colors', 'family', 'verbs', 'adjectives', 'personal'];
+const CATEGORIES = ['all', 'greetings', 'numbers', 'time', 'food', 'places', 'colors', 'family', 'verbs', 'adjectives', 'personal', 'weather'];
 
 const CAT_EMOJI: Record<string, string> = {
   all: '🔍', greetings: '🙏', numbers: '🔢', time: '⏰',
   food: '🍜', places: '📍', colors: '🎨', family: '👨‍👩‍👧',
-  verbs: '🏃', adjectives: '⚖️', personal: '🪪',
+  verbs: '🏃', adjectives: '⚖️', personal: '🪪', weather: '🌦️',
 };
 
 // Spirit Realm category colors
@@ -27,6 +27,7 @@ const CAT_COLORS: Record<string, string> = {
   verbs:      Colors.mintDark,
   adjectives: Colors.lavenderDark,
   personal:   Colors.cyan,
+  weather:    Colors.amber,
 };
 
 function catColor(cat: string): string {
