@@ -723,4 +723,139 @@ export const PHRASE_CATEGORIES: PhraseCategory[] = [
       },
     ],
   },
+  {
+    key: 'essentials',
+    th: 'พื้นฐาน',
+    label: 'Essentials',
+    icon: '✨',
+    sentences: [
+      {
+        tokens: [
+          { th: 'อรุณ', rom: 'à-run', en: 'dawn / morning' },
+          { th: 'สวัสดิ์', rom: 'sà-wàt', en: 'greeting / blessing' },
+        ],
+        en: 'Good morning.',
+      },
+      {
+        tokens: [
+          { th: 'ราตรี', rom: 'raa-trii', en: 'night' },
+          { th: 'สวัสดิ์', rom: 'sà-wàt', en: 'greeting / blessing' },
+        ],
+        en: 'Good night.',
+      },
+      {
+        tokens: [
+          { th: 'ลา', rom: 'laa', en: 'to take leave' },
+          { th: 'ก่อน', rom: 'kɔ̀ɔn', en: 'first / before' },
+        ],
+        en: 'Goodbye.',
+      },
+      {
+        tokens: [
+          { th: 'แล้ว', rom: 'lɛ́ɛw', en: 'then' },
+          { th: 'เจอ', rom: 'jɤɤ', en: 'meet' },
+          { th: 'กัน', rom: 'kan', en: 'each other' },
+        ],
+        en: 'See you soon.',
+      },
+      {
+        tokens: [
+          { th: 'โชค', rom: 'chôok', en: 'luck / fortune' },
+          { th: 'ดี', rom: 'dii', en: 'good' },
+        ],
+        en: 'Good luck!',
+      },
+      {
+        tokens: [
+          { th: 'ด้วย', rom: 'dûay', en: 'with' },
+          { th: 'ความยินดี', rom: 'khwaam-yin-dii', en: 'pleasure / gladness' },
+        ],
+        en: "You're welcome.",
+      },
+      {
+        tokens: [
+          { th: 'อะไร', rom: 'à-rai', en: 'what' },
+          { th: 'นะ', rom: 'ná', en: '[softening particle]' },
+        ],
+        en: 'Sorry? What was that?',
+      },
+    ],
+  },
+  {
+    key: 'about',
+    th: 'เกี่ยวกับตัวคุณ',
+    label: 'About You',
+    icon: '🪪',
+    sentences: [
+      {
+        tokens: [
+          { th: 'คุณ', rom: 'khun', en: 'you' },
+          { th: 'อายุ', rom: 'aa-yú', en: 'age' },
+          { th: 'เท่าไหร่', rom: 'thâo-rài', en: 'how much' },
+        ],
+        en: 'How old are you?',
+      },
+      {
+        tokens: [
+          { th: 'คุณ', rom: 'khun', en: 'you' },
+          { th: 'มา', rom: 'maa', en: 'come' },
+          { th: 'จาก', rom: 'jàak', en: 'from' },
+          { th: 'ประเทศ', rom: 'prà-thêet', en: 'country' },
+          { th: 'อะไร', rom: 'à-rai', en: 'what' },
+        ],
+        en: 'Where are you from?',
+      },
+      {
+        tokens: [
+          { th: 'คุณ', rom: 'khun', en: 'you' },
+          { th: 'พัก', rom: 'phák', en: 'stay' },
+          { th: 'อยู่', rom: 'yùu', en: 'reside' },
+          { th: 'ที่ไหน', rom: 'thîi-nǎi', en: 'where' },
+        ],
+        en: 'Where do you live?',
+      },
+      {
+        tokens: [
+          { th: 'คุณ', rom: 'khun', en: 'you' },
+          { th: 'แต่งงาน', rom: 'tàeng-ngaan', en: 'marry' },
+          { th: 'หรือยัง', rom: 'rɯ̌ɯ-yang', en: 'yet?' },
+        ],
+        en: 'Are you married?',
+      },
+      {
+        tokens: [
+          { th: 'ฉัน', rom: 'chǎn', en: 'I / me' },
+          { th: 'แต่งงาน', rom: 'tàeng-ngaan', en: 'marry' },
+          { th: 'แล้ว', rom: 'lɛ́ɛw', en: 'already' },
+        ],
+        en: "I'm married.",
+      },
+      {
+        tokens: [
+          { th: 'ฉัน', rom: 'chǎn', en: 'I / me' },
+          { th: 'เป็น', rom: 'pen', en: 'to be' },
+          { th: 'โสด', rom: 'sòot', en: 'single' },
+        ],
+        en: "I'm single.",
+      },
+      {
+        tokens: [
+          { th: 'คุณ', rom: 'khun', en: 'you' },
+          { th: 'มี', rom: 'mii', en: 'have' },
+          { th: 'ลูก', rom: 'lûuk', en: 'child' },
+          { th: 'ไหม', rom: 'mǎi', en: '[question particle]' },
+        ],
+        en: 'Do you have any children?',
+      },
+      {
+        tokens: [
+          { th: 'ฉัน', rom: 'chǎn', en: 'I / me' },
+          { th: 'ไม่', rom: 'mâi', en: 'not' },
+          { th: 'มี', rom: 'mii', en: 'have' },
+          { th: 'ลูก', rom: 'lûuk', en: 'child' },
+        ],
+        en: "I don't have any children.",
+      },
+    ],
+  },
 ];
