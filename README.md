@@ -1,56 +1,62 @@
-# 🐾 Petagotchi
+# ภาษาไทย — Thai Learning App
 
-> Tamagotchi meets AI personalization meets modern mobile addiction.
+A mobile-first **Thai language learning** app: spaced-repetition vocabulary
+quizzes, an interactive alphabet writing trainer (watch + trace with an
+accuracy scanner), and an illustrated reading / phrasebook section with
+text-to-speech. Built with Expo + React Native Web and shipped as a static
+PWA to GitHub Pages.
 
-Transform your real-life pet into an adorable animated pixel creature and raise it as your digital companion!
+**Live:** https://murcielay2k.github.io/thaiapp/
 
 ## Features
 
-- **AI Pet Transformation** — Upload a pet photo and get a charming 8-bit pixel-art version
-- **Digital Pet Care** — Feed, sleep, play, wash, walk, train & hug your pet
-- **Evolution System** — 6 stages from egg → legend based on care quality
-- **Personality Engine** — 8 unique AI-assigned personalities (lazy, chaotic, affectionate...)
-- **Mini Games** — Treat Catch, Retro Race, Fishing, Puzzle, Dance Battle, Pixel Rush
-- **Social Features** — Visit friends, leaderboards, daily challenges
-- **Customization** — Hats, outfits, room themes, pixel art styles
-- **Neglect System** — Leave your pet alone too long and it becomes a grumpy gremlin!
+- **Vocabulary SRS** — multiple-choice quizzes with an SM-2-lite spaced
+  repetition schedule, combo streaks, and star scoring
+- **Alphabet trainer** — *Watch* mode animates a write-on reveal of the real
+  font glyph; *Trace* mode lets you trace over a ghost glyph and scores your
+  accuracy
+- **Reading & phrasebook** — illustrated lessons and 16 phrase categories with
+  tap-to-gloss words, Thai text-to-speech, and a word-by-word read-along
+- **Pixel-art aesthetic** — lightweight sprites rendered from color grids
+- **Progress, streaks & profiles** — daily streaks, XP, leaderboard, and an
+  optional Premium tier
 
-## Tech Stack
+## Tech stack
 
-- **React Native** with **Expo** (iOS + Android)
-- **Expo Router** (file-based navigation)
-- **Zustand** (state management)
-- **React Native Reanimated** (animations)
-- **AsyncStorage** (cloud-ready local persistence)
-- **TypeScript** throughout
+- **Expo SDK 51** · React Native 0.74 · React 18 · TypeScript
+- **expo-router** (file-based routing) · **zustand** (state)
+- **react-native-web** (web target) · AsyncStorage persistence
+- Web Speech API for Thai TTS · Supabase + Stripe for accounts/Premium
 
-## Getting Started
+## Getting started
 
 ```bash
 npm install
-npx expo start
+npm run web          # local dev in the browser (expo start --web)
+npm run ios          # iOS simulator
+npm run android      # Android emulator
 ```
 
-## Project Structure
+## Build & deploy
 
-```
-app/
-  (tabs)/       # Main tab screens (Home, Care, Games, Social, Shop)
-  modals/       # Onboarding, Evolution reveal, Settings
-components/
-  pixel/        # PixelPet, PixelBackground, PixelText, RetroFrame
-  care/         # StatsBar, MoodBubble, CareButton
-  ui/           # RetroButton
-constants/      # Colors, pet data, evolutions
-store/          # Zustand pet store
-types/          # TypeScript types
+```bash
+npm run build:web    # static web export → dist/ (git-ignored)
 ```
 
-## Visual Style
+`dist/` is a build artifact and is **not** committed to source — the published
+site lives on the `gh-pages` branch. See **[DEVELOPER.md](./DEVELOPER.md)** for
+the full architecture, data models, SRS algorithm, deploy steps, and gotchas.
 
-- 90s Japanese Tamagotchi aesthetics
-- Deep purple/dark retro base colors
-- Neon pink, cyan, purple & yellow accents
-- Soft pastel highlights
-- Pixel art sprite rendering via View grids
-- CRT-inspired UI with glow effects
+## Project structure
+
+```
+app/         expo-router screens (index, session, write, read, lesson)
+components/   UI + tab screens (Learn, Practice, Database, Leaderboard, Profile)
+data/         vocabulary, alphabet, phrases, reading, sprites, worlds, rewards
+store/        zustand stores (srs, progress, user)
+constants/    theme, colors, typography, stripe, supabase config
+lib/          supabase client
+supabase/     database schema
+public/       PWA service worker
+assets/       sprite images
+```

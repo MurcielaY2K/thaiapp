@@ -15,4 +15,7 @@ web-build/
 
 expo-env.d.ts
 # @end expo-cli
-# dist/ — tracked for GitHub Pages deployment
+
+# Web build output (published to the gh-pages branch, not tracked in source)
+dist/
+web-build/
