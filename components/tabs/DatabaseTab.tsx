@@ -7,7 +7,7 @@ import { VOCABULARY, Word } from '../../data/vocabulary';
 import { Colors } from '../../constants/colors';
 import { Fonts } from '../../constants/typography';
 
-const CATEGORIES = ['all', 'greetings', 'numbers', 'time', 'food', 'places', 'colors', 'family', 'verbs', 'adjectives', 'personal', 'weather', 'feelings', 'jobs', 'transport', 'car', 'travel', 'home', 'kitchen', 'bedroom', 'bathroom', 'garden', 'housework', 'shopping', 'fruit', 'vegetables', 'seafood', 'meat', 'bakery', 'dairy', 'pharmacy', 'beauty', 'baby', 'stationery', 'store', 'clothing', 'tools', 'shops', 'breakfast', 'meals', 'dishes', 'desserts', 'eatingout', 'fastfood', 'tech', 'education'];
+const CATEGORIES = ['all', 'greetings', 'numbers', 'time', 'food', 'places', 'colors', 'family', 'verbs', 'adjectives', 'personal', 'weather', 'feelings', 'jobs', 'transport', 'car', 'travel', 'home', 'kitchen', 'bedroom', 'bathroom', 'garden', 'housework', 'shopping', 'fruit', 'vegetables', 'seafood', 'meat', 'bakery', 'dairy', 'pharmacy', 'beauty', 'baby', 'stationery', 'store', 'clothing', 'tools', 'shops', 'breakfast', 'meals', 'dishes', 'desserts', 'eatingout', 'fastfood', 'tech', 'education', 'office', 'bank', 'post'];
 
 const CAT_EMOJI: Record<string, string> = {
   all: '🔍', greetings: '🙏', numbers: '🔢', time: '⏰',
@@ -21,6 +21,7 @@ const CAT_EMOJI: Record<string, string> = {
   stationery: '📰', store: '🏬', clothing: '👕', tools: '🔧',
   shops: '🏪', breakfast: '🥞', meals: '🍽️', dishes: '🍲',
   desserts: '🍧', eatingout: '🍴', fastfood: '🍔', tech: '📱', education: '🎓',
+  office: '🏢', bank: '🏦', post: '📮',
 };
 
 // Spirit Realm category colors
@@ -70,6 +71,9 @@ const CAT_COLORS: Record<string, string> = {
   fastfood:   Colors.ember,
   tech:       Colors.cyan,
   education:  Colors.lavender,
+  office:     Colors.jade,
+  bank:       Colors.gold,
+  post:       Colors.ember,
 };
 
 function catColor(cat: string): string {
