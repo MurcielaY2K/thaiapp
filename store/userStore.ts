@@ -144,7 +144,10 @@ export const useUserStore = create<UserStore>((set, get) => ({
           bio:          bio.trim(),
           profile_frame: 'default',
         })
-        .select()
+        // auth_id is not client-selectable (see supabase/hardening.sql), so
+        // only return the columns we use — a bare select() does RETURNING *
+        // and would fail on the revoked column.
+        .select('id, username, display_name')
         .single();
       if (profileErr) return profileErr.message;
 
