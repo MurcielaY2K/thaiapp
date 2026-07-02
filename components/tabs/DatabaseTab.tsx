@@ -7,7 +7,7 @@ import { VOCABULARY, Word } from '../../data/vocabulary';
 import { Colors } from '../../constants/colors';
 import { Fonts } from '../../constants/typography';
 
-const CATEGORIES = ['all', 'greetings', 'numbers', 'time', 'food', 'places', 'colors', 'family', 'verbs', 'adjectives', 'personal', 'weather', 'feelings', 'jobs', 'transport', 'car', 'travel', 'home', 'kitchen', 'bedroom', 'bathroom', 'garden', 'housework', 'shopping', 'fruit', 'vegetables', 'seafood', 'meat', 'bakery', 'dairy', 'pharmacy', 'beauty', 'baby', 'stationery', 'store', 'clothing', 'tools', 'shops', 'breakfast', 'meals', 'dishes', 'desserts', 'eatingout', 'fastfood', 'tech', 'education', 'office', 'bank', 'post', 'leisure', 'sightseeing', 'nightlife', 'hotel', 'beach', 'music', 'photography', 'games', 'crafts', 'sport', 'fitness'];
+const CATEGORIES = ['all', 'greetings', 'numbers', 'time', 'food', 'places', 'colors', 'family', 'verbs', 'adjectives', 'personal', 'weather', 'feelings', 'jobs', 'transport', 'car', 'travel', 'home', 'kitchen', 'bedroom', 'bathroom', 'garden', 'housework', 'shopping', 'fruit', 'vegetables', 'seafood', 'meat', 'bakery', 'dairy', 'pharmacy', 'beauty', 'baby', 'stationery', 'store', 'clothing', 'tools', 'shops', 'breakfast', 'meals', 'dishes', 'desserts', 'eatingout', 'fastfood', 'tech', 'education', 'office', 'bank', 'post', 'leisure', 'sightseeing', 'nightlife', 'hotel', 'beach', 'music', 'photography', 'games', 'crafts', 'sport', 'fitness', 'health', 'body'];
 
 const CAT_EMOJI: Record<string, string> = {
   all: '🔍', greetings: '🙏', numbers: '🔢', time: '⏰',
@@ -26,6 +26,7 @@ const CAT_EMOJI: Record<string, string> = {
   beach: '🏖️', music: '🎵',
   photography: '📷', games: '🎮', crafts: '🎨', sport: '⚽',
   fitness: '🏋️',
+  health: '🏥', body: '🧍',
 };
 
 // Spirit Realm category colors
@@ -89,6 +90,8 @@ const CAT_COLORS: Record<string, string> = {
   crafts:     Colors.rose,
   sport:      Colors.mintDark,
   fitness:    Colors.jade,
+  health:     Colors.rose,
+  body:       Colors.peach,
 };
 
 function catColor(cat: string): string {
