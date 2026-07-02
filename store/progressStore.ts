@@ -1,11 +1,15 @@
 import { create } from 'zustand';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { PREMIUM_ON_HOLD } from '../constants/features';
+import { supabase } from '../lib/supabase';
 
 const XP_KEY      = '@thaiapp_xp';
 const HEARTS_KEY  = '@thaiapp_hearts';
 const GEMS_KEY    = '@thaiapp_gems';
-const PREMIUM_KEY = '@thaiapp_premium';
+// Cache of the last server-verified entitlement verdict. The old
+// '@thaiapp_premium' key (self-granted on redirect) is deliberately ignored:
+// Premium is now granted only by the Stripe webhook → entitlements table.
+const PREMIUM_KEY = '@thaiapp_premium_v2';
 const PROGRESS_KEY = '@thaiapp_lesson_progress';
 const DAILY_KEY   = '@thaiapp_daily_xp';
 
@@ -35,7 +39,8 @@ interface ProgressStore {
   addGems: (n: number) => void;
   spendGems: (n: number) => boolean;
   completeLesson: (lessonId: string, nextLessonId?: string, nextIsPremium?: boolean) => void;
-  unlockPremium: () => void;
+  applyPremium: (active: boolean) => void;
+  refreshEntitlement: () => Promise<void>;
   seedProgress: (firstLessonId: string) => void;
 }
 
@@ -168,15 +173,45 @@ export const useProgressStore = create<ProgressStore>((set, get) => ({
     AsyncStorage.setItem(PROGRESS_KEY, JSON.stringify(next));
   },
 
-  unlockPremium: () => {
+  applyPremium: (active: boolean) => {
     const { lessonProgress } = get();
-    // Unlock all premium-locked lessons
     const next = { ...lessonProgress };
-    for (const [id, state] of Object.entries(next)) {
-      if (state === 'premium-locked') next[id] = 'available';
+    if (active) {
+      // Unlock all premium-locked lessons
+      for (const [id, state] of Object.entries(next)) {
+        if (state === 'premium-locked') next[id] = 'available';
+      }
     }
-    set({ isPremium: true, hearts: MAX_HEARTS, lessonProgress: next });
-    AsyncStorage.setItem(PREMIUM_KEY, 'true');
-    AsyncStorage.setItem(PROGRESS_KEY, JSON.stringify(next));
+    set({
+      isPremium: PREMIUM_ON_HOLD || active,
+      lessonProgress: next,
+      ...(active ? { hearts: MAX_HEARTS } : {}),
+    });
+    AsyncStorage.setItem(PREMIUM_KEY, active ? 'true' : 'false');
+    if (active) AsyncStorage.setItem(PROGRESS_KEY, JSON.stringify(next));
+  },
+
+  refreshEntitlement: async () => {
+    if (!supabase) return;
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+      const { data, error } = await supabase
+        .from('entitlements')
+        .select('status, current_period_end')
+        .eq('auth_id', session.user.id)
+        .maybeSingle();
+      if (error) return; // table missing or request failed: keep cached verdict
+      // past_due keeps access until the period end + 1 day grace, giving
+      // Stripe's dunning emails a chance before we lock the account out.
+      const GRACE_MS = 24 * 60 * 60 * 1000;
+      const active = !!data
+        && (data.status === 'active' || data.status === 'past_due')
+        && (!data.current_period_end
+            || new Date(data.current_period_end).getTime() + GRACE_MS > Date.now());
+      get().applyPremium(active);
+    } catch {
+      // Offline: keep the cached verdict from the last successful check.
+    }
   },
 }));

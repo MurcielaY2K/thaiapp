@@ -9,3 +9,10 @@ export const STRIPE_PAYMENT_LINK = 'https://buy.stripe.com/fZuaEPai75mJ5d6asJ77O
 
 // The URL param Stripe appends on redirect-back success
 export const STRIPE_SUCCESS_PARAM = 'payment_success';
+
+// Payment link with the buyer's Supabase auth uuid attached. The Stripe
+// webhook receives it as checkout.session.client_reference_id and grants
+// the entitlement to that user — the app never self-grants Premium.
+export function paymentLinkFor(authId: string): string {
+  return `${STRIPE_PAYMENT_LINK}?client_reference_id=${encodeURIComponent(authId)}`;
+}

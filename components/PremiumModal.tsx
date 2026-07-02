@@ -4,7 +4,8 @@ import {
 } from 'react-native';
 import { Colors } from '../constants/colors';
 import { Fonts } from '../constants/typography';
-import { STRIPE_PAYMENT_LINK } from '../constants/stripe';
+import { STRIPE_PAYMENT_LINK, paymentLinkFor } from '../constants/stripe';
+import { supabase } from '../lib/supabase';
 
 interface Props {
   visible: boolean;
@@ -18,11 +19,29 @@ const PERKS = [
   { icon: '🏆', text: 'All badges & achievements' },
 ];
 
-function openStripe() {
+async function openStripe() {
+  // The checkout must carry the buyer's Supabase auth uuid so the Stripe
+  // webhook can grant the entitlement to this user. Sign in anonymously
+  // first if there's no session yet.
+  let authId: string | null = null;
+  if (supabase) {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      authId = session?.user.id ?? null;
+      if (!authId) {
+        const { data } = await supabase.auth.signInAnonymously();
+        authId = data?.user?.id ?? null;
+      }
+    } catch {
+      // Fall through — better to let the user pay than to block checkout;
+      // an unlinked payment can be linked manually from the dashboard.
+    }
+  }
+  const url = authId ? paymentLinkFor(authId) : STRIPE_PAYMENT_LINK;
   if (Platform.OS === 'web' && typeof window !== 'undefined') {
-    window.open(STRIPE_PAYMENT_LINK, '_blank', 'noopener,noreferrer');
+    window.open(url, '_blank', 'noopener,noreferrer');
   } else {
-    Linking.openURL(STRIPE_PAYMENT_LINK);
+    Linking.openURL(url);
   }
 }
 

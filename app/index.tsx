@@ -26,7 +26,7 @@ function consumeStripeSuccess(): boolean {
 export default function HomeScreen() {
   const [activeTab, setActiveTab] = useState<TabId>('learn');
   const { load: loadSrs, getStats, streak } = useSrsStore();
-  const { load: loadProgress, unlockPremium, isLoaded: progressLoaded, xp } = useProgressStore();
+  const { load: loadProgress, refreshEntitlement, isLoaded: progressLoaded, xp } = useProgressStore();
   const { load: loadUser, isLoaded: userLoaded, checkRewards, syncScore, newRewards, clearNewRewards, profileId } = useUserStore();
 
   useEffect(() => {
@@ -35,12 +35,17 @@ export default function HomeScreen() {
     loadUser();
   }, []);
 
-  // Stripe payment redirect
+  // Premium entitlement — always verified against the server, never granted
+  // from the URL. On return from Stripe the webhook may lag the redirect by
+  // a few seconds, so re-check on a short backoff.
   useEffect(() => {
     if (!progressLoaded) return;
+    refreshEntitlement();
     if (consumeStripeSuccess()) {
-      unlockPremium();
       setActiveTab('profile');
+      for (const ms of [3000, 8000, 15000, 30000]) {
+        setTimeout(() => { useProgressStore.getState().refreshEntitlement(); }, ms);
+      }
     }
   }, [progressLoaded]);
 
