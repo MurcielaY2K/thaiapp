@@ -14,7 +14,7 @@ interface Props {
 const PERKS = [
   { icon: '🌍', text: 'All 5 learning worlds' },
   { icon: '❤️', text: 'Unlimited hearts — never stop learning' },
-  { icon: '📚', text: '180+ vocabulary words unlocked' },
+  { icon: '📚', text: '2,000+ vocabulary words unlocked' },
   { icon: '🏆', text: 'All badges & achievements' },
 ];
 

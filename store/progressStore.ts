@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { PREMIUM_ON_HOLD } from '../constants/features';
 
 const XP_KEY      = '@thaiapp_xp';
 const HEARTS_KEY  = '@thaiapp_hearts';
@@ -70,7 +71,7 @@ export const useProgressStore = create<ProgressStore>((set, get) => ({
   hearts: MAX_HEARTS,
   lastHeartRefill: Date.now(),
   gems: 30,
-  isPremium: false,
+  isPremium: PREMIUM_ON_HOLD,
   lessonProgress: {},
   dailyXp: { date: todayStr(), earned: 0 },
   dailyGoal: 50,
@@ -91,8 +92,16 @@ export const useProgressStore = create<ProgressStore>((set, get) => ({
       const rawHearts = hJ ? JSON.parse(hJ) : { hearts: MAX_HEARTS, lastRefill: Date.now() };
       const { hearts, lastRefill } = refillHearts(rawHearts.hearts, rawHearts.lastRefill);
       const gems = gJ ? Number(gJ) : 30;
-      const isPremium = premJ === 'true';
+      const isPremium = PREMIUM_ON_HOLD || premJ === 'true';
       const lessonProgress: Record<string, LessonState> = progJ ? JSON.parse(progJ) : {};
+      // While the Premium hold is active, open premium-locked lessons in
+      // memory only — stored state is untouched so flipping the flag back
+      // restores the paywall.
+      if (PREMIUM_ON_HOLD) {
+        for (const [id, state] of Object.entries(lessonProgress)) {
+          if (state === 'premium-locked') lessonProgress[id] = 'available';
+        }
+      }
       let daily: DailyXP = dailyJ ? JSON.parse(dailyJ) : { date: todayStr(), earned: 0 };
       if (daily.date !== todayStr()) daily = { date: todayStr(), earned: 0 };
       set({ xp, level: computeLevel(xp), hearts, lastHeartRefill: lastRefill, gems, isPremium, lessonProgress, dailyXp: daily, isLoaded: true });
