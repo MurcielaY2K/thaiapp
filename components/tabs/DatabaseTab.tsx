@@ -7,7 +7,7 @@ import { VOCABULARY, Word } from '../../data/vocabulary';
 import { Colors } from '../../constants/colors';
 import { Fonts } from '../../constants/typography';
 
-const CATEGORIES = ['all', 'greetings', 'numbers', 'time', 'food', 'places', 'colors', 'family', 'verbs', 'adjectives', 'personal', 'weather', 'feelings', 'jobs', 'transport', 'car', 'travel', 'home', 'kitchen', 'bedroom', 'bathroom', 'garden', 'housework', 'shopping', 'fruit', 'vegetables', 'seafood', 'meat', 'bakery', 'dairy', 'pharmacy', 'beauty', 'baby', 'stationery', 'store', 'clothing', 'tools', 'shops', 'breakfast', 'meals', 'dishes', 'desserts', 'eatingout', 'fastfood', 'tech', 'education', 'office', 'bank', 'post', 'leisure', 'sightseeing', 'nightlife', 'hotel', 'beach', 'music', 'photography', 'games', 'crafts', 'sport', 'fitness', 'health', 'body'];
+const CATEGORIES = ['all', 'greetings', 'numbers', 'time', 'food', 'places', 'colors', 'family', 'verbs', 'adjectives', 'personal', 'weather', 'feelings', 'jobs', 'transport', 'car', 'travel', 'home', 'kitchen', 'bedroom', 'bathroom', 'garden', 'housework', 'shopping', 'fruit', 'vegetables', 'seafood', 'meat', 'bakery', 'dairy', 'pharmacy', 'beauty', 'baby', 'stationery', 'store', 'clothing', 'tools', 'shops', 'breakfast', 'meals', 'dishes', 'desserts', 'eatingout', 'fastfood', 'tech', 'education', 'office', 'bank', 'post', 'leisure', 'sightseeing', 'nightlife', 'hotel', 'beach', 'music', 'photography', 'games', 'crafts', 'sport', 'fitness', 'health', 'body', 'animals'];
 
 const CAT_EMOJI: Record<string, string> = {
   all: '🔍', greetings: '🙏', numbers: '🔢', time: '⏰',
@@ -26,7 +26,7 @@ const CAT_EMOJI: Record<string, string> = {
   beach: '🏖️', music: '🎵',
   photography: '📷', games: '🎮', crafts: '🎨', sport: '⚽',
   fitness: '🏋️',
-  health: '🏥', body: '🧍',
+  health: '🏥', body: '🧍', animals: '🐾',
 };
 
 // Spirit Realm category colors
@@ -92,6 +92,7 @@ const CAT_COLORS: Record<string, string> = {
   fitness:    Colors.jade,
   health:     Colors.rose,
   body:       Colors.peach,
+  animals:    Colors.jade,
 };
 
 function catColor(cat: string): string {
