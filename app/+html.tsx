@@ -11,7 +11,7 @@ export default function Root({ children }: PropsWithChildren) {
           name="viewport"
           content="width=device-width, initial-scale=1, shrink-to-fit=no, viewport-fit=cover"
         />
-        <meta name="theme-color" content="#09071a" />
+        <meta name="theme-color" content="#f0eee7" />
         <title>ภาษาไทย — Learn Thai</title>
         <meta name="description" content="Learn Thai with 2,600+ words, reading and writing practice, quizzes and a global leaderboard. Free to play, right in your browser." />
         {/* Open Graph / social sharing */}
@@ -40,7 +40,7 @@ export default function Root({ children }: PropsWithChildren) {
           dangerouslySetInnerHTML={{
             __html: `
               html, body, #root {
-                background-color: #09071a;
+                background-color: #f0eee7;
                 font-family: 'Sarabun', system-ui, sans-serif;
               }
               body { overscroll-behavior: none; }

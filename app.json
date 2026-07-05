@@ -9,7 +9,7 @@
     "userInterfaceStyle": "dark",
     "splash": {
       "resizeMode": "contain",
-      "backgroundColor": "#0d0d1a"
+      "backgroundColor": "#f0eee7"
     },
     "ios": {
       "supportsTablet": false,
@@ -18,7 +18,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#0d0d1a"
+        "backgroundColor": "#f0eee7"
       },
       "package": "com.thaiapp.learn"
     },

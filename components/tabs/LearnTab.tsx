@@ -95,8 +95,8 @@ function LessonNode({
   const isPremLocked = state === 'premium-locked';
   const isCheckpoint = lesson.type === 'checkpoint';
 
-  const bg = isComplete ? Colors.gold + '20' : isAvailable ? Colors.mint + '20' : Colors.card;
-  const borderColor = isComplete ? Colors.gold : isAvailable ? Colors.mint : Colors.border;
+  const bg = isComplete ? Colors.realmGrove : isAvailable ? Colors.ember : Colors.card;
+  const borderColor = isComplete || isAvailable ? Colors.borderStrong : Colors.border;
 
   return (
     <View style={[styles.nodeRow, { height: NODE_SIZE + 32 }]}>
@@ -115,10 +115,8 @@ function LessonNode({
               borderColor,
               opacity: isLocked && !isPremLocked ? 0.35 : 1,
             },
-            Platform.OS === 'web' && isAvailable ? {
-              boxShadow: `0 0 20px rgba(158,245,212,0.5)`,
-            } as any : Platform.OS === 'web' && isComplete ? {
-              boxShadow: `0 0 16px rgba(255,215,0,0.4)`,
+            Platform.OS === 'web' && (isAvailable || isComplete) ? {
+              boxShadow: `0 4px 0 0 ${Colors.borderStrong}`,
             } as any : {},
           ]}
           onPress={onPress}
@@ -132,12 +130,7 @@ function LessonNode({
           ) : (
             <Text style={styles.nodeIcon}>{lesson.icon}</Text>
           )}
-          {isAvailable && (
-            <View style={[styles.glowRing, { borderColor: Colors.mint }]} />
-          )}
-          {isComplete && (
-            <View style={[styles.glowRing, { borderColor: Colors.gold }]} />
-          )}
+
         </TouchableOpacity>
         <Text style={[
           styles.nodeLabel,
@@ -147,8 +140,8 @@ function LessonNode({
           {lesson.title}
         </Text>
         {isAvailable && (
-          <View style={[styles.startBubble, { backgroundColor: Colors.mint }]}>
-            <Text style={[styles.startText, { color: '#0d3320' }]}>START</Text>
+          <View style={styles.startBubble}>
+            <Text style={styles.startText}>START</Text>
           </View>
         )}
       </Animated.View>
@@ -156,39 +149,46 @@ function LessonNode({
   );
 }
 
-function WorldHeader({ world }: { world: World }) {
+function WorldHeader({ world, done }: { world: World; done: number }) {
   const spriteName = WORLD_SPRITE[world.id];
   const sprite = spriteName ? SPRITES[spriteName] : null;
+  const total = world.lessons.length;
   return (
     <View style={[
       styles.worldHeader,
-      { backgroundColor: world.realmTint, borderColor: world.color + '40' },
+      { backgroundColor: world.realmTint },
       Platform.OS === 'web' ? {
-        boxShadow: `0 2px 16px rgba(0,0,0,0.3)`,
+        boxShadow: `0 4px 0 0 ${Colors.borderStrong}`,
       } as any : {},
     ]}>
-      <View style={[styles.worldEmoji, { backgroundColor: world.color + '25' }]}>
-        {sprite
-          ? <PixelSprite sprite={sprite} size={36} />
-          : <Text style={styles.worldEmojiText}>{world.emoji}</Text>}
-      </View>
-      <View style={styles.worldText}>
-        <View style={styles.worldTitleRow}>
-          <Text style={[styles.worldTitle, { color: world.color }]}>{world.title}</Text>
-          {world.isPremium && (
-            <View style={styles.premiumBadge}>
-              <Text style={styles.premiumBadgeText}>👑 PREMIUM</Text>
-            </View>
-          )}
+      <View style={styles.worldTop}>
+        <View style={styles.worldEmoji}>
+          {sprite
+            ? <PixelSprite sprite={sprite} size={36} />
+            : <Text style={styles.worldEmojiText}>{world.emoji}</Text>}
         </View>
-        <Text style={styles.worldSub}>{world.subtitle}</Text>
+        {world.isPremium && (
+          <View style={styles.premiumBadge}>
+            <Text style={styles.premiumBadgeText}>👑 PREMIUM</Text>
+          </View>
+        )}
+      </View>
+      <Text style={styles.worldTitle}>{world.title}</Text>
+      <Text style={styles.worldSub}>{world.subtitle}</Text>
+      <View style={styles.worldMeta}>
+        <View style={styles.metaChip}>
+          <Text style={styles.metaChipText}>📚 {total} lessons</Text>
+        </View>
+        <View style={styles.metaChip}>
+          <Text style={styles.metaChipText}>✓ {done}/{total} done</Text>
+        </View>
       </View>
     </View>
   );
 }
 
 export default function LearnTab() {
-  const { lessonProgress, isPremium, load, isLoaded, seedProgress } = useProgressStore();
+  const { lessonProgress, isPremium, load, isLoaded, seedProgress, xp, level, dailyXp, dailyGoal } = useProgressStore();
   const [premiumVisible, setPremiumVisible] = useState(false);
 
   useEffect(() => {
@@ -214,9 +214,22 @@ export default function LearnTab() {
       <View style={styles.topBar}>
         <View style={styles.topLeft}>
           <Text style={styles.topTitle}>ภาษาไทย</Text>
-          <Text style={styles.topSub}>SPIRIT REALM</Text>
+          <Text style={styles.topSub}>LEARN THAI</Text>
         </View>
         <HeartsBar />
+      </View>
+
+      <View style={styles.heroBlock}>
+        <Text style={styles.heroLabel}>TOTAL XP</Text>
+        <Text style={styles.heroValue}>{xp.toLocaleString()}</Text>
+        <View style={styles.heroMeta}>
+          <View style={styles.heroChip}>
+            <Text style={styles.heroChipText}>LV {level}</Text>
+          </View>
+          <View style={[styles.heroChip, { backgroundColor: Colors.realmGrove }]}>
+            <Text style={styles.heroChipText}>⚡ {dailyXp.earned}/{dailyGoal} today</Text>
+          </View>
+        </View>
       </View>
 
       <View style={styles.xpWrap}>
@@ -231,7 +244,8 @@ export default function LearnTab() {
         <SpiritHero width={SCREEN_W} />
         {LIST_ITEMS.map((item, idx) => {
           if (item.type === 'header') {
-            return <WorldHeader key={`h-${item.world.id}`} world={item.world} />;
+            const done = item.world.lessons.filter(l => lessonProgress[l.id] === 'complete').length;
+            return <WorldHeader key={`h-${item.world.id}`} world={item.world} done={done} />;
           }
           const { lesson, world, zigIdx } = item;
           const state = getEffectiveState(lesson, world, lessonProgress, isPremium);
@@ -267,7 +281,7 @@ const styles = StyleSheet.create({
   },
   topLeft: { gap: 2 },
   topTitle: {
-    color: Colors.mint,
+    color: Colors.text,
     fontSize: 24,
     fontFamily: Fonts.body,
     fontWeight: '700',
@@ -281,40 +295,69 @@ const styles = StyleSheet.create({
 
   xpWrap: { paddingHorizontal: 20, paddingBottom: 12 },
 
+  heroBlock: { paddingHorizontal: 20, paddingTop: 6, paddingBottom: 10, gap: 2 },
+  heroLabel: {
+    color: Colors.textDim, fontSize: 10,
+    fontFamily: Fonts.hud, letterSpacing: 2,
+  },
+  heroValue: {
+    color: Colors.text, fontSize: 52, lineHeight: 56,
+    fontFamily: Fonts.hud,
+  },
+  heroMeta: { flexDirection: 'row', gap: 8, marginTop: 6 },
+  heroChip: {
+    backgroundColor: Colors.realmMarket,
+    borderRadius: 999,
+    borderWidth: 1.5, borderColor: Colors.borderStrong,
+    paddingHorizontal: 12, paddingVertical: 4,
+  },
+  heroChipText: { color: Colors.text, fontSize: 10, fontFamily: Fonts.hud },
+
   scroll: { flex: 1 },
   scrollContent: { paddingTop: 0, paddingBottom: 24 },
 
   worldHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 14,
-    marginHorizontal: 20,
-    marginTop: 20,
-    marginBottom: 8,
-    padding: 14,
-    backgroundColor: Colors.card,
-    borderRadius: 14,
-    borderWidth: 1,
+    marginHorizontal: 16,
+    marginTop: 22,
+    marginBottom: 10,
+    padding: 18,
+    borderRadius: 18,
+    borderWidth: 2,
+    borderColor: Colors.borderStrong,
+    gap: 4,
+  },
+  worldTop: {
+    flexDirection: 'row', alignItems: 'center',
+    justifyContent: 'space-between', marginBottom: 6,
   },
   worldEmoji: {
-    width: 48, height: 48, borderRadius: 6,
+    width: 52, height: 52, borderRadius: 10,
     alignItems: 'center', justifyContent: 'center',
+    backgroundColor: 'rgba(255,255,255,0.45)',
+    borderWidth: 2, borderColor: Colors.borderStrong,
   },
   worldEmojiText: { fontSize: 26 },
-  worldText: { flex: 1, gap: 3 },
-  worldTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  worldTitle: { fontSize: 15, fontFamily: Fonts.display, fontWeight: '700' },
-  worldSub: { color: Colors.textDim, fontSize: 12, fontFamily: Fonts.body },
+  worldTitle: {
+    color: Colors.text, fontSize: 20,
+    fontFamily: Fonts.display, fontWeight: '700',
+  },
+  worldSub: { color: 'rgba(23,21,15,0.68)', fontSize: 13, fontFamily: Fonts.body },
+  worldMeta: { flexDirection: 'row', gap: 8, marginTop: 10 },
+  metaChip: {
+    backgroundColor: 'rgba(255,255,255,0.6)',
+    borderRadius: 999,
+    borderWidth: 1.5, borderColor: Colors.borderStrong,
+    paddingHorizontal: 10, paddingVertical: 4,
+  },
+  metaChipText: { color: Colors.text, fontSize: 10, fontFamily: Fonts.hud },
   premiumBadge: {
-    backgroundColor: 'rgba(251,191,36,0.12)',
-    borderRadius: 4,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderWidth: 1,
-    borderColor: 'rgba(251,191,36,0.3)',
+    backgroundColor: Colors.borderStrong,
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
   },
   premiumBadgeText: {
-    color: Colors.gold,
+    color: '#f5d43e',
     fontSize: 9,
     fontFamily: Fonts.hud,
     letterSpacing: 0.5,
@@ -331,7 +374,7 @@ const styles = StyleSheet.create({
     opacity: 0.2,
   },
   node: {
-    width: NODE_SIZE, height: NODE_SIZE, borderRadius: 4,
+    width: NODE_SIZE, height: NODE_SIZE, borderRadius: 12,
     borderWidth: 2,
     alignItems: 'center', justifyContent: 'center',
   },
@@ -349,19 +392,20 @@ const styles = StyleSheet.create({
     top: -8, left: -8,
   },
   nodeIcon: { fontSize: 26 },
-  nodeCheckMark: { color: '#fff', fontSize: 28, fontWeight: '800' },
+  nodeCheckMark: { color: Colors.text, fontSize: 28, fontWeight: '800' },
   nodeLabel: {
     marginTop: 6, fontSize: 11,
     textAlign: 'center', width: NODE_SIZE + 30,
     marginLeft: -15,
   },
   startBubble: {
-    marginTop: 4, borderRadius: 4,
+    marginTop: 4, borderRadius: 999,
     paddingHorizontal: 10, paddingVertical: 3,
     alignSelf: 'center',
+    backgroundColor: Colors.borderStrong,
   },
   startText: {
-    color: '#fff', fontSize: 9,
+    color: '#ffffff', fontSize: 9,
     fontFamily: Fonts.hud,
     letterSpacing: 1,
   },

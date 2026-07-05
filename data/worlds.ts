@@ -30,7 +30,7 @@ export const WORLDS: World[] = [
     subtitle: 'Essential words for day one',
     color: '#9ef5d4',
     darkColor: '#5fd9ac',
-    realmTint: '#2a3a4a',
+    realmTint: '#ff6a2e',
     emoji: '🙏',
     isPremium: false,
     lessons: [
@@ -72,7 +72,7 @@ export const WORLDS: World[] = [
     subtitle: 'Eat like a local',
     color: '#ffb3d1',
     darkColor: '#f57aa8',
-    realmTint: '#3a2a44',
+    realmTint: '#c0b2f8',
     emoji: '🍜',
     isPremium: false,
     lessons: [
@@ -114,7 +114,7 @@ export const WORLDS: World[] = [
     subtitle: 'Get around the city',
     color: '#8fe8ff',
     darkColor: '#4fc4e8',
-    realmTint: '#1f3340',
+    realmTint: '#b5cb51',
     emoji: '🏙️',
     isPremium: true,
     lessons: [
@@ -156,7 +156,7 @@ export const WORLDS: World[] = [
     subtitle: 'Talk like a local',
     color: '#9ef5d4',
     darkColor: '#5fd9ac',
-    realmTint: '#213a30',
+    realmTint: '#f5d43e',
     emoji: '🗣️',
     isPremium: true,
     lessons: [
@@ -198,7 +198,7 @@ export const WORLDS: World[] = [
     subtitle: 'Master Thai expressions',
     color: '#ffd700',
     darkColor: '#e0ab00',
-    realmTint: '#3a3320',
+    realmTint: '#f06060',
     emoji: '🏆',
     isPremium: true,
     lessons: [

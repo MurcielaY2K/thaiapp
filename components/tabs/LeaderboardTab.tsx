@@ -5,6 +5,7 @@ import {
 } from 'react-native';
 import { useUserStore, LeaderboardEntry } from '../../store/userStore';
 import { Colors } from '../../constants/colors';
+import PixelAvatar from '../PixelAvatar';
 import { Fonts } from '../../constants/typography';
 import { SUPABASE_CONFIGURED } from '../../constants/supabase';
 import { FRAME_STYLES, FrameId } from '../../data/rewards';
@@ -38,7 +39,7 @@ function EntryRow({ entry, isMe }: { entry: LeaderboardEntry; isMe: boolean }) {
     ]}>
       <RankBadge rank={entry.rank} />
       <View style={[styles.avatar, { borderColor: border }]}>
-        <Text style={styles.avatarEmoji}>{entry.avatarEmoji}</Text>
+        <PixelAvatar avatar={entry.avatarEmoji} size={24} />
       </View>
       <View style={styles.info}>
         <View style={styles.nameRow}>

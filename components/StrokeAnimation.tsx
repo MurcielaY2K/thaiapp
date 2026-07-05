@@ -12,11 +12,11 @@ import { Colors } from '../constants/colors';
 const REVEAL_MS = 1900;
 const FONT = '"Noto Sans Thai", "Thonburi", -apple-system, sans-serif';
 
-const GRID_COLOR      = 'rgba(255,255,255,0.07)';
-const GRID_DASH_COLOR = 'rgba(255,255,255,0.14)';
-const OUTLINE_COLOR   = 'rgba(255,255,255,0.16)';
-const GHOST_FILL      = 'rgba(255,255,255,0.05)';
-const INK_COLOR       = '#ff9f43';
+const GRID_COLOR      = 'rgba(23,21,15,0.10)';
+const GRID_DASH_COLOR = 'rgba(23,21,15,0.22)';
+const OUTLINE_COLOR   = 'rgba(23,21,15,0.22)';
+const GHOST_FILL      = 'rgba(23,21,15,0.06)';
+const INK_COLOR       = '#ff5c1e';
 
 interface Props {
   charId: string;

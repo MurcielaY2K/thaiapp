@@ -1,79 +1,81 @@
-// Sanuk Design System — Spirit Realm exact tokens from _ds_manifest.json
+// Sanuk Design System v2 — "Paper Arcade": warm-light surfaces, chunky
+// saturated color-block cards, near-black ink, pixel-art accents.
+// Token NAMES are stable (the whole app references them); only values change.
 
 export const Colors = {
-  // Night World — background surfaces
-  bg:           '#161626',   // night-900 / surface-deep
-  bgDeep:       '#111021',   // night-950
-  bgInset:      '#1a1a2e',   // night-850 / surface-inset
-  card:         '#1e1e34',   // night-800 / surface-night
-  cardAlt:      '#262642',   // night-700 / surface-panel
-  cardRaised:   '#313156',   // night-600 / surface-raised
-  border:       '#3f3f6b',   // night-500 / border-subtle
-  borderStrong: '#565488',   // night-400 / border-strong
-  borderGlow:   '#8fe8ff',   // cyan / border-glow
+  // Paper — background surfaces
+  bg:           '#f0eee7',   // warm off-white
+  bgDeep:       '#e7e4da',
+  bgInset:      '#e7e4da',
+  card:         '#ffffff',
+  cardAlt:      '#eae7dd',
+  cardRaised:   '#ffffff',
+  border:       '#d9d5c9',
+  borderStrong: '#17150f',   // chunky ink outline
+  borderGlow:   '#17150f',
 
-  // Ghost-Glow pastels
-  mint:         '#9ef5d4',   // mint
-  mintLight:    '#c9ffe9',   // mint-300
-  mintDark:     '#5fd9ac',   // mint-600
-  cyan:         '#8fe8ff',   // cyan
-  cyanLight:    '#c4f1ff',   // cyan-300
-  cyanDark:     '#4fc4e8',   // cyan-600
-  blush:        '#ffb3d1',   // blush
-  blushLight:   '#ffd6e6',   // blush-300
-  blushDark:    '#f57aa8',   // blush-600
-  lavender:     '#c4b5fd',   // lavender
-  lavenderLight:'#e3dcff',   // lavender-300
-  lavenderDark: '#9d86f0',   // lavender-600
+  // Accent inks (readable as text on paper)
+  mint:         '#7d9930',   // olive
+  mintLight:    '#cede84',   // olive fill
+  mintDark:     '#5d7423',
+  cyan:         '#3f8fd4',   // blue
+  cyanLight:    '#a9cdf2',   // blue fill
+  cyanDark:     '#2a6faa',
+  blush:        '#e2557c',   // pink
+  blushLight:   '#f6c2d2',   // pink fill
+  blushDark:    '#c23a60',
+  lavender:     '#8f7be8',   // violet
+  lavenderLight:'#cfc4fa',   // violet fill
+  lavenderDark: '#6f57d4',
 
   // Sacred / Feedback
-  gold:         '#ffd700',   // gold / premium
-  goldDeep:     '#e0ab00',   // gold-deep
-  amber:        '#ffb938',   // amber
-  ember:        '#ff9f43',   // ember / brand primary CTA / xp / streak
-  emberDeep:    '#e07a1f',   // ember-deep (button edge shadow)
-  jade:         '#34d399',   // jade / guide / success / correct
-  jadeDeep:     '#15a877',   // jade-deep
-  rose:         '#ff7a8a',   // rose / hearts / wrong / error
-  roseDeep:     '#e0485c',   // rose-deep
+  gold:         '#dfa300',
+  goldDeep:     '#b88600',
+  amber:        '#d98e1b',
+  ember:        '#ff5c1e',   // brand primary orange / CTA / xp / streak
+  emberDeep:    '#d6440e',   // button edge shadow
+  jade:         '#3f9d58',   // success / correct
+  jadeDeep:     '#2c7a41',
+  rose:         '#e84a52',   // hearts / wrong / error
+  roseDeep:     '#c02f38',
 
   // Text
-  text:         '#f5f1e8',   // cream / text-primary
-  textMoon:     '#e2e8f0',   // moon
-  textDim:      '#b8c0d8',   // mist / text-secondary
-  textMuted:    '#8b90b5',   // dusk / text-muted
+  text:         '#17150f',   // ink
+  textMoon:     '#2b2820',
+  textDim:      '#6e6a5d',
+  textMuted:    '#94907e',
 
   // Semantic aliases
-  brand:        '#ff9f43',   // ember
-  onBrand:      '#2a1606',   // on-brand text on ember buttons
-  guide:        '#34d399',   // jade
-  premium:      '#ffd700',   // gold
+  brand:        '#ff5c1e',
+  onBrand:      '#17150f',   // black-on-orange, reference style
+  guide:        '#3f9d58',
+  premium:      '#dfa300',
 
   // Functional
-  correct:      '#34d399',   // jade
-  correctBg:    'rgba(52,211,153,0.12)',
-  wrong:        '#ff7a8a',   // rose
-  wrongBg:      'rgba(255,122,138,0.12)',
-  xp:           '#ff9f43',   // ember
-  streak:       '#ff9f43',   // ember
-  hearts:       '#ff7a8a',   // rose
+  correct:      '#3f9d58',
+  correctBg:    'rgba(63,157,88,0.14)',
+  wrong:        '#e84a52',
+  wrongBg:      'rgba(232,74,82,0.12)',
+  xp:           '#ff5c1e',
+  streak:       '#ff5c1e',
+  hearts:       '#e84a52',
 
-  // Realm world tints (world header backgrounds)
-  realmVillage:    '#2a3a4a',   // w1 Survival Thai
-  realmMarket:     '#3a2a44',   // w2 Food & Flavors
-  realmUnderworld: '#1f3340',   // w3 Bangkok Life
-  realmGrove:      '#213a30',   // w4 Social Thai
-  realmSummit:     '#3a3320',   // w5 Fluency Path
+  // Realm world tints — the chunky color-block card fills (black text on top)
+  realmVillage:    '#ff6a2e',   // w1 Survival Thai — orange
+  realmMarket:     '#c0b2f8',   // w2 Food & Flavors — lavender
+  realmUnderworld: '#b5cb51',   // w3 Bangkok Life — olive
+  realmGrove:      '#f5d43e',   // w4 Social Thai — yellow
+  realmSummit:     '#f06060',   // w5 Fluency Path — red
 
   // Backwards-compatible aliases
-  accent:       '#ff9f43',   // ember (was lavender — UPDATED)
-  teal:         '#34d399',   // jade alias
-  tealDim:      '#15a877',
-  sky:          '#8fe8ff',   // cyan alias
-  peach:        '#ffb3d1',   // blush alias
-  goldDim:      '#e0ab00',
-  premiumBg:    'rgba(255,215,0,0.08)',
-  xpGlow:       'rgba(255,159,67,0.6)',
+  accent:       '#ff5c1e',
+  teal:         '#3f9d58',
+  tealDim:      '#2c7a41',
+  sky:          '#3f8fd4',
+  peach:        '#e2557c',
+  goldDim:      '#b88600',
+  premiumBg:    'rgba(223,163,0,0.12)',
+  xpGlow:       'rgba(255,92,30,0.4)',
 };
 
 export type ColorKey = keyof typeof Colors;

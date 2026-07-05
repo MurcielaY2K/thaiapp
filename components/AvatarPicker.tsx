@@ -4,6 +4,7 @@ import {
   ScrollView, Pressable,
 } from 'react-native';
 import { Colors } from '../constants/colors';
+import PixelAvatar from './PixelAvatar';
 
 interface Props {
   visible: boolean;
@@ -28,7 +29,7 @@ export default function AvatarPicker({ visible, avatars, selected, onSelect, onC
                 onPress={() => { onSelect(emoji); onClose(); }}
                 activeOpacity={0.75}
               >
-                <Text style={styles.emoji}>{emoji}</Text>
+                <PixelAvatar avatar={emoji} size={36} />
               </TouchableOpacity>
             ))}
           </ScrollView>

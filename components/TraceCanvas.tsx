@@ -9,11 +9,12 @@ type Point = { x: number; y: number };
 
 const STROKE = 14;
 const FONT = '"Noto Sans Thai", "Thonburi", -apple-system, sans-serif';
-const GRID_COLOR      = 'rgba(255,255,255,0.07)';
-const GRID_DASH_COLOR = 'rgba(255,255,255,0.14)';
-const GHOST_COLOR     = 'rgba(255,255,255,0.15)';
-const HIT_COLOR       = 'rgba(46,204,113,0.40)';
-const MISS_COLOR      = 'rgba(231,76,60,0.38)';
+// Ink-on-paper: dark alpha values readable on the light canvas card.
+const GRID_COLOR      = 'rgba(23,21,15,0.10)';
+const GRID_DASH_COLOR = 'rgba(23,21,15,0.22)';
+const GHOST_COLOR     = 'rgba(23,21,15,0.20)';
+const HIT_COLOR       = 'rgba(63,157,88,0.42)';
+const MISS_COLOR      = 'rgba(232,74,82,0.40)';
 
 function speak(text: string, lang = 'th-TH') {
   if (Platform.OS !== 'web') return;
@@ -449,12 +450,12 @@ const styles = StyleSheet.create({
     borderColor: Colors.border,
     overflow: 'hidden',
   },
-  gridLine: { position: 'absolute', left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,255,255,0.05)' },
+  gridLine: { position: 'absolute', left: 0, right: 0, height: 1, backgroundColor: 'rgba(23,21,15,0.08)' },
   gridLineDashed: {
     position: 'absolute', left: 0, right: 0, height: 1,
-    borderTopWidth: 1, borderColor: 'rgba(255,255,255,0.12)', borderStyle: 'dashed',
+    borderTopWidth: 1, borderColor: 'rgba(23,21,15,0.18)', borderStyle: 'dashed',
   },
-  gridLineV: { position: 'absolute', top: 0, bottom: 0, width: 1, backgroundColor: 'rgba(255,255,255,0.05)' },
+  gridLineV: { position: 'absolute', top: 0, bottom: 0, width: 1, backgroundColor: 'rgba(23,21,15,0.08)' },
   ghostWrap: { ...StyleSheet.absoluteFillObject, alignItems: 'center', justifyContent: 'center' },
   ghost: { fontSize: 200, lineHeight: 240, color: GHOST_COLOR, fontWeight: '300' },
   dot: { position: 'absolute', width: STROKE, height: STROKE, borderRadius: STROKE / 2, backgroundColor: Colors.accent },

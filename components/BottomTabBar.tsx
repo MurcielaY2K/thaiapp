@@ -67,11 +67,11 @@ const styles = StyleSheet.create({
   bar: {
     flexDirection: 'row',
     backgroundColor: Colors.card,
-    borderTopWidth: 1,
-    borderTopColor: Colors.border,
+    borderTopWidth: 2,
+    borderTopColor: Colors.borderStrong,
     paddingBottom: 20,
     paddingTop: 10,
-    ...(Platform.OS === 'web' ? { boxShadow: '0 -4px 20px rgba(0,0,0,0.4)' } as any : {}),
+    ...(Platform.OS === 'web' ? { boxShadow: '0 -4px 16px rgba(23,21,15,0.08)' } as any : {}),
   },
   tab: { flex: 1, alignItems: 'center', gap: 3, position: 'relative', paddingTop: 6 },
   indicator: {

@@ -41,7 +41,7 @@ const DEFAULT_PROFILE: UserProfile = {
   authId:       null,
   username:     '',
   displayName:  '',
-  avatarEmoji:  '🐉',
+  avatarEmoji:  'px:naga',
   countryFlag:  '🌍',
   bio:          '',
   profileFrame: 'default',

@@ -15,6 +15,7 @@ import { SUPABASE_CONFIGURED } from '../../constants/supabase';
 import AvatarPicker from '../AvatarPicker';
 import FlagPicker from '../FlagPicker';
 import CloudSyncCard from '../CloudSyncCard';
+import PixelAvatar from '../PixelAvatar';
 
 function Avatar({ emoji, frame, size = 72 }: { emoji: string; frame: FrameId; size?: number }) {
   const { border, glow } = FRAME_STYLES[frame];
@@ -31,7 +32,7 @@ function Avatar({ emoji, frame, size = 72 }: { emoji: string; frame: FrameId; si
       },
       Platform.OS === 'web' ? { boxShadow: `0 0 16px ${glow}` } as any : {},
     ]}>
-      <Text style={{ fontSize: size * 0.5 }}>{emoji}</Text>
+      <PixelAvatar avatar={emoji} size={size * 0.58} />
     </View>
   );
 }
@@ -41,7 +42,7 @@ function ProfileSetup() {
   const [username, setUsername]       = useState('');
   const [displayName, setDisplayName] = useState('');
   const [bio, setBio]                 = useState('');
-  const [avatar, setAvatar]           = useState('🐉');
+  const [avatar, setAvatar]           = useState('px:naga');
   const [flag, setFlag]               = useState('🌍');
   const [avatarOpen, setAvatarOpen]   = useState(false);
   const [flagOpen, setFlagOpen]       = useState(false);
@@ -67,7 +68,7 @@ function ProfileSetup() {
 
         <View style={styles.setupAvatarRow}>
           <TouchableOpacity onPress={() => setAvatarOpen(true)} style={styles.setupAvatarBtn}>
-            <Text style={styles.setupAvatarEmoji}>{avatar}</Text>
+            <PixelAvatar avatar={avatar} size={52} />
             <Text style={styles.setupAvatarEdit}>Change ›</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => setFlagOpen(true)} style={styles.setupFlagBtn}>
@@ -177,7 +178,7 @@ function ProfileEdit({ onDone }: { onDone: () => void }) {
       <Text style={styles.editTitle}>Edit Profile</Text>
 
       <TouchableOpacity onPress={() => setAvatarOpen(true)} style={styles.editAvatarBtn}>
-        <Text style={{ fontSize: 56 }}>{avatar}</Text>
+        <PixelAvatar avatar={avatar} size={52} />
         <Text style={styles.editAvatarHint}>Change avatar ›</Text>
       </TouchableOpacity>
 

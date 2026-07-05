@@ -9,11 +9,12 @@ export type FrameId = 'default' | 'silver' | 'gold' | 'diamond' | 'platinum';
 export type AvatarPackId = 'starter' | 'animals' | 'nature' | 'symbols' | 'legendary';
 
 export const AVATAR_PACKS: Record<AvatarPackId, string[]> = {
-  starter:   ['🐉', '🦅', '🌊', '🔥', '⚡', '🌙', '🌟', '💫', '🎭', '🎯'],
-  animals:   ['🦁', '🐯', '🦊', '🐺', '🦋', '🐬', '🦄', '🐼', '🦖', '🐘'],
-  nature:    ['🌺', '🌸', '☀️', '🌈', '⛩️', '🎋', '🌿', '🌴', '🍀', '🌻'],
-  symbols:   ['⚔️', '🛡️', '🔮', '💎', '🏺', '👁️', '🌀', '🎪', '🗡️', '🔱'],
-  legendary: ['👑', '🏆', '💍', '✨', '🎆', '💰', '🏅', '🌠', '☄️', '🐲'],
+  // Pixel-art avatars: 'px:<spriteName>' from data/sprites.ts
+  starter:   ['px:naga', 'px:cat', 'px:girl', 'px:lotus'],
+  animals:   ['px:elephant', 'px:garuda', 'px:nagaSleep'],
+  nature:    ['px:palm', 'px:sun'],
+  symbols:   ['px:chedi', 'px:temple'],
+  legendary: ['px:hanuman', 'px:yaksha'],
 };
 
 export const FRAME_STYLES: Record<FrameId, { border: string; glow: string; label: string }> = {
