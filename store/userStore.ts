@@ -6,8 +6,10 @@ import {
   REWARDS, RewardStats, FrameId, AvatarPackId, AVATAR_PACKS,
 } from '../data/rewards';
 
-const PROFILE_KEY  = '@thaiapp_user_profile';
-const REWARDS_KEY  = '@thaiapp_unlocked_rewards';
+import { StorageKeys } from '../constants/storageKeys';
+
+const PROFILE_KEY  = StorageKeys.profile;
+const REWARDS_KEY  = StorageKeys.rewards;
 
 export interface UserProfile {
   profileId: string | null;   // Supabase profile UUID

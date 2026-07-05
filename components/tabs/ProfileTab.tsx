@@ -14,6 +14,7 @@ import { REWARDS, FRAME_STYLES, FrameId, BONUS_PACKS } from '../../data/rewards'
 import { SUPABASE_CONFIGURED } from '../../constants/supabase';
 import AvatarPicker from '../AvatarPicker';
 import FlagPicker from '../FlagPicker';
+import CloudSyncCard from '../CloudSyncCard';
 
 function Avatar({ emoji, frame, size = 72 }: { emoji: string; frame: FrameId; size?: number }) {
   const { border, glow } = FRAME_STYLES[frame];
@@ -132,6 +133,10 @@ function ProfileSetup() {
             : <Text style={styles.setupBtnText}>Create Profile</Text>
           }
         </TouchableOpacity>
+
+        <View style={{ marginTop: 24 }}>
+          <CloudSyncCard />
+        </View>
       </ScrollView>
 
       <AvatarPicker
@@ -284,6 +289,8 @@ export default function ProfileTab() {
           <StatCard icon="📅" value={dailyXp.earned} label={`/${dailyGoal} today`} color={Colors.lavender} />
         </View>
 
+        <CloudSyncCard />
+
         {unlockedContent.length > 0 && (
           <>
             <Text style={styles.sectionTitle}>🎁 Bonus Content</Text>
@@ -339,7 +346,7 @@ export default function ProfileTab() {
               <Text style={styles.legalLink}>Refunds</Text>
             </TouchableOpacity>
           </View>
-          <Text style={styles.legalContact}>contact@tarsgallery.com · v1.0.0</Text>
+          <Text style={styles.legalContact}>coficollective@gmail.com · v1.0.0</Text>
         </View>
 
       </ScrollView>

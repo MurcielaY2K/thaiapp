@@ -44,7 +44,7 @@ export default function LegalPage({ title, updated, sections }: Props) {
             ))}
           </View>
         ))}
-        <Text style={styles.contact}>Questions? Contact us at contact@tarsgallery.com</Text>
+        <Text style={styles.contact}>Questions? Contact us at coficollective@gmail.com</Text>
       </ScrollView>
     </SafeAreaView>
   );

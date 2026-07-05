@@ -49,6 +49,20 @@ export default function Root({ children }: PropsWithChildren) {
             `,
           }}
         />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ('serviceWorker' in navigator) {
+                // updateViaCache 'none' forces the browser to re-fetch the SW
+                // script on every navigation, so new deploys roll out without
+                // users needing a hard refresh.
+                navigator.serviceWorker
+                  .register('/thaiapp/service-worker.js', { updateViaCache: 'none' })
+                  .catch(function () {});
+              }
+            `,
+          }}
+        />
       </head>
       <body>{children}</body>
     </html>

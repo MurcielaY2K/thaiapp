@@ -12,6 +12,7 @@ import DatabaseTab from '../components/tabs/DatabaseTab';
 import LeaderboardTab from '../components/tabs/LeaderboardTab';
 import ProfileTab from '../components/tabs/ProfileTab';
 import RewardToast from '../components/RewardToast';
+import { initProgressSync, restoreProfileFromCloud, pullAndMerge } from '../lib/progressSync';
 
 function consumeStripeSuccess(): boolean {
   if (Platform.OS !== 'web' || typeof window === 'undefined') return false;
@@ -34,6 +35,20 @@ export default function HomeScreen() {
     loadProgress();
     loadUser();
   }, []);
+
+  // Cloud sync: once local state is hydrated and we have a session, restore
+  // the profile (new device after magic-link sign-in), reconcile progress
+  // with the cloud snapshot, then start the debounced auto-push.
+  const authId = useUserStore(s => s.authId);
+  const srsLoading = useSrsStore(s => s.isLoading);
+  useEffect(() => {
+    if (!progressLoaded || !userLoaded || srsLoading || !authId) return;
+    (async () => {
+      await restoreProfileFromCloud().catch(() => {});
+      await pullAndMerge().catch(() => {});
+      initProgressSync();
+    })();
+  }, [progressLoaded, userLoaded, srsLoading, authId]);
 
   // Premium entitlement — always verified against the server, never granted
   // from the URL. On return from Stripe the webhook may lag the redirect by

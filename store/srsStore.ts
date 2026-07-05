@@ -3,9 +3,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { VOCABULARY, type Word } from '../data/vocabulary';
 
 const SESSION_SIZE = 20;
-const STORAGE_KEY = '@thaiapp_progress';
-const WRITING_KEY = '@thaiapp_writing';
-const STREAK_KEY  = '@thaiapp_streak';
+import { StorageKeys } from '../constants/storageKeys';
+
+const STORAGE_KEY = StorageKeys.srsProgress;
+const WRITING_KEY = StorageKeys.writing;
+const STREAK_KEY  = StorageKeys.streak;
 const MIN_EASE = 1.3;
 
 export interface WordProgress {

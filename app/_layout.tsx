@@ -1,10 +1,13 @@
+import { useEffect } from 'react';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { StyleSheet } from 'react-native';
 import { Colors } from '../constants/colors';
+import { initMonitoring } from '../lib/monitoring';
 
 export default function RootLayout() {
+  useEffect(() => { initMonitoring(); }, []);
   return (
     <GestureHandlerRootView style={styles.root}>
       <StatusBar style="light" backgroundColor={Colors.bg} />

@@ -3,15 +3,17 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { PREMIUM_ON_HOLD } from '../constants/features';
 import { supabase } from '../lib/supabase';
 
-const XP_KEY      = '@thaiapp_xp';
-const HEARTS_KEY  = '@thaiapp_hearts';
-const GEMS_KEY    = '@thaiapp_gems';
+import { StorageKeys } from '../constants/storageKeys';
+
+const XP_KEY      = StorageKeys.xp;
+const HEARTS_KEY  = StorageKeys.hearts;
+const GEMS_KEY    = StorageKeys.gems;
 // Cache of the last server-verified entitlement verdict. The old
 // '@thaiapp_premium' key (self-granted on redirect) is deliberately ignored:
 // Premium is now granted only by the Stripe webhook → entitlements table.
-const PREMIUM_KEY = '@thaiapp_premium_v2';
-const PROGRESS_KEY = '@thaiapp_lesson_progress';
-const DAILY_KEY   = '@thaiapp_daily_xp';
+const PREMIUM_KEY = StorageKeys.premium;
+const PROGRESS_KEY = StorageKeys.lessonProgress;
+const DAILY_KEY   = StorageKeys.dailyXp;
 
 const HEART_REFILL_MS = 30 * 60 * 1000; // 30 min per heart
 const MAX_HEARTS = 5;

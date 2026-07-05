@@ -34,7 +34,7 @@ export default function Refunds() {
         {
           heading: 'How to request a refund',
           paragraphs: [
-            'Email contact@tarsgallery.com from the address associated with your payment, including the approximate charge date. Refunds are issued to the original payment method via Stripe, normally within 5–10 business days.',
+            'Email coficollective@gmail.com from the address associated with your payment, including the approximate charge date. Refunds are issued to the original payment method via Stripe, normally within 5–10 business days.',
           ],
         },
       ]}

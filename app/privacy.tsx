@@ -59,7 +59,7 @@ export default function Privacy() {
         {
           heading: '6. Your rights (GDPR and similar laws)',
           paragraphs: [
-            'You can access, correct or delete your profile data at any time. Profile deletion is available in the app and removes your data from our database. You also have the right to data portability, to object to processing, and to lodge a complaint with your local data-protection authority. To exercise any right, or for any privacy question, email contact@tarsgallery.com.',
+            'You can access, correct or delete your profile data at any time. Profile deletion is available in the app and removes your data from our database. You also have the right to data portability, to object to processing, and to lodge a complaint with your local data-protection authority. To exercise any right, or for any privacy question, email coficollective@gmail.com.',
           ],
         },
         {
