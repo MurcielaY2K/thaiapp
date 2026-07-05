@@ -2,6 +2,7 @@ import React from 'react';
 import {
   Modal, View, Text, TouchableOpacity, StyleSheet, Pressable, Linking, Platform,
 } from 'react-native';
+import { router } from 'expo-router';
 import { Colors } from '../constants/colors';
 import { Fonts } from '../constants/typography';
 import { STRIPE_PAYMENT_LINK, paymentLinkFor } from '../constants/stripe';
@@ -84,6 +85,13 @@ export default function PremiumModal({ visible, onClose }: Props) {
 
           <Text style={styles.secureNote}>
             🔒 Secure payment · Powered by Stripe
+          </Text>
+
+          <Text style={styles.legalNote}>
+            By subscribing you agree to our{' '}
+            <Text style={styles.legalLink} onPress={() => { onClose(); router.push('/terms'); }}>Terms</Text>
+            {' '}and{' '}
+            <Text style={styles.legalLink} onPress={() => { onClose(); router.push('/refunds'); }}>Refund Policy</Text>.
           </Text>
 
           <TouchableOpacity onPress={onClose} activeOpacity={0.7} style={styles.dismissWrap}>
@@ -169,6 +177,8 @@ const styles = StyleSheet.create({
   stripeArrow: { color: '#fff', fontSize: 22, opacity: 0.8 },
 
   secureNote: { color: Colors.textDim, fontSize: 11, textAlign: 'center' },
+  legalNote: { color: Colors.textDim, fontSize: 10, textAlign: 'center', marginTop: 6, lineHeight: 15 },
+  legalLink: { color: Colors.lavender, textDecorationLine: 'underline' },
 
   dismissWrap: { paddingVertical: 4 },
   dismiss: { color: Colors.textDim, fontSize: 13 },

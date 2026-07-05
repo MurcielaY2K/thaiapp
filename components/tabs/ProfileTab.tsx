@@ -4,6 +4,7 @@ import {
   TouchableOpacity, TextInput, ActivityIndicator, Platform,
 } from 'react-native';
 
+import { router } from 'expo-router';
 import { useUserStore } from '../../store/userStore';
 import { useProgressStore } from '../../store/progressStore';
 import { useSrsStore } from '../../store/srsStore';
@@ -324,6 +325,23 @@ export default function ProfileTab() {
           })}
         </View>
 
+        <View style={styles.legalFooter}>
+          <View style={styles.legalLinks}>
+            <TouchableOpacity onPress={() => router.push('/privacy')}>
+              <Text style={styles.legalLink}>Privacy</Text>
+            </TouchableOpacity>
+            <Text style={styles.legalDot}>·</Text>
+            <TouchableOpacity onPress={() => router.push('/terms')}>
+              <Text style={styles.legalLink}>Terms</Text>
+            </TouchableOpacity>
+            <Text style={styles.legalDot}>·</Text>
+            <TouchableOpacity onPress={() => router.push('/refunds')}>
+              <Text style={styles.legalLink}>Refunds</Text>
+            </TouchableOpacity>
+          </View>
+          <Text style={styles.legalContact}>contact@tarsgallery.com · v1.0.0</Text>
+        </View>
+
       </ScrollView>
     </SafeAreaView>
   );
@@ -480,4 +498,10 @@ const styles = StyleSheet.create({
   },
   offlineNoteText: { color: Colors.textDim, fontSize: 12, fontFamily: Fonts.body, lineHeight: 17 },
   errorText: { color: Colors.wrong, fontSize: 12, fontFamily: Fonts.body, marginBottom: 8, textAlign: 'center' },
+
+  legalFooter: { alignItems: 'center', gap: 6, paddingBottom: 24 },
+  legalLinks: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  legalLink: { color: Colors.textDim, fontSize: 11, fontFamily: Fonts.body, textDecorationLine: 'underline' },
+  legalDot: { color: Colors.textDim, fontSize: 11 },
+  legalContact: { color: Colors.textDim, fontSize: 10, fontFamily: Fonts.mono, opacity: 0.7 },
 });
