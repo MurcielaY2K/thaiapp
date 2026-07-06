@@ -2,6 +2,11 @@ import { create } from 'zustand';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { VOCABULARY, type Word } from '../data/vocabulary';
 
+// The 'dictionary' category is reference material (auto-generated
+// romanization, no tone marks) — browsable in the Words tab but kept out
+// of the spaced-repetition practice pool and its stats.
+const LEARNABLE = VOCABULARY.filter(w => w.category !== 'dictionary');
+
 const SESSION_SIZE = 20;
 import { StorageKeys } from '../constants/storageKeys';
 
@@ -72,11 +77,11 @@ export const useSrsStore = create<SrsStore>((set, get) => ({
     const { progress } = get();
     const now = Date.now();
 
-    const due = VOCABULARY
+    const due = LEARNABLE
       .filter(w => { const p = progress[w.id]; return p && p.dueDate <= now; })
       .sort(() => Math.random() - 0.5);
 
-    const unseen = VOCABULARY
+    const unseen = LEARNABLE
       .filter(w => !progress[w.id]);
 
     const session: Word[] = [...due.slice(0, SESSION_SIZE)];
@@ -132,9 +137,9 @@ export const useSrsStore = create<SrsStore>((set, get) => ({
   getStats: () => {
     const { progress } = get();
     const now = Date.now();
-    const total = VOCABULARY.length;
-    const newWords = VOCABULARY.filter(w => !progress[w.id]).length;
-    const dueToday = VOCABULARY.filter(w => {
+    const total = LEARNABLE.length;
+    const newWords = LEARNABLE.filter(w => !progress[w.id]).length;
+    const dueToday = LEARNABLE.filter(w => {
       const p = progress[w.id];
       return p && p.dueDate <= now;
     }).length;

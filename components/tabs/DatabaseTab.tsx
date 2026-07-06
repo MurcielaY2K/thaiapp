@@ -7,7 +7,7 @@ import { VOCABULARY, Word } from '../../data/vocabulary';
 import { Colors } from '../../constants/colors';
 import { Fonts } from '../../constants/typography';
 
-const CATEGORIES = ['all', 'greetings', 'numbers', 'time', 'food', 'places', 'colors', 'family', 'verbs', 'adjectives', 'personal', 'weather', 'feelings', 'jobs', 'transport', 'car', 'travel', 'home', 'kitchen', 'bedroom', 'bathroom', 'garden', 'housework', 'shopping', 'fruit', 'vegetables', 'seafood', 'meat', 'bakery', 'dairy', 'pharmacy', 'beauty', 'baby', 'stationery', 'store', 'clothing', 'tools', 'shops', 'breakfast', 'meals', 'dishes', 'desserts', 'eatingout', 'fastfood', 'tech', 'education', 'office', 'bank', 'post', 'leisure', 'sightseeing', 'nightlife', 'hotel', 'beach', 'music', 'photography', 'games', 'crafts', 'sport', 'fitness', 'health', 'body', 'animals', 'plants', 'nature', 'celebrations'];
+const CATEGORIES = ['all', 'greetings', 'numbers', 'time', 'food', 'places', 'colors', 'family', 'verbs', 'adjectives', 'personal', 'weather', 'feelings', 'jobs', 'transport', 'car', 'travel', 'home', 'kitchen', 'bedroom', 'bathroom', 'garden', 'housework', 'shopping', 'fruit', 'vegetables', 'seafood', 'meat', 'bakery', 'dairy', 'pharmacy', 'beauty', 'baby', 'stationery', 'store', 'clothing', 'tools', 'shops', 'breakfast', 'meals', 'dishes', 'desserts', 'eatingout', 'fastfood', 'tech', 'education', 'office', 'bank', 'post', 'leisure', 'sightseeing', 'nightlife', 'hotel', 'beach', 'music', 'photography', 'games', 'crafts', 'sport', 'fitness', 'health', 'body', 'animals', 'plants', 'nature', 'celebrations', 'dictionary'];
 
 const CAT_EMOJI: Record<string, string> = {
   all: '🔍', greetings: '🙏', numbers: '🔢', time: '⏰',
@@ -27,7 +27,7 @@ const CAT_EMOJI: Record<string, string> = {
   photography: '📷', games: '🎮', crafts: '🎨', sport: '⚽',
   fitness: '🏋️',
   health: '🏥', body: '🧍', animals: '🐾', plants: '🌸', nature: '🏔️',
-  celebrations: '🎉',
+  celebrations: '🎉', dictionary: '📖',
 };
 
 // Spirit Realm category colors
@@ -97,6 +97,7 @@ const CAT_COLORS: Record<string, string> = {
   plants:     Colors.mint,
   nature:     Colors.sky,
   celebrations: Colors.gold,
+  dictionary: Colors.amber,
 };
 
 function catColor(cat: string): string {
