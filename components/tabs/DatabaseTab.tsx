@@ -261,7 +261,7 @@ const styles = StyleSheet.create({
   input: { flex: 1, color: Colors.text, fontSize: 15, fontFamily: Fonts.body },
   clear: { color: Colors.textDim, fontSize: 14, paddingHorizontal: 4 },
 
-  catBar: { flexGrow: 0, marginBottom: 6 },
+  catBar: { flexGrow: 0, flexShrink: 0, marginBottom: 6 },
   cats: { paddingHorizontal: 20, gap: 8, paddingBottom: 4 },
   catChip: {
     paddingHorizontal: 12, paddingVertical: 6,

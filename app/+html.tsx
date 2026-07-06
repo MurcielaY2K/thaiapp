@@ -43,6 +43,12 @@ export default function Root({ children }: PropsWithChildren) {
                 background-color: #f0eee7;
                 font-family: 'Sarabun', system-ui, sans-serif;
               }
+              /* viewport-fit=cover lets the page extend under the iPhone
+                 status bar / home indicator; pad the app back out of them. */
+              #root {
+                padding-top: env(safe-area-inset-top);
+                padding-bottom: env(safe-area-inset-bottom);
+              }
               body { overscroll-behavior: none; }
               img, canvas { image-rendering: pixelated; }
               * { box-sizing: border-box; }

@@ -99,7 +99,7 @@ function LessonNode({
   const borderColor = isComplete || isAvailable ? Colors.borderStrong : Colors.border;
 
   return (
-    <View style={[styles.nodeRow, { height: NODE_SIZE + 32 }]}>
+    <View style={[styles.nodeRow, { height: NODE_SIZE + (isCheckpoint ? 72 : 58) }]}>
       <View style={[styles.connLine, { borderColor: Colors.borderGlow }]} />
 
       <Animated.View style={[
