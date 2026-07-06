@@ -310,42 +310,61 @@ const GEN_TINTS: [string, string, string][] = [
 
 const LESSON_SIZE = 8;
 const MAX_LESSONS = 8;
+const WORLD_WORDS = LESSON_SIZE * MAX_LESSONS;
+const PART_SUFFIX = ['', ' II', ' III', ' IV', ' V', ' VI'];
+const PART_ID = ['', 'b', 'c', 'd', 'e', 'f'];
+
+function makeGenWorld(def: GenWorldDef, wi: number, lap: number, words: typeof VOCABULARY): World {
+  const id = def.id + PART_ID[lap];
+  // Later laps of the same theme get harder (capped at tier 4)
+  const tier = Math.min(4, def.tier + lap) as 2 | 3 | 4;
+  const lessonCount = Math.min(MAX_LESSONS, Math.floor(words.length / LESSON_SIZE));
+  const [realmTint, color, darkColor] = GEN_TINTS[(wi + lap) % GEN_TINTS.length];
+  const xp = tier === 2 ? 20 : tier === 3 ? 25 : 30;
+
+  const lessons: Lesson[] = [];
+  for (let i = 0; i < lessonCount; i++) {
+    const slice = words.slice(i * LESSON_SIZE, (i + 1) * LESSON_SIZE);
+    const [t, icon] = def.lessonTitles[i % def.lessonTitles.length];
+    const suffix = i >= def.lessonTitles.length ? ' ' + ['II', 'III', 'IV', 'V', 'VI'][Math.floor(i / def.lessonTitles.length) - 1] : '';
+    lessons.push({
+      id: `${id}-l${i + 1}`, worldId: id,
+      title: t + suffix, icon, xpReward: xp, type: 'vocab',
+      vocabIds: slice.map(w => w.id),
+    });
+  }
+  // Checkpoint samples evenly across everything taught in this world
+  const taught = lessons.flatMap(l => l.vocabIds);
+  const cpSize = Math.min(12, taught.length);
+  const step = Math.max(1, Math.floor(taught.length / cpSize));
+  const cpIds = Array.from({ length: cpSize }, (_, i) => taught[(i * step) % taught.length]);
+  lessons.push({
+    id: `${id}-cp`, worldId: id,
+    title: 'Checkpoint', icon: '⭐', xpReward: xp * 3, type: 'checkpoint',
+    vocabIds: [...new Set(cpIds)],
+  });
+
+  return {
+    id, title: def.title + PART_SUFFIX[lap], subtitle: lap === 0 ? def.subtitle : 'Deeper into ' + def.title.toLowerCase(),
+    color, darkColor, realmTint, emoji: def.emoji,
+    isPremium: true, tier, lessons,
+  };
+}
 
 function buildGeneratedWorlds(): World[] {
-  return GEN_DEFS.map((def, wi) => {
+  // Lap 0 of every theme first, then all lap-1 continuations, and so on —
+  // the path cycles through topics instead of grinding one to the end.
+  const laps: World[][] = [];
+  GEN_DEFS.forEach((def, wi) => {
     const words = VOCABULARY.filter(w => def.categories.includes(w.category));
-    const lessonCount = Math.min(MAX_LESSONS, Math.floor(words.length / LESSON_SIZE));
-    const [realmTint, color, darkColor] = GEN_TINTS[wi % GEN_TINTS.length];
-    const xp = def.tier === 2 ? 20 : def.tier === 3 ? 25 : 30;
-
-    const lessons: Lesson[] = [];
-    for (let i = 0; i < lessonCount; i++) {
-      const slice = words.slice(i * LESSON_SIZE, (i + 1) * LESSON_SIZE);
-      const [t, icon] = def.lessonTitles[i % def.lessonTitles.length];
-      const suffix = i >= def.lessonTitles.length ? ' ' + ['II', 'III', 'IV', 'V', 'VI'][Math.floor(i / def.lessonTitles.length) - 1] : '';
-      lessons.push({
-        id: `${def.id}-l${i + 1}`, worldId: def.id,
-        title: t + suffix, icon, xpReward: xp, type: 'vocab',
-        vocabIds: slice.map(w => w.id),
-      });
+    for (let lap = 0; lap * WORLD_WORDS < words.length && lap < PART_ID.length; lap++) {
+      const slice = words.slice(lap * WORLD_WORDS, (lap + 1) * WORLD_WORDS);
+      // A continuation world needs at least 2 full lessons to be worth it
+      if (lap > 0 && slice.length < LESSON_SIZE * 2) break;
+      (laps[lap] ??= []).push(makeGenWorld(def, wi, lap, slice));
     }
-    // Checkpoint samples evenly across everything taught in this world
-    const taught = lessons.flatMap(l => l.vocabIds);
-    const cpSize = Math.min(12, taught.length);
-    const step = Math.max(1, Math.floor(taught.length / cpSize));
-    const cpIds = Array.from({ length: cpSize }, (_, i) => taught[(i * step) % taught.length]);
-    lessons.push({
-      id: `${def.id}-cp`, worldId: def.id,
-      title: 'Checkpoint', icon: '⭐', xpReward: xp * 3, type: 'checkpoint',
-      vocabIds: [...new Set(cpIds)],
-    });
-
-    return {
-      id: def.id, title: def.title, subtitle: def.subtitle,
-      color, darkColor, realmTint, emoji: def.emoji,
-      isPremium: true, tier: def.tier, lessons,
-    };
   });
+  return laps.flat();
 }
 
 WORLDS.push(...buildGeneratedWorlds());
