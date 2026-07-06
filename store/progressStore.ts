@@ -13,6 +13,7 @@ const GEMS_KEY    = StorageKeys.gems;
 // Premium is now granted only by the Stripe webhook → entitlements table.
 const PREMIUM_KEY = StorageKeys.premium;
 const PROGRESS_KEY = StorageKeys.lessonProgress;
+const STARS_KEY   = StorageKeys.lessonStars;
 const DAILY_KEY   = StorageKeys.dailyXp;
 
 const HEART_REFILL_MS = 30 * 60 * 1000; // 30 min per heart
@@ -30,6 +31,7 @@ interface ProgressStore {
   gems: number;
   isPremium: boolean;
   lessonProgress: Record<string, LessonState>;
+  lessonStars: Record<string, number>;   // best 1-3 star result per lesson
   dailyXp: DailyXP;
   dailyGoal: number;
   badges: string[];
@@ -41,6 +43,7 @@ interface ProgressStore {
   addGems: (n: number) => void;
   spendGems: (n: number) => boolean;
   completeLesson: (lessonId: string, nextLessonId?: string, nextIsPremium?: boolean) => void;
+  setLessonStars: (lessonId: string, stars: number) => void;
   applyPremium: (active: boolean) => void;
   refreshEntitlement: () => Promise<void>;
   seedProgress: (firstLessonId: string) => void;
@@ -80,6 +83,7 @@ export const useProgressStore = create<ProgressStore>((set, get) => ({
   gems: 30,
   isPremium: PREMIUM_ON_HOLD,
   lessonProgress: {},
+  lessonStars: {},
   dailyXp: { date: todayStr(), earned: 0 },
   dailyGoal: 50,
   badges: [],
@@ -87,14 +91,16 @@ export const useProgressStore = create<ProgressStore>((set, get) => ({
 
   load: async () => {
     try {
-      const [xpJ, hJ, gJ, premJ, progJ, dailyJ] = await Promise.all([
+      const [xpJ, hJ, gJ, premJ, progJ, dailyJ, starsJ] = await Promise.all([
         AsyncStorage.getItem(XP_KEY),
         AsyncStorage.getItem(HEARTS_KEY),
         AsyncStorage.getItem(GEMS_KEY),
         AsyncStorage.getItem(PREMIUM_KEY),
         AsyncStorage.getItem(PROGRESS_KEY),
         AsyncStorage.getItem(DAILY_KEY),
+        AsyncStorage.getItem(STARS_KEY),
       ]);
+      const lessonStars: Record<string, number> = starsJ ? JSON.parse(starsJ) : {};
       const xp = xpJ ? Number(xpJ) : 0;
       const rawHearts = hJ ? JSON.parse(hJ) : { hearts: MAX_HEARTS, lastRefill: Date.now() };
       const { hearts, lastRefill } = refillHearts(rawHearts.hearts, rawHearts.lastRefill);
@@ -111,7 +117,7 @@ export const useProgressStore = create<ProgressStore>((set, get) => ({
       }
       let daily: DailyXP = dailyJ ? JSON.parse(dailyJ) : { date: todayStr(), earned: 0 };
       if (daily.date !== todayStr()) daily = { date: todayStr(), earned: 0 };
-      set({ xp, level: computeLevel(xp), hearts, lastHeartRefill: lastRefill, gems, isPremium, lessonProgress, dailyXp: daily, isLoaded: true });
+      set({ xp, level: computeLevel(xp), hearts, lastHeartRefill: lastRefill, gems, isPremium, lessonProgress, lessonStars, dailyXp: daily, isLoaded: true });
       // Persist updated heart count (may have refilled)
       AsyncStorage.setItem(HEARTS_KEY, JSON.stringify({ hearts, lastRefill }));
     } catch {
@@ -173,6 +179,14 @@ export const useProgressStore = create<ProgressStore>((set, get) => ({
     }
     set({ lessonProgress: next });
     AsyncStorage.setItem(PROGRESS_KEY, JSON.stringify(next));
+  },
+
+  setLessonStars: (lessonId: string, stars: number) => {
+    const { lessonStars } = get();
+    if ((lessonStars[lessonId] ?? 0) >= stars) return;   // keep the best run
+    const next = { ...lessonStars, [lessonId]: stars };
+    set({ lessonStars: next });
+    AsyncStorage.setItem(STARS_KEY, JSON.stringify(next));
   },
 
   applyPremium: (active: boolean) => {

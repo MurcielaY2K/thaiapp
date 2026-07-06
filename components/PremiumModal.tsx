@@ -7,16 +7,18 @@ import { Colors } from '../constants/colors';
 import { Fonts } from '../constants/typography';
 import { STRIPE_PAYMENT_LINK, paymentLinkFor } from '../constants/stripe';
 import { supabase } from '../lib/supabase';
+import { WORLDS, ALL_LESSONS } from '../data/worlds';
 
 interface Props {
   visible: boolean;
   onClose: () => void;
 }
 
+const PREMIUM_LESSONS = WORLDS.filter(w => w.isPremium).flatMap(w => w.lessons).length;
 const PERKS = [
-  { icon: '🌍', text: 'All 5 learning worlds' },
-  { icon: '❤️', text: 'Unlimited hearts — never stop learning' },
-  { icon: '📚', text: '2,000+ vocabulary words unlocked' },
+  { icon: '🌍', text: `All ${WORLDS.length} learning worlds (${ALL_LESSONS.length} lessons)` },
+  { icon: '❤️', text: 'Unlimited hearts — never fail a lesson run' },
+  { icon: '📚', text: `${PREMIUM_LESSONS} premium lessons across 4 difficulty tiers` },
   { icon: '🏆', text: 'All badges & achievements' },
 ];
 

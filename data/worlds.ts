@@ -20,6 +20,7 @@ export interface World {
   realmTint: string;   // world header background tint
   emoji: string;
   isPremium: boolean;
+  tier: 1 | 2 | 3 | 4; // difficulty: question variety + distractor pool + length
   lessons: Lesson[];
 }
 
@@ -33,6 +34,7 @@ export const WORLDS: World[] = [
     realmTint: '#ff6a2e',
     emoji: '🙏',
     isPremium: false,
+    tier: 1,
     lessons: [
       {
         id: 'w1-l1', worldId: 'w1', title: 'Hello & Goodbye', icon: '👋', xpReward: 15,
@@ -75,6 +77,7 @@ export const WORLDS: World[] = [
     realmTint: '#c0b2f8',
     emoji: '🍜',
     isPremium: false,
+    tier: 1,
     lessons: [
       {
         id: 'w2-l1', worldId: 'w2', title: 'Thai Classics', icon: '🍛', xpReward: 15,
@@ -117,6 +120,7 @@ export const WORLDS: World[] = [
     realmTint: '#b5cb51',
     emoji: '🏙️',
     isPremium: true,
+    tier: 2,
     lessons: [
       {
         id: 'w3-l1', worldId: 'w3', title: 'Transport', icon: '🛺', xpReward: 20,
@@ -159,6 +163,7 @@ export const WORLDS: World[] = [
     realmTint: '#f5d43e',
     emoji: '🗣️',
     isPremium: true,
+    tier: 2,
     lessons: [
       {
         id: 'w4-l1', worldId: 'w4', title: 'Action Words I', icon: '🏃', xpReward: 20,
@@ -201,6 +206,7 @@ export const WORLDS: World[] = [
     realmTint: '#f06060',
     emoji: '🏆',
     isPremium: true,
+    tier: 3,
     lessons: [
       {
         id: 'w5-l1', worldId: 'w5', title: 'Good & Bad', icon: '⚖️', xpReward: 25,
@@ -235,6 +241,114 @@ export const WORLDS: World[] = [
     ],
   },
 ];
+
+
+// ---------------------------------------------------------------------------
+// Generated worlds — built from the curated vocabulary categories so the
+// Learn path covers far more of the database. Each world takes its words in
+// database order: 8-word lessons (max 8 + checkpoint per world).
+// ---------------------------------------------------------------------------
+import { VOCABULARY } from './vocabulary';
+
+interface GenWorldDef {
+  id: string;
+  title: string;
+  subtitle: string;
+  emoji: string;
+  tier: 2 | 3 | 4;
+  categories: string[];          // curated categories, pulled in this order
+  lessonTitles: [string, string][]; // [title, icon] cycled per lesson
+}
+
+const GEN_DEFS: GenWorldDef[] = [
+  { id: 'w6',  title: 'At Home',        subtitle: 'Rooms, furniture & chores',    emoji: '🏠', tier: 2,
+    categories: ['home', 'kitchen', 'bedroom', 'bathroom', 'garden', 'housework'],
+    lessonTitles: [['Around the House', '🏠'], ['In the Kitchen', '🍳'], ['Bedroom & Bath', '🛏️'], ['Garden & Chores', '🪴']] },
+  { id: 'w7',  title: 'Shopping Spree', subtitle: 'Stores, clothes & tools',      emoji: '🛍️', tier: 2,
+    categories: ['shopping', 'clothing', 'shops', 'store', 'tools'],
+    lessonTitles: [['At the Shops', '🛒'], ['What to Wear', '👕'], ['Around Town', '🏪'], ['Handy Tools', '🔧']] },
+  { id: 'w8',  title: 'Fresh Market',   subtitle: 'Fruit, veg, meat & more',      emoji: '🥬', tier: 2,
+    categories: ['fruit', 'vegetables', 'meat', 'seafood', 'bakery', 'dairy'],
+    lessonTitles: [['Fruit Stand', '🍎'], ['Veggie Corner', '🥬'], ['Meat & Seafood', '🦐'], ['Bakery & Dairy', '🥐']] },
+  { id: 'w9',  title: 'Food Adventures', subtitle: 'Eating out, Thai style',      emoji: '🍲', tier: 3,
+    categories: ['breakfast', 'meals', 'dishes', 'desserts', 'eatingout', 'fastfood'],
+    lessonTitles: [['Breakfast Time', '🥞'], ['Thai Dishes', '🍲'], ['Sweet Treats', '🍧'], ['Eating Out', '🍴']] },
+  { id: 'w10', title: 'On the Move',    subtitle: 'Transport & road trips',       emoji: '🚌', tier: 3,
+    categories: ['transport', 'car', 'travel'],
+    lessonTitles: [['Getting Around', '🛺'], ['Behind the Wheel', '🚗'], ['Travel Days', '✈️']] },
+  { id: 'w11', title: 'City Life',      subtitle: 'Places, money & offices',      emoji: '🏦', tier: 3,
+    categories: ['places', 'bank', 'post', 'office', 'tech', 'sightseeing'],
+    lessonTitles: [['Around the City', '📍'], ['Bank & Post', '🏦'], ['At the Office', '🏢'], ['Tech Talk', '📱']] },
+  { id: 'w12', title: 'Body & Health',  subtitle: 'From head to toe',             emoji: '🩺', tier: 3,
+    categories: ['body', 'health', 'pharmacy', 'beauty', 'baby'],
+    lessonTitles: [['The Body', '🧍'], ['Staying Healthy', '🏥'], ['At the Pharmacy', '💊'], ['Care & Beauty', '💄']] },
+  { id: 'w13', title: 'Sport & Fitness', subtitle: 'Games, gyms & glory',         emoji: '🏆', tier: 4,
+    categories: ['sport', 'fitness'],
+    lessonTitles: [['Game On', '⚽'], ['At the Gym', '🏋️']] },
+  { id: 'w14', title: 'Wild Thailand',  subtitle: 'Animals, plants & nature',     emoji: '🐘', tier: 4,
+    categories: ['animals', 'plants', 'nature', 'weather'],
+    lessonTitles: [['Creatures', '🐾'], ['Green Things', '🌸'], ['The Great Outdoors', '🏔️'], ['Sky & Weather', '🌦️']] },
+  { id: 'w15', title: 'Work & Study',   subtitle: 'Jobs, school & supplies',      emoji: '🎓', tier: 4,
+    categories: ['jobs', 'education', 'stationery'],
+    lessonTitles: [['World of Work', '💼'], ['School Days', '🎓'], ['Desk Drawer', '📰']] },
+  { id: 'w16', title: 'Fun & Free Time', subtitle: 'Hobbies, nights out & play',  emoji: '🎮', tier: 4,
+    categories: ['leisure', 'music', 'games', 'crafts', 'photography', 'nightlife', 'hotel', 'beach'],
+    lessonTitles: [['Hobby Time', '🎣'], ['Music & Games', '🎵'], ['Night Out', '🎭'], ['Beach Day', '🏖️']] },
+  { id: 'w17', title: 'Thai Culture',   subtitle: 'Festivals & life events',      emoji: '🎉', tier: 4,
+    categories: ['celebrations'],
+    lessonTitles: [['Celebrations', '🎉'], ['Festivals', '🏮']] },
+];
+
+const GEN_TINTS: [string, string, string][] = [
+  // [realmTint, color, darkColor] cycled across generated worlds
+  ['#c0b2f8', '#8f7be8', '#6f57d4'],
+  ['#b5cb51', '#7d9930', '#5d7423'],
+  ['#f5d43e', '#dfa300', '#b88600'],
+  ['#f06060', '#e84a52', '#c02f38'],
+  ['#ff6a2e', '#ff5c1e', '#d6440e'],
+];
+
+const LESSON_SIZE = 8;
+const MAX_LESSONS = 8;
+
+function buildGeneratedWorlds(): World[] {
+  return GEN_DEFS.map((def, wi) => {
+    const words = VOCABULARY.filter(w => def.categories.includes(w.category));
+    const lessonCount = Math.min(MAX_LESSONS, Math.floor(words.length / LESSON_SIZE));
+    const [realmTint, color, darkColor] = GEN_TINTS[wi % GEN_TINTS.length];
+    const xp = def.tier === 2 ? 20 : def.tier === 3 ? 25 : 30;
+
+    const lessons: Lesson[] = [];
+    for (let i = 0; i < lessonCount; i++) {
+      const slice = words.slice(i * LESSON_SIZE, (i + 1) * LESSON_SIZE);
+      const [t, icon] = def.lessonTitles[i % def.lessonTitles.length];
+      const suffix = i >= def.lessonTitles.length ? ' ' + ['II', 'III', 'IV', 'V', 'VI'][Math.floor(i / def.lessonTitles.length) - 1] : '';
+      lessons.push({
+        id: `${def.id}-l${i + 1}`, worldId: def.id,
+        title: t + suffix, icon, xpReward: xp, type: 'vocab',
+        vocabIds: slice.map(w => w.id),
+      });
+    }
+    // Checkpoint samples evenly across everything taught in this world
+    const taught = lessons.flatMap(l => l.vocabIds);
+    const cpSize = Math.min(12, taught.length);
+    const step = Math.max(1, Math.floor(taught.length / cpSize));
+    const cpIds = Array.from({ length: cpSize }, (_, i) => taught[(i * step) % taught.length]);
+    lessons.push({
+      id: `${def.id}-cp`, worldId: def.id,
+      title: 'Checkpoint', icon: '⭐', xpReward: xp * 3, type: 'checkpoint',
+      vocabIds: [...new Set(cpIds)],
+    });
+
+    return {
+      id: def.id, title: def.title, subtitle: def.subtitle,
+      color, darkColor, realmTint, emoji: def.emoji,
+      isPremium: true, tier: def.tier, lessons,
+    };
+  });
+}
+
+WORLDS.push(...buildGeneratedWorlds());
 
 // Flat list of all lessons in order
 export const ALL_LESSONS: Lesson[] = WORLDS.flatMap(w => w.lessons);

@@ -69,10 +69,10 @@ function getEffectiveState(
 }
 
 function LessonNode({
-  lesson, world, zigIdx, state, onPress,
+  lesson, world, zigIdx, state, stars, onPress,
 }: {
   lesson: Lesson; world: World; zigIdx: number;
-  state: LessonState; onPress: () => void;
+  state: LessonState; stars: number; onPress: () => void;
 }) {
   const pulse = useRef(new Animated.Value(1)).current;
 
@@ -144,12 +144,15 @@ function LessonNode({
             <Text style={styles.startText}>START</Text>
           </View>
         )}
+        {isComplete && stars > 0 && (
+          <Text style={styles.nodeStars}>{'★'.repeat(stars)}{'☆'.repeat(3 - stars)}</Text>
+        )}
       </Animated.View>
     </View>
   );
 }
 
-function WorldHeader({ world, done }: { world: World; done: number }) {
+function WorldHeader({ world, done, stars }: { world: World; done: number; stars: number }) {
   const spriteName = WORLD_SPRITE[world.id];
   const sprite = spriteName ? SPRITES[spriteName] : null;
   const total = world.lessons.length;
@@ -182,13 +185,19 @@ function WorldHeader({ world, done }: { world: World; done: number }) {
         <View style={styles.metaChip}>
           <Text style={styles.metaChipText}>✓ {done}/{total} done</Text>
         </View>
+        <View style={styles.metaChip}>
+          <Text style={styles.metaChipText}>★ {stars}/{total * 3}</Text>
+        </View>
+        <View style={styles.metaChip}>
+          <Text style={styles.metaChipText}>{'🌶️'.repeat(world.tier)}</Text>
+        </View>
       </View>
     </View>
   );
 }
 
 export default function LearnTab() {
-  const { lessonProgress, isPremium, load, isLoaded, seedProgress, xp, level, dailyXp, dailyGoal } = useProgressStore();
+  const { lessonProgress, lessonStars, isPremium, load, isLoaded, seedProgress, xp, level, dailyXp, dailyGoal } = useProgressStore();
   const [premiumVisible, setPremiumVisible] = useState(false);
 
   useEffect(() => {
@@ -245,7 +254,8 @@ export default function LearnTab() {
         {LIST_ITEMS.map((item, idx) => {
           if (item.type === 'header') {
             const done = item.world.lessons.filter(l => lessonProgress[l.id] === 'complete').length;
-            return <WorldHeader key={`h-${item.world.id}`} world={item.world} done={done} />;
+            const starSum = item.world.lessons.reduce((acc, l) => acc + (lessonStars[l.id] ?? 0), 0);
+            return <WorldHeader key={`h-${item.world.id}`} world={item.world} done={done} stars={starSum} />;
           }
           const { lesson, world, zigIdx } = item;
           const state = getEffectiveState(lesson, world, lessonProgress, isPremium);
@@ -256,6 +266,7 @@ export default function LearnTab() {
               world={world}
               zigIdx={zigIdx}
               state={state}
+              stars={lessonStars[lesson.id] ?? 0}
               onPress={() => handleNodePress(lesson, world, state)}
             />
           );
@@ -342,7 +353,7 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.display, fontWeight: '700',
   },
   worldSub: { color: 'rgba(23,21,15,0.68)', fontSize: 13, fontFamily: Fonts.body },
-  worldMeta: { flexDirection: 'row', gap: 8, marginTop: 10 },
+  worldMeta: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 10 },
   metaChip: {
     backgroundColor: 'rgba(255,255,255,0.6)',
     borderRadius: 999,
@@ -407,6 +418,11 @@ const styles = StyleSheet.create({
   startText: {
     color: '#ffffff', fontSize: 9,
     fontFamily: Fonts.hud,
+    letterSpacing: 1,
+  },
+  nodeStars: {
+    marginTop: 2, fontSize: 11, color: Colors.gold,
+    textAlign: 'center', width: NODE_SIZE + 30, marginLeft: -15,
     letterSpacing: 1,
   },
 });

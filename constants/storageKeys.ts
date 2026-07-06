@@ -8,6 +8,7 @@ export const StorageKeys = {
   gems:           '@thaiapp_gems',
   premium:        '@thaiapp_premium_v2',
   lessonProgress: '@thaiapp_lesson_progress',
+  lessonStars:    '@thaiapp_lesson_stars',
   dailyXp:        '@thaiapp_daily_xp',
   // srsStore
   srsProgress:    '@thaiapp_progress',
