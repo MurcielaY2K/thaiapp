@@ -84,37 +84,20 @@ export default function Root({ children }: PropsWithChildren) {
               (function () {
                 if (!('serviceWorker' in navigator)) return;
                 var OUR_SW = '/thaiapp/service-worker.js';
-                // Self-heal devices stuck on a stale service worker from old
-                // deploys: if the controlling SW is not ours, evict every
-                // registration + cache and reload once so fresh JS loads.
-                var ctrl = navigator.serviceWorker.controller;
-                var foreign = ctrl && ctrl.scriptURL.indexOf(OUR_SW) === -1;
-                if (foreign && !sessionStorage.getItem('sw-healed')) {
-                  sessionStorage.setItem('sw-healed', '1');
-                  var work = [];
-                  work.push(navigator.serviceWorker.getRegistrations().then(function (rs) {
-                    return Promise.all(rs.map(function (r) { return r.unregister(); }));
-                  }));
-                  if (window.caches) {
-                    work.push(caches.keys().then(function (ks) {
-                      return Promise.all(ks.map(function (k) { return caches.delete(k); }));
-                    }));
-                  }
-                  Promise.all(work).catch(function () {}).then(function () {
-                    window.location.reload();
-                  });
-                  return;
-                }
-                // Drop any leftover registrations that are not ours, then
-                // register. updateViaCache 'none' re-fetches the SW script on
-                // every navigation, so new deploys roll out without users
-                // needing a hard refresh.
+                // Silently unregister any leftover service worker that isn't
+                // ours (e.g. an old root-scope one from a previous deploy), then
+                // register the current one. We deliberately do NOT force a
+                // page reload here — the correct worker takes over on the next
+                // natural navigation. (An earlier version reloaded on every
+                // launch, which was jarring on the iOS home-screen app.)
                 navigator.serviceWorker.getRegistrations().then(function (rs) {
                   rs.forEach(function (r) {
                     var u = ((r.active || r.waiting || r.installing) || {}).scriptURL || '';
                     if (u && u.indexOf(OUR_SW) === -1) r.unregister();
                   });
                 }).catch(function () {});
+                // updateViaCache 'none' re-fetches the SW script on every
+                // navigation, so new deploys roll out without a hard refresh.
                 navigator.serviceWorker
                   .register(OUR_SW, { updateViaCache: 'none' })
                   .catch(function () {});
