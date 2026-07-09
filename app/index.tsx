@@ -12,6 +12,7 @@ import DatabaseTab from '../components/tabs/DatabaseTab';
 import LeaderboardTab from '../components/tabs/LeaderboardTab';
 import ProfileTab from '../components/tabs/ProfileTab';
 import RewardToast from '../components/RewardToast';
+import LevelPicker from '../components/LevelPicker';
 import { initProgressSync, restoreProfileFromCloud, pullAndMerge } from '../lib/progressSync';
 
 function consumeStripeSuccess(): boolean {
@@ -27,7 +28,7 @@ function consumeStripeSuccess(): boolean {
 export default function HomeScreen() {
   const [activeTab, setActiveTab] = useState<TabId>('learn');
   const { load: loadSrs, getStats, streak } = useSrsStore();
-  const { load: loadProgress, refreshEntitlement, isLoaded: progressLoaded, xp } = useProgressStore();
+  const { load: loadProgress, refreshEntitlement, isLoaded: progressLoaded, xp, skillLevel, setSkillLevel } = useProgressStore();
   const { load: loadUser, isLoaded: userLoaded, checkRewards, syncScore, newRewards, clearNewRewards, profileId } = useUserStore();
 
   useEffect(() => {
@@ -79,6 +80,13 @@ export default function HomeScreen() {
     // Sync score to Supabase whenever progress changes
     if (profileId) syncScore(rewardStats);
   }, [xp, streak, progressLoaded, userLoaded]);
+
+  // Onboarding gate: the first thing a new user sees is the level picker,
+  // so lessons can be tailored from question one. Wait for load so we don't
+  // flash it at returning users who already chose.
+  if (progressLoaded && skillLevel === null) {
+    return <LevelPicker onPick={setSkillLevel} />;
+  }
 
   return (
     <View style={styles.root}>

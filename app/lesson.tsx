@@ -34,6 +34,21 @@ const TIER_MODES: Record<number, Mode[]> = {
 const TIER_QUESTIONS: Record<number, number> = { 1: 5, 2: 6, 3: 6, 4: 7 };
 const TIER_CP_QUESTIONS: Record<number, number> = { 1: 10, 2: 10, 3: 12, 4: 12 };
 
+// The self-reported skill level overlays the per-world difficulty tier:
+//  beginner     — never reads Thai script. Only meaning (Thai→English) and
+//                 listening, and romanization is ALWAYS shown for pronunciation.
+//  intermediate — the world's own tier modes (romanization revealed on answer).
+//  advanced     — one tier harder everywhere, more script reading.
+type Level = 'beginner' | 'intermediate' | 'advanced' | null;
+
+function effectiveModes(tier: number, level: Level): Mode[] {
+  if (level === 'beginner') {
+    return speechAvailable() ? ['meaning', 'meaning', 'listen'] : ['meaning'];
+  }
+  const t = level === 'advanced' ? Math.min(4, tier + 1) : tier;
+  return TIER_MODES[t].filter(m => m !== 'listen' || speechAvailable());
+}
+
 interface Question {
   word: Word;
   mode: Mode;
@@ -54,7 +69,7 @@ function speechAvailable(): boolean {
   return typeof window !== 'undefined' && !!window.speechSynthesis;
 }
 
-function buildQuestions(lesson: Lesson): Question[] {
+function buildQuestions(lesson: Lesson, level: Level): Question[] {
   const world = WORLDS.find(w => w.id === lesson.worldId);
   const tier = world?.tier ?? 1;
   const words = lesson.vocabIds
@@ -64,15 +79,16 @@ function buildQuestions(lesson: Lesson): Question[] {
   const target = lesson.type === 'checkpoint' ? TIER_CP_QUESTIONS[tier] : TIER_QUESTIONS[tier];
   const count = Math.min(words.length, target);
   const selected = shuffle(words).slice(0, count);
-  const modes = TIER_MODES[tier].filter(m => m !== 'listen' || speechAvailable());
+  const modes = effectiveModes(tier, level);
+  // Beginners get easy, whole-pool distractors; everyone else gets tougher
+  // same-category look-alikes (advanced always, intermediate from tier 2 up).
+  const hardDistractors = level === 'advanced' || (level !== 'beginner' && tier >= 2);
 
   return selected.map((word, i) => {
     const mode = modes[i % modes.length];
     const field: 'en' | 'th' = (mode === 'reverse' || mode === 'reading') ? 'th' : 'en';
 
-    // From tier 2 up, distractors come from the same category — words that
-    // actually resemble the answer — instead of the whole database.
-    let pool = tier >= 2 ? POOL.filter(w => w.category === word.category && w.id !== word.id) : [];
+    let pool = hardDistractors ? POOL.filter(w => w.category === word.category && w.id !== word.id) : [];
     if (pool.length < 3) pool = POOL.filter(w => w.id !== word.id);
     const seen = new Set([word[field]]);
     const distractors: string[] = [];
@@ -109,9 +125,11 @@ export default function LessonScreen() {
   const { lessonId } = useLocalSearchParams<{ lessonId: string }>();
   const lesson = getLessonById(lessonId ?? '');
 
-  const { hearts, loseHeart, earnXP, completeLesson, setLessonStars, isPremium } = useProgressStore();
+  const { hearts, loseHeart, earnXP, completeLesson, setLessonStars, isPremium, skillLevel } = useProgressStore();
+  // Beginners always see the romanization for pronunciation — never Thai-only.
+  const romAlways = skillLevel === 'beginner';
 
-  const [questions, setQuestions] = useState(() => lesson ? buildQuestions(lesson) : []);
+  const [questions, setQuestions] = useState(() => lesson ? buildQuestions(lesson, skillLevel) : []);
   const [qIdx, setQIdx] = useState(0);
   const [selected, setSelected] = useState<string | null>(null);
   const [correct, setCorrect] = useState(0);
@@ -136,7 +154,7 @@ export default function LessonScreen() {
 
   const retry = () => {
     if (!lesson) return;
-    setQuestions(buildQuestions(lesson));
+    setQuestions(buildQuestions(lesson, skillLevel));
     setQIdx(0);
     setSelected(null);
     setCorrect(0);
@@ -264,7 +282,7 @@ export default function LessonScreen() {
               <TouchableOpacity onPress={() => speakThai(q.word.th)} activeOpacity={0.7}>
                 <Text style={styles.thaiWord}>{q.word.th}</Text>
               </TouchableOpacity>
-              {selected && <Text style={styles.romText}>{q.word.rom}</Text>}
+              {(romAlways || selected) && <Text style={styles.romText}>{q.word.rom}</Text>}
               <Text style={styles.speakerHint}>🔊 tap to hear</Text>
             </>
           )}
@@ -281,7 +299,7 @@ export default function LessonScreen() {
               <TouchableOpacity onPress={() => speakThai(q.word.th)} activeOpacity={0.7} style={styles.listenBtn}>
                 <Text style={styles.listenIcon}>🔊</Text>
               </TouchableOpacity>
-              {selected
+              {(romAlways || selected)
                 ? <Text style={styles.thaiWordSmall}>{q.word.th} · {q.word.rom}</Text>
                 : <Text style={styles.speakerHint}>tap to replay</Text>}
             </>

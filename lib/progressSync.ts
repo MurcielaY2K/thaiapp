@@ -21,6 +21,7 @@ export interface ProgressSnapshot {
   gems: number;
   lessonProgress: Record<string, string>;
   lessonStars?: Record<string, number>;
+  skillLevel?: 'beginner' | 'intermediate' | 'advanced' | null;
   srs: Record<string, unknown>;
   writing: Record<string, number>;
   streak: number;
@@ -39,6 +40,7 @@ export function buildSnapshot(): ProgressSnapshot {
     gems: p.gems,
     lessonProgress: p.lessonProgress,
     lessonStars: p.lessonStars,
+    skillLevel: p.skillLevel,
     srs: s.progress,
     writing: s.writing,
     streak: s.streak,
@@ -53,6 +55,7 @@ async function applySnapshot(snap: ProgressSnapshot): Promise<void> {
     AsyncStorage.setItem(StorageKeys.gems, String(snap.gems)),
     AsyncStorage.setItem(StorageKeys.lessonProgress, JSON.stringify(snap.lessonProgress)),
     AsyncStorage.setItem(StorageKeys.lessonStars, JSON.stringify(snap.lessonStars ?? {})),
+    ...(snap.skillLevel ? [AsyncStorage.setItem(StorageKeys.skillLevel, snap.skillLevel)] : []),
     AsyncStorage.setItem(StorageKeys.srsProgress, JSON.stringify(snap.srs)),
     AsyncStorage.setItem(StorageKeys.writing, JSON.stringify(snap.writing)),
     AsyncStorage.setItem(StorageKeys.streak, JSON.stringify({ streak: snap.streak, lastStudyDay: snap.lastStudyDay })),

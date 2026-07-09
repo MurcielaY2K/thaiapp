@@ -104,10 +104,17 @@ function LessonNode({
 
       <Animated.View style={[
         { transform: [{ scale: isAvailable ? pulse : 1 }] },
-        { position: 'absolute', left, top: 8 },
+        { position: 'absolute', left, top: 8, alignItems: 'center' },
       ]}>
+        {/* The whole stack (icon + label + START) is one tap target, so the
+            visible START button actually starts the lesson. */}
         <TouchableOpacity
-          style={[
+          style={{ alignItems: 'center' }}
+          onPress={onPress}
+          activeOpacity={0.8}
+          disabled={isLocked && !isPremLocked}
+        >
+          <View style={[
             styles.node,
             isCheckpoint && styles.nodeCheckpoint,
             {
@@ -118,35 +125,31 @@ function LessonNode({
             Platform.OS === 'web' && (isAvailable || isComplete) ? {
               boxShadow: `0 4px 0 0 ${Colors.borderStrong}`,
             } as any : {},
-          ]}
-          onPress={onPress}
-          activeOpacity={0.8}
-          disabled={isLocked && !isPremLocked}
-        >
-          {isComplete ? (
-            <Text style={styles.nodeCheckMark}>✓</Text>
-          ) : isPremLocked ? (
-            <Text style={styles.nodeIcon}>👑</Text>
-          ) : (
-            <Text style={styles.nodeIcon}>{lesson.icon}</Text>
-          )}
-
-        </TouchableOpacity>
-        <Text style={[
-          styles.nodeLabel,
-          { color: isAvailable || isComplete ? Colors.text : Colors.textMuted },
-          { fontFamily: Fonts.body },
-        ]} numberOfLines={1}>
-          {lesson.title}
-        </Text>
-        {isAvailable && (
-          <View style={styles.startBubble}>
-            <Text style={styles.startText}>START</Text>
+          ]}>
+            {isComplete ? (
+              <Text style={styles.nodeCheckMark}>✓</Text>
+            ) : isPremLocked ? (
+              <Text style={styles.nodeIcon}>👑</Text>
+            ) : (
+              <Text style={styles.nodeIcon}>{lesson.icon}</Text>
+            )}
           </View>
-        )}
-        {isComplete && stars > 0 && (
-          <Text style={styles.nodeStars}>{'★'.repeat(stars)}{'☆'.repeat(3 - stars)}</Text>
-        )}
+          <Text style={[
+            styles.nodeLabel,
+            { color: isAvailable || isComplete ? Colors.text : Colors.textMuted },
+            { fontFamily: Fonts.body },
+          ]} numberOfLines={1}>
+            {lesson.title}
+          </Text>
+          {isAvailable && (
+            <View style={styles.startBubble}>
+              <Text style={styles.startText}>START</Text>
+            </View>
+          )}
+          {isComplete && stars > 0 && (
+            <Text style={styles.nodeStars}>{'★'.repeat(stars)}{'☆'.repeat(3 - stars)}</Text>
+          )}
+        </TouchableOpacity>
       </Animated.View>
     </View>
   );

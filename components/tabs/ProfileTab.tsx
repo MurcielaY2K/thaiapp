@@ -235,6 +235,38 @@ function ProfileEdit({ onDone }: { onDone: () => void }) {
   );
 }
 
+const LEVELS: { key: 'beginner' | 'intermediate' | 'advanced'; emoji: string; label: string }[] = [
+  { key: 'beginner',     emoji: '🌱', label: 'Beginner' },
+  { key: 'intermediate', emoji: '🔥', label: 'Intermediate' },
+  { key: 'advanced',     emoji: '⚡', label: 'Advanced' },
+];
+
+function LevelCard() {
+  const { skillLevel, setSkillLevel } = useProgressStore();
+  return (
+    <View style={styles.levelCard}>
+      <Text style={styles.levelTitle}>🎯 Learning Level</Text>
+      <Text style={styles.levelSub}>Beginners always see pronunciation; harder levels add script reading.</Text>
+      <View style={styles.levelRowBtns}>
+        {LEVELS.map(l => {
+          const active = skillLevel === l.key;
+          return (
+            <TouchableOpacity
+              key={l.key}
+              style={[styles.levelBtn, active && styles.levelBtnActive]}
+              onPress={() => setSkillLevel(l.key)}
+              activeOpacity={0.85}
+            >
+              <Text style={styles.levelBtnEmoji}>{l.emoji}</Text>
+              <Text style={[styles.levelBtnText, active && styles.levelBtnTextActive]}>{l.label}</Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+    </View>
+  );
+}
+
 export default function ProfileTab() {
   const store = useUserStore();
   const { xp, level, hearts, gems, isPremium, badges, dailyXp, dailyGoal } = useProgressStore();
@@ -289,6 +321,8 @@ export default function ProfileTab() {
           <StatCard icon="💎" value={gems} label="Gems" color={Colors.sky} />
           <StatCard icon="📅" value={dailyXp.earned} label={`/${dailyGoal} today`} color={Colors.lavender} />
         </View>
+
+        <LevelCard />
 
         <CloudSyncCard />
 
@@ -506,6 +540,22 @@ const styles = StyleSheet.create({
   },
   offlineNoteText: { color: Colors.textDim, fontSize: 12, fontFamily: Fonts.body, lineHeight: 17 },
   errorText: { color: Colors.wrong, fontSize: 12, fontFamily: Fonts.body, marginBottom: 8, textAlign: 'center' },
+
+  levelCard: {
+    backgroundColor: Colors.card, borderRadius: 14, padding: 16, gap: 8,
+    borderWidth: 1, borderColor: Colors.border, marginBottom: 20,
+  },
+  levelTitle: { color: Colors.text, fontSize: 15, fontFamily: Fonts.display, fontWeight: '700' },
+  levelSub: { color: Colors.textDim, fontSize: 12, fontFamily: Fonts.body, lineHeight: 17 },
+  levelRowBtns: { flexDirection: 'row', gap: 8, marginTop: 4 },
+  levelBtn: {
+    flex: 1, alignItems: 'center', gap: 3, paddingVertical: 10, borderRadius: 10,
+    backgroundColor: Colors.bg, borderWidth: 2, borderColor: Colors.border,
+  },
+  levelBtnActive: { borderColor: Colors.borderStrong, backgroundColor: Colors.realmGrove },
+  levelBtnEmoji: { fontSize: 20 },
+  levelBtnText: { color: Colors.textDim, fontSize: 11, fontFamily: Fonts.hud },
+  levelBtnTextActive: { color: Colors.text },
 
   legalFooter: { alignItems: 'center', gap: 6, paddingBottom: 24 },
   legalLinks: { flexDirection: 'row', alignItems: 'center', gap: 10 },

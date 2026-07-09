@@ -9,6 +9,7 @@ export const StorageKeys = {
   premium:        '@thaiapp_premium_v2',
   lessonProgress: '@thaiapp_lesson_progress',
   lessonStars:    '@thaiapp_lesson_stars',
+  skillLevel:     '@thaiapp_skill_level',
   dailyXp:        '@thaiapp_daily_xp',
   // srsStore
   srsProgress:    '@thaiapp_progress',
