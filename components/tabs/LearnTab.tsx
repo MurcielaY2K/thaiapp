@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
   Dimensions, Animated, Platform,
@@ -69,10 +69,11 @@ function getEffectiveState(
 }
 
 function LessonNode({
-  lesson, world, zigIdx, state, stars, onPress,
+  lesson, world, zigIdx, state, stars, onPress, onMeasureY,
 }: {
   lesson: Lesson; world: World; zigIdx: number;
   state: LessonState; stars: number; onPress: () => void;
+  onMeasureY?: (y: number) => void;
 }) {
   const pulse = useRef(new Animated.Value(1)).current;
 
@@ -99,7 +100,10 @@ function LessonNode({
   const borderColor = isComplete || isAvailable ? Colors.borderStrong : Colors.border;
 
   return (
-    <View style={[styles.nodeRow, { height: NODE_SIZE + (isCheckpoint ? 72 : 58) }]}>
+    <View
+      style={[styles.nodeRow, { height: NODE_SIZE + (isCheckpoint ? 72 : 58) }]}
+      onLayout={onMeasureY ? e => onMeasureY(e.nativeEvent.layout.y) : undefined}
+    >
       <View style={[styles.connLine, { borderColor: Colors.borderGlow }]} />
 
       <Animated.View style={[
@@ -202,6 +206,9 @@ function WorldHeader({ world, done, stars }: { world: World; done: number; stars
 export default function LearnTab() {
   const { lessonProgress, lessonStars, isPremium, load, isLoaded, seedProgress, xp, level, dailyXp, dailyGoal } = useProgressStore();
   const [premiumVisible, setPremiumVisible] = useState(false);
+  const scrollRef = useRef<ScrollView>(null);
+  const didAutoScroll = useRef(false);
+  const nodeY = useRef<Record<string, number>>({});
 
   useEffect(() => {
     if (!isLoaded) load();
@@ -210,6 +217,49 @@ export default function LearnTab() {
   useEffect(() => {
     if (isLoaded) seedProgress(ALL_LESSONS[0].id);
   }, [isLoaded]);
+
+  // The "current" lesson is the next one to do: the first still-available
+  // node. If nothing is available but some lessons are done, target the last
+  // completed one (they've finished the path). For a brand-new user with no
+  // progress yet, target nothing — the first lesson is already at the top.
+  const currentLessonId = useMemo(() => {
+    if (!isLoaded) return null;
+    let lastComplete: string | null = null;
+    for (const item of LIST_ITEMS) {
+      if (item.type !== 'lesson') continue;
+      const st = getEffectiveState(item.lesson, item.world, lessonProgress, isPremium);
+      if (st === 'available') return item.lesson.id;
+      if (st === 'complete') lastComplete = item.lesson.id;
+    }
+    return lastComplete;
+  }, [isLoaded, lessonProgress, isPremium]);
+
+  // Record every node's scroll offset as it lays out (positions stream in via
+  // onLayout, sometimes before the progress data has loaded).
+  const measureNode = (id: string, y: number) => { nodeY.current[id] = y; };
+
+  // One-time jump to the current lesson so returning users don't have to
+  // scroll past everything they've finished. Once we know the target lesson,
+  // poll a few animation frames for its measured position (layout can lag the
+  // effect), then scroll there and stop.
+  useEffect(() => {
+    if (didAutoScroll.current || !isLoaded || !currentLessonId) return;
+    let raf = 0;
+    let tries = 0;
+    const attempt = () => {
+      if (didAutoScroll.current) return;
+      const y = nodeY.current[currentLessonId];
+      if (y == null) {
+        if (tries++ < 40) { raf = requestAnimationFrame(attempt); }
+        return;
+      }
+      didAutoScroll.current = true;
+      const target = Math.max(0, y - 140); // leave a little context above
+      if (target >= 40) scrollRef.current?.scrollTo({ y: target, animated: false });
+    };
+    raf = requestAnimationFrame(attempt);
+    return () => cancelAnimationFrame(raf);
+  }, [isLoaded, currentLessonId]);
 
   const handleNodePress = (lesson: Lesson, world: World, state: LessonState) => {
     if (state === 'premium-locked' || (world.isPremium && !isPremium && state !== 'complete' && state !== 'available')) {
@@ -249,6 +299,7 @@ export default function LearnTab() {
       </View>
 
       <ScrollView
+        ref={scrollRef}
         style={styles.scroll}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
@@ -271,6 +322,7 @@ export default function LearnTab() {
               state={state}
               stars={lessonStars[lesson.id] ?? 0}
               onPress={() => handleNodePress(lesson, world, state)}
+              onMeasureY={y => measureNode(lesson.id, y)}
             />
           );
         })}
