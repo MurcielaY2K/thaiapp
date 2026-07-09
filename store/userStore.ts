@@ -117,8 +117,25 @@ export const useUserStore = create<UserStore>((set, get) => ({
   },
 
   setupProfile: async ({ username, displayName, avatarEmoji, countryFlag, bio }) => {
-    // Validate username uniqueness on Supabase if available
-    if (SUPABASE_CONFIGURED && supabase) {
+    // Create a local-only profile. Used when Supabase isn't configured AND as
+    // the graceful fallback when the backend is unreachable / anonymous auth is
+    // disabled / the insert is blocked — so a new user is never stuck on the
+    // setup screen. Cloud sync + leaderboard start working once the backend is
+    // set up; the profile can be linked to an account later.
+    const saveLocal = async (): Promise<null> => {
+      const update: Partial<UserProfile> = {
+        username: username.trim(), displayName: displayName.trim() || username.trim(),
+        avatarEmoji, countryFlag, bio, isSetup: true,
+      };
+      set({ ...update, isOnline: false } as any);
+      await AsyncStorage.setItem(PROFILE_KEY, JSON.stringify({ ...get(), ...update }));
+      return null;
+    };
+
+    if (!SUPABASE_CONFIGURED || !supabase) return saveLocal();
+
+    try {
+      // Username uniqueness — a real conflict is a fixable error, so surface it.
       const { data: existing } = await supabase
         .from('profiles')
         .select('id')
@@ -130,7 +147,7 @@ export const useUserStore = create<UserStore>((set, get) => ({
       let authId = get().authId;
       if (!authId) {
         const { data, error } = await supabase.auth.signInAnonymously();
-        if (error || !data.user) return 'Could not connect to server';
+        if (error || !data.user) throw error ?? new Error('no anonymous session');
         authId = data.user.id;
       }
 
@@ -151,7 +168,7 @@ export const useUserStore = create<UserStore>((set, get) => ({
         // and would fail on the revoked column.
         .select('id, username, display_name')
         .single();
-      if (profileErr) return profileErr.message;
+      if (profileErr) throw profileErr;
 
       const update: Partial<UserProfile> = {
         profileId: profile.id, authId,
@@ -161,16 +178,11 @@ export const useUserStore = create<UserStore>((set, get) => ({
       set({ ...update, isOnline: true } as any);
       await AsyncStorage.setItem(PROFILE_KEY, JSON.stringify({ ...get(), ...update }));
       return null;
+    } catch {
+      // Backend not reachable / not fully set up — fall back to a local
+      // profile so the app is usable now instead of blocking the user.
+      return saveLocal();
     }
-
-    // Offline mode
-    const update: Partial<UserProfile> = {
-      username: username.trim(), displayName: displayName.trim() || username.trim(),
-      avatarEmoji, countryFlag, bio, isSetup: true,
-    };
-    set(update);
-    await AsyncStorage.setItem(PROFILE_KEY, JSON.stringify({ ...get(), ...update }));
-    return null;
   },
 
   updateProfile: async (data) => {
