@@ -35,6 +35,9 @@ create or replace function public.clamp_score()
 returns trigger
 language plpgsql
 security definer
+-- Pin the search path: a SECURITY DEFINER function must not resolve names
+-- through a caller-controlled search_path.
+set search_path = public
 as $$
 begin
   new.xp                := least(greatest(coalesce(new.xp, 0), 0), 1000000);

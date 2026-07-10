@@ -108,11 +108,16 @@ export const useProgressStore = create<ProgressStore>((set, get) => ({
         AsyncStorage.getItem(SKILL_KEY),
       ]);
       const lessonStars: Record<string, number> = starsJ ? JSON.parse(starsJ) : {};
-      const skillLevel = (skillJ as SkillLevel | null) ?? null;
-      const xp = xpJ ? Number(xpJ) : 0;
+      // Stored values can be stale or hand-edited; coerce instead of trusting.
+      const skillLevel: SkillLevel | null =
+        skillJ === 'beginner' || skillJ === 'intermediate' || skillJ === 'advanced' ? skillJ : null;
+      const xp = Number.isFinite(Number(xpJ)) ? Math.max(0, Number(xpJ)) : 0;
       const rawHearts = hJ ? JSON.parse(hJ) : { hearts: MAX_HEARTS, lastRefill: Date.now() };
-      const { hearts, lastRefill } = refillHearts(rawHearts.hearts, rawHearts.lastRefill);
-      const gems = gJ ? Number(gJ) : 30;
+      const storedHearts = Number.isFinite(rawHearts?.hearts)
+        ? Math.min(Math.max(rawHearts.hearts, 0), MAX_HEARTS) : MAX_HEARTS;
+      const storedRefill = Number.isFinite(rawHearts?.lastRefill) ? rawHearts.lastRefill : Date.now();
+      const { hearts, lastRefill } = refillHearts(storedHearts, storedRefill);
+      const gems = gJ !== null && Number.isFinite(Number(gJ)) ? Math.max(0, Number(gJ)) : 30;
       const isPremium = PREMIUM_ON_HOLD || premJ === 'true';
       const lessonProgress: Record<string, LessonState> = progJ ? JSON.parse(progJ) : {};
       // While the Premium hold is active, open premium-locked lessons in

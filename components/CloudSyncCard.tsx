@@ -51,10 +51,18 @@ export default function CloudSyncCard() {
     setBusy(true); setMsg('');
     const { error } = await supabase!.auth.signInWithOtp({
       email: email.trim(),
-      options: { emailRedirectTo: redirectUrl() },
+      // Restore flow only: the account must already exist (linked on the old
+      // device). Without this, any typed address silently creates a fresh
+      // empty account — confusing for typos, and an account-spam vector.
+      options: { emailRedirectTo: redirectUrl(), shouldCreateUser: false },
     });
     setBusy(false);
-    setMsg(error ? error.message : '📬 Magic link sent — open it on this device to restore your progress.');
+    const friendly = error
+      ? (/signup|not allowed|not found/i.test(error.message)
+          ? 'No account found for that email. Link it from the app on your old device first.'
+          : error.message)
+      : '📬 Magic link sent — open it on this device to restore your progress.';
+    setMsg(friendly);
   };
 
   const syncNow = async () => {

@@ -27,15 +27,11 @@ function consumeStripeSuccess(): boolean {
 
 export default function HomeScreen() {
   const [activeTab, setActiveTab] = useState<TabId>('learn');
-  const { load: loadSrs, getStats, streak } = useSrsStore();
-  const { load: loadProgress, refreshEntitlement, isLoaded: progressLoaded, xp, skillLevel, setSkillLevel } = useProgressStore();
-  const { load: loadUser, isLoaded: userLoaded, checkRewards, syncScore, newRewards, clearNewRewards, profileId } = useUserStore();
-
-  useEffect(() => {
-    loadSrs();
-    loadProgress();
-    loadUser();
-  }, []);
+  // Stores are hydrated once by the root layout (app/_layout.tsx) before any
+  // route renders; this screen only consumes them.
+  const { getStats, streak } = useSrsStore();
+  const { refreshEntitlement, isLoaded: progressLoaded, xp, skillLevel, setSkillLevel } = useProgressStore();
+  const { isLoaded: userLoaded, checkRewards, syncScore, newRewards, clearNewRewards, profileId } = useUserStore();
 
   // Cloud sync: once local state is hydrated and we have a session, restore
   // the profile (new device after magic-link sign-in), reconcile progress

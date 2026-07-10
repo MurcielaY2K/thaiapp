@@ -12,6 +12,11 @@ export default function Root({ children }: PropsWithChildren) {
           content="width=device-width, initial-scale=1, shrink-to-fit=no, viewport-fit=cover"
         />
         <meta name="theme-color" content="#f0eee7" />
+        {/* GitHub Pages can't send security headers, so ship what meta-CSP
+            supports: no plugins, no <base> hijacking, no cross-site referrers.
+            (script-src is deliberately omitted — Expo emits inline scripts.) */}
+        <meta httpEquiv="Content-Security-Policy" content="object-src 'none'; base-uri 'none'" />
+        <meta name="referrer" content="no-referrer" />
         <title>Sanuk Thai — Learn Thai</title>
         <meta name="description" content="Sanuk Thai: learn Thai with 3,100+ words, reading and writing practice, quizzes and a global leaderboard. Free to play, right in your browser." />
         {/* Open Graph / social sharing */}

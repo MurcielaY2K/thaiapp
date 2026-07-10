@@ -1,122 +1,111 @@
-# ภาษาไทย Thai App — Commercial Launch Audit
-*Audited: July 2026 · Scope: full codebase, backend (Supabase), payments (Stripe), deploy pipeline*
+# Sanuk Thai — Security & Quality Audit
 
-**Verdict: NOT ready for commercial launch yet.** The learning product itself is solid
-(2,013-word database, SRS engine, writing trainer, reader, leaderboard — all working,
-typechecked, deployed). What blocks a paid launch is the *commercial layer*: payment
-entitlement, legal compliance, and abuse resistance. All fixable in ~2–3 weeks.
+*Re-audited: 2026-07-10 · Scope: full codebase, Supabase backend (SQL + Edge Function), payments, web deploy.*
+*Previous audit (launch readiness) is superseded; its critical items C1–C3, H1–H4 and M1/M2/M4 have all been implemented since.*
 
-Current status: **Premium is ON HOLD** (`constants/features.ts → PREMIUM_ON_HOLD = true`).
-Everyone gets full access while testing. Flip to `false` to restore the paywall.
+**Verdict:** codebase is in good shape. No secrets leaked, RLS is owner-scoped with
+server-side clamps, Premium is server-verified via Stripe webhook, and the client
+renders all user content through React Native `Text` (no HTML injection surface).
+The re-audit found **one high-severity client-side hole and a set of medium/low
+hardening gaps — all fixed in this pass** (see "Fixed in this audit").
 
----
-
-## 🔴 CRITICAL — must fix before charging money
-
-### C1. Payment entitlement is client-side and trivially bypassable
-- Visiting `https://…/thaiapp/?payment_success=1` unlocks Premium — no verification.
-- Premium is a localStorage flag (`@thaiapp_premium`); anyone can set it in DevTools.
-- It's a **monthly subscription**, but the app can never re-lock: cancellations,
-  failed renewals and refunds have no effect.
-- Purchase is device-local: clear browser data or switch devices → paid customer
-  loses access (refund/support nightmare). No "restore purchase" possible.
-- Stripe has no idea *which user* paid — no customer ↔ account link.
-
-**Fix (the right way):** entitlements in Supabase.
-1. Require a signed-in Supabase user before purchase (anonymous → email upgrade is fine).
-2. Create the Stripe Checkout session server-side (Supabase Edge Function) with
-   `client_reference_id = auth user id`.
-3. Stripe **webhook** (`checkout.session.completed`, `customer.subscription.deleted`,
-   `invoice.payment_failed`) → Edge Function → upsert an `entitlements` table.
-4. App reads `isPremium` from the entitlements row (RLS: owner-read), cached locally.
-   Alternative: RevenueCat (~free at this scale) if going to app stores — it handles all of this.
-
-### C2. No legal / compliance layer
-- No Privacy Policy, Terms of Service, or refund/cancellation policy. These are
-  **required by Stripe**, by GDPR (EU users), and by Thailand's PDPA. The app collects
-  personal data (usernames, bios, country flags) into Supabase.
-- Subscriptions legally require a discoverable cancel path — none exists in-app.
-
-**Fix:** static Privacy/Terms/Refund pages (can live on the same GitHub Pages site),
-linked from the Premium modal and profile; a "Manage subscription" link to the Stripe
-customer portal; a data-deletion contact/flow (PDPA/GDPR right to erasure).
-
-### C3. Leaderboard/backend integrity — cheating and abuse are trivial
-- `scores` RLS lets the owner write **any values**: `xp: 999999999` from the browser
-  console puts anyone at #1 on a public leaderboard of a paid product.
-- Anonymous sign-in + no rate limiting → unlimited fake profiles.
-- Username/display/bio limits exist **only client-side** (`maxLength`); the DB accepts
-  any length or content via direct API calls. No profanity/impersonation control.
-
-**Fix:** DB constraints (`char_length` checks), a validation trigger clamping
-score deltas to plausible values, unique-username case handling, and a simple
-blocklist filter. Accept that client-reported XP is soft; clamp and monitor.
+Current commercial status: `PREMIUM_ON_HOLD = true` (everyone gets Premium free
+while testing). Flip `constants/features.ts` to launch the paywall.
 
 ---
 
-## 🟠 HIGH
+## Fixed in this audit (2026-07-10)
 
-- **H1. `profiles.auth_id` is publicly readable** (the `select using (true)` policy
-  exposes every column). Leaks auth UUIDs. Fix: public read via a view without
-  `auth_id` (like `leaderboard`), tighten the table policy to owner-only.
-- **H2. No cloud sync of learning progress.** XP, streaks, SRS state are device-local.
-  A paying customer who reinstalls loses everything. Fix: sync progress JSON to a
-  `user_state` table (owner-only RLS) — the auth plumbing already exists.
-- **H3. Zero observability.** No error tracking, no analytics. You cannot see crashes,
-  funnels, or conversion. Fix: Sentry (errors) + PostHog or Plausible (product analytics).
-- **H4. Dependency health.** Expo SDK 51 (current is 54); `npm audit`: 39 vulns
-  (22 high — mostly dev-server tooling like `ws`/metro, not the shipped static bundle,
-  but upgrade before store submission). Anonymous-auth abuse could also inflate
-  Supabase usage/cost — set project usage alerts.
+### 🔴 A1. Deep-linked routes bypassed progression/paywall and could wipe saved progress — FIXED
+Routed screens (`/lesson`, `/session`, `/write`, `/read`) never hydrated the
+zustand stores. Opening a crafted URL like `…/thaiapp/lesson?lessonId=w12f-cp`:
+1. played **any** lesson directly — skipping progression locks and (when the
+   paywall is live) `premium-locked` gating, and
+2. worse, rendered against **empty** stores, so the first write
+   (`completeLesson`, `recordAnswer`, `markWritten`) persisted the default
+   state map and **wiped the user's saved progress**.
 
-## 🟡 MEDIUM
+Fix: `app/_layout.tsx` now hydrates all stores before any route renders, and
+`app/lesson.tsx` refuses to start a lesson whose stored state isn't
+`available`/`complete` (shows a 🔒 screen instead). Verified by browser test:
+locked deep link blocks + progress intact; available deep link still plays.
 
-- **M1. Missing brand assets.** `app.json` points at `assets/images/icon.png`,
-  `adaptive-icon.png`, `favicon.png` — none exist. No OG/social meta tags either;
-  shared links show nothing. Bad for a commercial product.
-- **M2. Service worker doesn't actually cache.** It's network-first with a cache
-  fallback, but nothing is ever `cache.put()` — offline mode is an illusion, and the
-  SW has historically forced hard refreshes. Fix: precache the app shell with a
-  versioned cache + `skipWaiting` update flow, or remove the SW until done properly.
-- **M3. Content/paywall mismatch.** 35 lessons across 5 worlds teach only a few hundred
-  of the 2,013 words; the rest live in the Database/Practice tabs. ฿199/month is steep
-  for the current guided-lesson depth (see improvements).
-- **M4. No tests or CI.** Nothing runs `tsc`, the vocabulary duplicate checks, or the
-  build on push. One bad commit can silently break the deployed site. Fix: GitHub
-  Actions running the validation suite + build (and ideally auto-deploying gh-pages).
-- **M5. TTS quality is device-dependent.** Web Speech Thai voices vary wildly; on
-  devices without a Thai voice, audio silently fails — a core feature for a language app.
+### 🟠 A2. Cloud snapshot applied without validation — FIXED
+`pullAndMerge()` wrote the remote `progress_sync` JSON straight into
+AsyncStorage. A stale/truncated/hand-edited snapshot could poison local state
+(NaN XP, bogus lesson states, corrupt SRS scheduler dates). Fix:
+`sanitizeSnapshot()` in `lib/progressSync.ts` — type/range-coerces every field
+(XP/gems/streak clamped, lesson states whitelisted, SRS entries numerically
+validated, rewards list capped) before anything is persisted.
 
-## 🟢 LOW
+### 🟠 A3. Magic-link restore created accounts for any typed email — FIXED
+`signInWithOtp` defaulted to `shouldCreateUser: true`: a typo'd email silently
+created a fresh empty account (confusing "lost my progress" support cases, and
+an account-spam vector). Fix: `shouldCreateUser: false` in the restore flow +
+a friendly "No account found" message.
 
-- Hearts refill trusts the device clock (client-side cheat only).
-- Manual deploy procedure (documented, but automatable via Actions).
-- README/DEVELOPER content counts drift as the database grows.
+### 🟡 A4. Local storage parsed without guards — FIXED
+`progressStore.load()` trusted stored values (`Number(xpJ)` NaN, unvalidated
+`skillLevel`, unchecked hearts object shape). All coerced/whitelisted now.
+
+### 🟡 A5. Username-taken race silently masked — FIXED
+If two users raced for the same username, the unique-constraint violation was
+swallowed by the offline fallback: the loser got a *local* profile whose
+cloud name belongs to someone else. Postgres error `23505` now surfaces as
+"Username already taken".
+
+### 🟡 A6. SECURITY DEFINER function without pinned search_path — FIXED
+`public.clamp_score()` (and the size-guard trigger) now `set search_path =
+public`, per Supabase linter guidance. **Action required: re-run
+`supabase/hardening.sql` and `supabase/progress_sync.sql` in the SQL editor.**
+
+### 🟡 A7. No CSP / referrer policy — FIXED (partial by platform)
+GitHub Pages can't send security headers. Added what meta-CSP supports:
+`object-src 'none'; base-uri 'none'` (blocks plugin/`<base>` injection) and
+`referrer: no-referrer`. A full `script-src` CSP isn't feasible: Expo's static
+export emits inline scripts. Revisit if the app moves to a host with headers.
 
 ---
 
-## What's already GOOD ✅
+## Verified clean (no action)
 
-- No secrets leaked (anon key is public by design; no service keys anywhere).
-- RLS is enabled with owner-scoped writes — the skeleton is right.
-- Clean source tree, documented deploy, reproducible builds, tsc-clean.
-- Data quality: 2,013 words, zero duplicate id/th/en, validated every batch.
-- Real product differentiators: writing trainer with accuracy scanner, glossed
-  reader with word-by-word TTS, Thai-specific content (Muay Thai, ขิม, ผัดซีอิ๊ว…).
+- **Secrets** — tree + git history scanned: no service-role keys, Stripe
+  secrets, or private keys. The committed Supabase anon key is public by design
+  (RLS is the security boundary).
+- **RLS** — profiles/scores/progress_sync/entitlements all owner-scoped writes;
+  `auth_id` column revoked from client SELECT; entitlements have **no** client
+  write policy (webhook/service-role only). Score clamps kill the
+  console-command leaderboard attack.
+- **Stripe webhook** — signature-verified (`constructEventAsync`), pinned API
+  version, entitlement keyed to `client_reference_id` (auth uuid), handles
+  update/delete/payment-failure. Client never self-grants: `refreshEntitlement`
+  reads the entitlements row and ignores the legacy localStorage flag.
+- **XSS** — no `dangerouslySetInnerHTML`/`eval`/`innerHTML` outside the static
+  HTML shell; all user-generated content (usernames, bios, leaderboard,
+  avatars, flags) renders through RN `Text`, which escapes. Payment link opened
+  with `noopener,noreferrer`.
+- **Service worker** — scoped to `/thaiapp/`, network-first with same-origin
+  `res.ok` cache fallback, self-heals foreign workers without forced reloads.
+- **Dependencies** — `npm audit`: 39 findings, **all in the dev/build
+  toolchain** (metro/`ws` etc.), none shipped in the static bundle. Runtime
+  deps (react 18.2, supabase-js 2.108, zustand 4.5, sentry 10) are current.
 
-## Prioritized improvement backlog
+## Remaining (accepted risks / backlog)
 
-| # | Improvement | Impact | Effort |
-|---|---|---|---|
-| 1 | Stripe webhook → Supabase entitlements (C1) | Unblocks revenue | 2–4 days |
-| 2 | Legal pages + cancel/manage-subscription links (C2) | Unblocks launch | 1 day |
-| 3 | DB constraints + score clamping + username filter (C3) | Trust | 1–2 days |
-| 4 | Icons, favicon, OG tags, custom domain | Credibility | 1 day |
-| 5 | Sentry + PostHog | Visibility | ½ day |
-| 6 | CI (tsc + vocab validation + build + deploy) | Safety | ½ day |
-| 7 | Cloud progress sync (H2) | Retention/paid UX | 2–3 days |
-| 8 | **Auto-generate lessons from the 2,013-word database** (every category → a world/unit; the content is already structured for it) | Turns the DB into 50+ sellable lessons | 2–3 days |
-| 9 | Fix or remove service worker; real PWA manifest | UX | 1 day |
-| 10 | Bundled audio for top 500 words (or paid TTS for Premium) | Quality | 2–4 days |
-| 11 | Expo SDK upgrade → EAS builds → App Store / Play Store | Distribution | 1–2 weeks |
-| 12 | Referral rewards (gems) + share cards | Growth | 2 days |
+| # | Item | Risk | Note |
+|---|------|------|------|
+| R1 | Client-reported XP is soft-trust | Low | Server clamps (≤2000/sync); acceptable for a casual leaderboard. |
+| R2 | Hearts refill trusts device clock | Cosmetic | Self-cheat only. |
+| R3 | Expo SDK 51 (current 54) | Low now | Upgrade before app-store submission; clears dev-chain `npm audit` noise too. |
+| R4 | No profanity filter on usernames/bios | Low | Add a blocklist before scale; content length is already DB-constrained. |
+| R5 | SW cache never evicts old hashed bundles | Cosmetic | Bounded by browser storage eviction. |
+| R6 | Anonymous sign-in abuse could inflate Supabase usage | Low | Set project usage alerts in dashboard. |
+
+## Operator checklist (dashboard actions, not code)
+
+1. Run in Supabase SQL editor (idempotent): `schema.sql`, `hardening.sql`
+   *(updated in this audit)*, `progress_sync.sql` *(updated)*, `entitlements.sql`.
+2. Enable **Authentication → Providers → Anonymous** and **Email** (magic link).
+3. Set Site URL / Redirect URL to `https://murcielay2k.github.io/thaiapp/`.
+4. Deploy the Stripe webhook per `docs/PAYMENTS_SETUP.md`.
+5. Before charging money: set `PREMIUM_ON_HOLD = false`.

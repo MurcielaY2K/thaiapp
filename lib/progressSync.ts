@@ -49,6 +49,82 @@ export function buildSnapshot(): ProgressSnapshot {
   };
 }
 
+// The remote snapshot is data, not code — but it can be stale (older app
+// version), truncated, or hand-edited via the API by the account owner.
+// Coerce every field to a sane shape/range before it touches storage, so a
+// bad snapshot can never poison local state (NaN xp, bogus lesson states…).
+const LESSON_STATES = new Set(['available', 'locked', 'complete', 'premium-locked']);
+const SKILL_LEVELS = new Set(['beginner', 'intermediate', 'advanced']);
+
+function toCount(v: unknown, max: number, fallback = 0): number {
+  const n = typeof v === 'number' && Number.isFinite(v) ? Math.floor(v) : fallback;
+  return Math.min(Math.max(n, 0), max);
+}
+
+export function sanitizeSnapshot(raw: unknown): ProgressSnapshot | null {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null;
+  const r = raw as Record<string, unknown>;
+
+  const lessonProgress: Record<string, string> = {};
+  if (r.lessonProgress && typeof r.lessonProgress === 'object' && !Array.isArray(r.lessonProgress)) {
+    for (const [k, v] of Object.entries(r.lessonProgress as Record<string, unknown>)) {
+      if (typeof v === 'string' && LESSON_STATES.has(v)) lessonProgress[k.slice(0, 40)] = v;
+    }
+  }
+
+  const lessonStars: Record<string, number> = {};
+  if (r.lessonStars && typeof r.lessonStars === 'object' && !Array.isArray(r.lessonStars)) {
+    for (const [k, v] of Object.entries(r.lessonStars as Record<string, unknown>)) {
+      const stars = toCount(v, 3);
+      if (stars > 0) lessonStars[k.slice(0, 40)] = stars;
+    }
+  }
+
+  // SRS entries must be numerically sound or the scheduler produces NaN dates.
+  const srs: Record<string, unknown> = {};
+  if (r.srs && typeof r.srs === 'object' && !Array.isArray(r.srs)) {
+    for (const [k, v] of Object.entries(r.srs as Record<string, unknown>)) {
+      if (!v || typeof v !== 'object') continue;
+      const e = v as Record<string, unknown>;
+      srs[k.slice(0, 40)] = {
+        interval: toCount(e.interval, 3650),
+        dueDate:  toCount(e.dueDate, 8.64e15),
+        ease:     typeof e.ease === 'number' && Number.isFinite(e.ease)
+                    ? Math.min(Math.max(e.ease, 1.3), 2.5) : 2.5,
+        reviews:  toCount(e.reviews, 100000),
+      };
+    }
+  }
+
+  const writing: Record<string, number> = {};
+  if (r.writing && typeof r.writing === 'object' && !Array.isArray(r.writing)) {
+    for (const [k, v] of Object.entries(r.writing as Record<string, unknown>)) {
+      const n = toCount(v, 100000);
+      if (n > 0) writing[k.slice(0, 40)] = n;
+    }
+  }
+
+  const unlockedRewards = Array.isArray(r.unlockedRewards)
+    ? r.unlockedRewards.filter((x): x is string => typeof x === 'string').slice(0, 500)
+    : [];
+
+  return {
+    v: 1,
+    savedAt: toCount(r.savedAt, 8.64e15),
+    xp:   toCount(r.xp, 100_000_000),
+    gems: toCount(r.gems, 100_000_000),
+    lessonProgress,
+    lessonStars,
+    skillLevel: typeof r.skillLevel === 'string' && SKILL_LEVELS.has(r.skillLevel)
+      ? (r.skillLevel as ProgressSnapshot['skillLevel']) : null,
+    srs,
+    writing,
+    streak: toCount(r.streak, 36500),
+    lastStudyDay: typeof r.lastStudyDay === 'string' ? r.lastStudyDay.slice(0, 10) : '',
+    unlockedRewards,
+  };
+}
+
 async function applySnapshot(snap: ProgressSnapshot): Promise<void> {
   await Promise.all([
     AsyncStorage.setItem(StorageKeys.xp, String(snap.xp)),
@@ -115,7 +191,7 @@ export async function pullAndMerge(): Promise<'remote' | 'local' | 'none'> {
   if (error) return 'none';
 
   const local = buildSnapshot();
-  const remote = (data?.data ?? null) as ProgressSnapshot | null;
+  const remote = sanitizeSnapshot(data?.data ?? null);
 
   if (!remote) {
     if (local.xp > 0) await pushProgress();

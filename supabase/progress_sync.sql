@@ -44,6 +44,7 @@ create policy "owner delete" on public.progress_sync
 create or replace function public.progress_sync_size_guard()
 returns trigger
 language plpgsql
+set search_path = public
 as $$
 begin
   if pg_column_size(new.data) > 300 * 1024 then

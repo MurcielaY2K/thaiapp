@@ -125,7 +125,12 @@ export default function LessonScreen() {
   const { lessonId } = useLocalSearchParams<{ lessonId: string }>();
   const lesson = getLessonById(lessonId ?? '');
 
-  const { hearts, loseHeart, earnXP, completeLesson, setLessonStars, isPremium, skillLevel } = useProgressStore();
+  const { hearts, loseHeart, earnXP, completeLesson, setLessonStars, isPremium, skillLevel, lessonProgress } = useProgressStore();
+  // Deep-link gate: a lesson is playable only when normal progression has
+  // marked it available (or it's a completed replay). Without this, a crafted
+  // /lesson?lessonId=… URL skips both progression and the Premium paywall.
+  const storedState = lesson ? lessonProgress[lesson.id] : undefined;
+  const isUnlocked = storedState === 'available' || storedState === 'complete';
   // Beginners always see the romanization for pronunciation — never Thai-only.
   const romAlways = skillLevel === 'beginner';
 
@@ -217,12 +222,12 @@ export default function LessonScreen() {
     setPhase('pass');
   };
 
-  if (!lesson) {
+  if (!lesson || !isUnlocked) {
     return (
       <SafeAreaView style={styles.safe}>
         <View style={styles.center}>
-          <Text style={styles.errorText}>Lesson not found</Text>
-          <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
+          <Text style={styles.errorText}>{!lesson ? 'Lesson not found' : '🔒 Lesson locked — complete the path to get here'}</Text>
+          <TouchableOpacity style={styles.backBtn} onPress={() => (router.canGoBack() ? router.back() : router.replace('/'))}>
             <Text style={styles.backBtnText}>← Back</Text>
           </TouchableOpacity>
         </View>

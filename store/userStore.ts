@@ -168,6 +168,12 @@ export const useUserStore = create<UserStore>((set, get) => ({
         // and would fail on the revoked column.
         .select('id, username, display_name')
         .single();
+      // Unique-constraint race: someone claimed the name between our check
+      // and the insert. That's a real, fixable error — don't mask it with the
+      // local fallback or the cloud name would silently belong to someone else.
+      if ((profileErr as { code?: string } | null)?.code === '23505') {
+        return 'Username already taken';
+      }
       if (profileErr) throw profileErr;
 
       const update: Partial<UserProfile> = {
