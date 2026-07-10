@@ -12,20 +12,20 @@ export default function Root({ children }: PropsWithChildren) {
           content="width=device-width, initial-scale=1, shrink-to-fit=no, viewport-fit=cover"
         />
         <meta name="theme-color" content="#f0eee7" />
-        <title>ภาษาไทย — Learn Thai</title>
-        <meta name="description" content="Learn Thai with 2,600+ words, reading and writing practice, quizzes and a global leaderboard. Free to play, right in your browser." />
+        <title>Sanuk Thai — Learn Thai</title>
+        <meta name="description" content="Sanuk Thai: learn Thai with 3,100+ words, reading and writing practice, quizzes and a global leaderboard. Free to play, right in your browser." />
         {/* Open Graph / social sharing */}
         <meta property="og:type" content="website" />
-        <meta property="og:site_name" content="ภาษาไทย — Learn Thai" />
-        <meta property="og:title" content="ภาษาไทย — Learn Thai" />
-        <meta property="og:description" content="Learn Thai with 2,600+ words, reading and writing practice, quizzes and a global leaderboard. Free to play, right in your browser." />
+        <meta property="og:site_name" content="Sanuk Thai" />
+        <meta property="og:title" content="Sanuk Thai — Learn Thai" />
+        <meta property="og:description" content="Sanuk Thai: learn Thai with 3,100+ words, reading and writing practice, quizzes and a global leaderboard. Free to play, right in your browser." />
         <meta property="og:url" content="https://murcielay2k.github.io/thaiapp/" />
         <meta property="og:image" content="https://murcielay2k.github.io/thaiapp/og.png" />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="ภาษาไทย — Learn Thai" />
-        <meta name="twitter:description" content="Learn Thai with 2,600+ words, reading and writing practice, quizzes and a global leaderboard." />
+        <meta name="twitter:title" content="Sanuk Thai — Learn Thai" />
+        <meta name="twitter:description" content="Sanuk Thai: learn Thai with 3,100+ words, reading and writing practice, quizzes and a global leaderboard." />
         <meta name="twitter:image" content="https://murcielay2k.github.io/thaiapp/og.png" />
         <link rel="apple-touch-icon" href="/thaiapp/apple-touch-icon.png" />
         {/* Sanuk Spirit Realm — Google Fonts */}

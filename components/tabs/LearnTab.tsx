@@ -276,7 +276,7 @@ export default function LearnTab() {
       <View style={styles.topBar}>
         <View style={styles.topLeft}>
           <Text style={styles.topTitle}>ภาษาไทย</Text>
-          <Text style={styles.topSub}>LEARN THAI</Text>
+          <Text style={styles.topSub}>SANUK THAI</Text>
         </View>
         <HeartsBar />
       </View>
