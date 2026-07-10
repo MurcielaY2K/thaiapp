@@ -42,7 +42,7 @@ const DEFAULT_PROFILE: UserProfile = {
   username:     '',
   displayName:  '',
   avatarEmoji:  'px:naga',
-  countryFlag:  '🌍',
+  countryFlag:  'world',
   bio:          '',
   profileFrame: 'default',
   isSetup:      false,

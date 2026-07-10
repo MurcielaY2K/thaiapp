@@ -16,6 +16,7 @@ import AvatarPicker from '../AvatarPicker';
 import FlagPicker from '../FlagPicker';
 import CloudSyncCard from '../CloudSyncCard';
 import PixelAvatar from '../PixelAvatar';
+import PixelFlag from '../PixelFlag';
 
 function Avatar({ emoji, frame, size = 72 }: { emoji: string; frame: FrameId; size?: number }) {
   const { border, glow } = FRAME_STYLES[frame];
@@ -43,7 +44,7 @@ function ProfileSetup() {
   const [displayName, setDisplayName] = useState('');
   const [bio, setBio]                 = useState('');
   const [avatar, setAvatar]           = useState('px:naga');
-  const [flag, setFlag]               = useState('🌍');
+  const [flag, setFlag]               = useState('world');
   const [avatarOpen, setAvatarOpen]   = useState(false);
   const [flagOpen, setFlagOpen]       = useState(false);
   const [loading, setLoading]         = useState(false);
@@ -72,7 +73,7 @@ function ProfileSetup() {
             <Text style={styles.setupAvatarEdit}>Change ›</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => setFlagOpen(true)} style={styles.setupFlagBtn}>
-            <Text style={styles.setupFlagEmoji}>{flag}</Text>
+            <PixelFlag value={flag} size={44} />
             <Text style={styles.setupAvatarEdit}>Flag ›</Text>
           </TouchableOpacity>
         </View>
@@ -177,10 +178,16 @@ function ProfileEdit({ onDone }: { onDone: () => void }) {
       <View style={styles.editHandle} />
       <Text style={styles.editTitle}>Edit Profile</Text>
 
-      <TouchableOpacity onPress={() => setAvatarOpen(true)} style={styles.editAvatarBtn}>
-        <PixelAvatar avatar={avatar} size={52} />
-        <Text style={styles.editAvatarHint}>Change avatar ›</Text>
-      </TouchableOpacity>
+      <View style={styles.editPickRow}>
+        <TouchableOpacity onPress={() => setAvatarOpen(true)} style={styles.editAvatarBtn}>
+          <PixelAvatar avatar={avatar} size={52} />
+          <Text style={styles.editAvatarHint}>Change avatar ›</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => setFlagOpen(true)} style={styles.editAvatarBtn}>
+          <PixelFlag value={flag} size={44} />
+          <Text style={styles.editAvatarHint}>Flag ›</Text>
+        </TouchableOpacity>
+      </View>
 
       <View style={styles.fieldGroup}>
         <Text style={styles.fieldLabel}>DISPLAY NAME</Text>
@@ -296,7 +303,7 @@ export default function ProfileTab() {
           <Avatar emoji={store.avatarEmoji} frame={store.profileFrame} size={80} />
           <View style={styles.nameRow}>
             <Text style={styles.displayName}>{store.displayName || store.username}</Text>
-            <Text style={styles.flagEmoji}>{store.countryFlag}</Text>
+            <PixelFlag value={store.countryFlag} size={22} />
           </View>
           <Text style={styles.username}>@{store.username}</Text>
           {store.bio ? <Text style={styles.bio}>{store.bio}</Text> : null}
@@ -503,6 +510,7 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.display, fontWeight: '700',
     marginBottom: 16, textAlign: 'center',
   },
+  editPickRow: { flexDirection: 'row', gap: 28, justifyContent: 'center' },
   editAvatarBtn: { alignItems: 'center', gap: 4, marginBottom: 16 },
   editAvatarHint: { color: Colors.lavender, fontSize: 11, fontFamily: Fonts.hud },
   frameRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 16 },

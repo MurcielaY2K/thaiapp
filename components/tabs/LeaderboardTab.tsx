@@ -6,6 +6,7 @@ import {
 import { useUserStore, LeaderboardEntry } from '../../store/userStore';
 import { Colors } from '../../constants/colors';
 import PixelAvatar from '../PixelAvatar';
+import PixelFlag from '../PixelFlag';
 import { Fonts } from '../../constants/typography';
 import { SUPABASE_CONFIGURED } from '../../constants/supabase';
 import { FRAME_STYLES, FrameId } from '../../data/rewards';
@@ -46,7 +47,7 @@ function EntryRow({ entry, isMe }: { entry: LeaderboardEntry; isMe: boolean }) {
           <Text style={[styles.displayName, isMe && styles.nameMe]} numberOfLines={1}>
             {entry.displayName || entry.username}
           </Text>
-          <Text style={styles.flag}>{entry.countryFlag}</Text>
+          <PixelFlag value={entry.countryFlag} size={18} />
           {isMe && (
             <View style={styles.meBadge}>
               <Text style={styles.meBadgeText}>YOU</Text>
