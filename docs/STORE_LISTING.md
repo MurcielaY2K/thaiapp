@@ -60,18 +60,22 @@ cross-app tracking → answer "No" to ATT; no ATT prompt needed).
 - **Login requirement:** app is fully usable without an account — no demo
   credentials needed for review.
 
-## ⚠️ Payments: required change before store submission
+## Payments: store-compliance (handled in code)
 
 Stripe checkout for Premium is **not allowed inside store builds** (Apple
-3.1.1; Play Payments policy). Digital subscriptions in the iOS/Android apps
-must use the store's own billing (StoreKit / Play Billing — RevenueCat is the
-low-effort cross-platform option and feeds the same `entitlements` table via
-its webhooks). The Stripe Payment Link may remain on the **web** version only;
-store builds must not even link out to it. Plan:
+3.1.1; Play Payments policy). This is now enforced in code:
+`constants/stripe.ts → STRIPE_CHECKOUT_ENABLED = Platform.OS === 'web'`. The
+Premium modal shows the Stripe button **only on web**; on iOS/Android it shows
+"Premium in-app purchase is coming soon" with **no external payment link and no
+steering** off-app, so a store build can never violate the billing policy —
+even if the paywall is later enabled.
 
-1. Keep `PREMIUM_ON_HOLD = true` for the first store release (no purchase UI
-   at all → no billing-policy exposure), or
-2. integrate RevenueCat/IAP before flipping the paywall on.
+Path to actually sell Premium in the apps: integrate StoreKit / Google Play
+Billing (RevenueCat is the low-effort cross-platform option and can feed the
+same `entitlements` table via its webhooks), then gate it behind the same
+constant. The Stripe Payment Link stays web-only. For the **first** store
+release the simplest route is to keep `PREMIUM_ON_HOLD = true` (everyone gets
+Premium free, zero purchase UI → zero billing-policy exposure).
 
 Also required for auto-renewing subscriptions on Apple: the App Store listing
 must include the subscription name, length, price, and links to the Terms and
@@ -83,5 +87,6 @@ Privacy (PremiumModal already does).
 - Expo SDK upgrade + EAS build to produce store binaries (current: SDK 51).
 - `app.json` iOS `bundleIdentifier` / Android `package` are `com.thaiapp.learn`
   — decide final IDs **before** first upload (they are permanent).
-- Supabase dashboard: run `supabase/delete_account.sql` (required for the
-  deletion flow), plus the other SQL files if not yet run — see docs/AUDIT.md.
+- Supabase dashboard: run **`supabase/setup.sql`** (one paste — includes the
+  deletion function and everything else, idempotent), then enable Anonymous +
+  Email auth and set the URL config. Steps are in the file's header.

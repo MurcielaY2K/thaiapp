@@ -5,7 +5,7 @@ import {
 import { router } from 'expo-router';
 import { Colors } from '../constants/colors';
 import { Fonts } from '../constants/typography';
-import { STRIPE_PAYMENT_LINK, paymentLinkFor } from '../constants/stripe';
+import { STRIPE_PAYMENT_LINK, paymentLinkFor, STRIPE_CHECKOUT_ENABLED } from '../constants/stripe';
 import { supabase } from '../lib/supabase';
 import { WORLDS, ALL_LESSONS } from '../data/worlds';
 
@@ -23,6 +23,8 @@ const PERKS = [
 ];
 
 async function openStripe() {
+  // Web only — never open an external payment flow inside a store build.
+  if (!STRIPE_CHECKOUT_ENABLED) return;
   // The checkout must carry the buyer's Supabase auth uuid so the Stripe
   // webhook can grant the entitlement to this user. Sign in anonymously
   // first if there's no session yet.
@@ -79,22 +81,41 @@ export default function PremiumModal({ visible, onClose }: Props) {
             ))}
           </View>
 
-          <TouchableOpacity style={styles.stripeBtn} onPress={openStripe} activeOpacity={0.88}>
-            <Text style={styles.stripeLogo}>stripe</Text>
-            <Text style={styles.stripeBtnText}>Subscribe with Stripe</Text>
-            <Text style={styles.stripeArrow}>›</Text>
-          </TouchableOpacity>
+          {STRIPE_CHECKOUT_ENABLED ? (
+            <>
+              <TouchableOpacity style={styles.stripeBtn} onPress={openStripe} activeOpacity={0.88}>
+                <Text style={styles.stripeLogo}>stripe</Text>
+                <Text style={styles.stripeBtnText}>Subscribe with Stripe</Text>
+                <Text style={styles.stripeArrow}>›</Text>
+              </TouchableOpacity>
 
-          <Text style={styles.secureNote}>
-            🔒 Secure payment · Powered by Stripe
-          </Text>
+              <Text style={styles.secureNote}>
+                🔒 Secure payment · Powered by Stripe
+              </Text>
 
-          <Text style={styles.legalNote}>
-            By subscribing you agree to our{' '}
-            <Text style={styles.legalLink} onPress={() => { onClose(); router.push('/terms'); }}>Terms</Text>
-            {' '}and{' '}
-            <Text style={styles.legalLink} onPress={() => { onClose(); router.push('/refunds'); }}>Refund Policy</Text>.
-          </Text>
+              <Text style={styles.legalNote}>
+                By subscribing you agree to our{' '}
+                <Text style={styles.legalLink} onPress={() => { onClose(); router.push('/terms'); }}>Terms</Text>
+                {' '}and{' '}
+                <Text style={styles.legalLink} onPress={() => { onClose(); router.push('/refunds'); }}>Refund Policy</Text>.
+              </Text>
+            </>
+          ) : (
+            // Store builds: no external payment (App Store 3.1.1 / Play Payments).
+            // In-app purchase is not wired up yet, so we don't advertise a way to
+            // buy or steer users off-app — just say it's coming.
+            <>
+              <View style={styles.soonBox}>
+                <Text style={styles.soonText}>Premium in-app purchase is coming soon.</Text>
+              </View>
+              <Text style={styles.legalNote}>
+                See our{' '}
+                <Text style={styles.legalLink} onPress={() => { onClose(); router.push('/terms'); }}>Terms</Text>
+                {' '}and{' '}
+                <Text style={styles.legalLink} onPress={() => { onClose(); router.push('/privacy'); }}>Privacy Policy</Text>.
+              </Text>
+            </>
+          )}
 
           <TouchableOpacity onPress={onClose} activeOpacity={0.7} style={styles.dismissWrap}>
             <Text style={styles.dismiss}>Maybe later</Text>
@@ -178,6 +199,12 @@ const styles = StyleSheet.create({
   stripeBtnText: { color: '#fff', fontSize: 15, fontWeight: '800', flex: 1, textAlign: 'center' },
   stripeArrow: { color: '#fff', fontSize: 22, opacity: 0.8 },
 
+  soonBox: {
+    width: '100%', backgroundColor: Colors.bgInset, borderRadius: 12,
+    paddingVertical: 15, paddingHorizontal: 18, marginTop: 4,
+    borderWidth: 1, borderColor: Colors.border, alignItems: 'center',
+  },
+  soonText: { color: Colors.text, fontSize: 14, fontWeight: '700', textAlign: 'center' },
   secureNote: { color: Colors.textDim, fontSize: 11, textAlign: 'center' },
   legalNote: { color: Colors.textDim, fontSize: 10, textAlign: 'center', marginTop: 6, lineHeight: 15 },
   legalLink: { color: Colors.lavender, textDecorationLine: 'underline' },
