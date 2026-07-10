@@ -42,6 +42,7 @@ export default function RootLayout() {
         <Stack.Screen name="privacy" options={{ animation: 'fade' }} />
         <Stack.Screen name="terms" options={{ animation: 'fade' }} />
         <Stack.Screen name="refunds" options={{ animation: 'fade' }} />
+        <Stack.Screen name="delete-account" options={{ animation: 'fade' }} />
       </Stack>
     </GestureHandlerRootView>
   );

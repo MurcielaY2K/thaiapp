@@ -387,6 +387,10 @@ export default function ProfileTab() {
             <TouchableOpacity onPress={() => router.push('/refunds')}>
               <Text style={styles.legalLink}>Refunds</Text>
             </TouchableOpacity>
+            <Text style={styles.legalDot}>·</Text>
+            <TouchableOpacity onPress={() => router.push('/delete-account')}>
+              <Text style={styles.legalLink}>Delete account</Text>
+            </TouchableOpacity>
           </View>
           <Text style={styles.legalContact}>coficollective@gmail.com · v1.0.0</Text>
         </View>

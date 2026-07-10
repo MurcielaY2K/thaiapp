@@ -5,21 +5,28 @@ export default function Refunds() {
   return (
     <LegalPage
       title="Refund Policy"
-      updated="5 July 2026"
+      updated="10 July 2026"
       sections={[
         {
           paragraphs: [
-            'Premium is a monthly subscription (฿199/month) processed by Stripe. This policy explains how cancellation and refunds work.',
+            'Sanuk Thai Premium is a monthly subscription (฿199/month). How cancellation and refunds work depends on where you purchased: on the web (processed by Stripe), or through the Apple App Store or Google Play.',
           ],
         },
         {
           heading: 'Cancelling',
           paragraphs: [
             'You can cancel at any time. Cancellation stops future charges; you keep Premium until the end of the period you already paid for. No partial-month charges apply after cancellation.',
+            'Web (Stripe): use the manage-subscription link in your Stripe receipt email, or email us and we will cancel it for you. App Store: Settings → your name → Subscriptions. Google Play: Play Store → Payments & subscriptions.',
           ],
         },
         {
-          heading: 'Refunds',
+          heading: 'Purchases made through the App Store or Google Play',
+          paragraphs: [
+            'Refunds for store purchases are handled by the store, under its own policy: for Apple, request at reportaproblem.apple.com; for Google Play, use your order history or the Play refund flow. We cannot issue refunds for charges we did not process, but email us and we will help you with the request.',
+          ],
+        },
+        {
+          heading: 'Refunds (web purchases)',
           paragraphs: [
             'If something went wrong — you were charged after cancelling, charged twice, or Premium features did not work — email us within 30 days of the charge and we will refund it.',
             'If you simply changed your mind, email us within 14 days of a charge and we will refund that charge, provided the request is made in good faith (not a pattern of subscribing, using heavily and refunding every month).',

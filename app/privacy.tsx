@@ -5,17 +5,17 @@ export default function Privacy() {
   return (
     <LegalPage
       title="Privacy Policy"
-      updated="5 July 2026"
+      updated="10 July 2026"
       sections={[
         {
           paragraphs: [
-            'This policy explains what data the ภาษาไทย Thai learning app ("the app", "we") collects, why, and what your rights are. The short version: your learning progress lives on your device, an account is optional, and we never sell your data or show ads.',
+            'This policy explains what data Sanuk Thai, the Thai learning app ("the app", "we"), collects, why, and what your rights are. The short version: your learning progress lives on your device, an account is optional, and we never sell your data or show ads.',
           ],
         },
         {
           heading: '1. Data stored on your device',
           paragraphs: [
-            'Your learning progress — XP, level, streaks, hearts, gems, completed lessons, spaced-repetition history and settings — is stored locally on your device (browser storage). It is not sent to us. Clearing your browser data deletes it.',
+            'Your learning progress — XP, level, streaks, hearts, gems, completed lessons, spaced-repetition history and settings — is stored locally on your device (browser or app storage). It is not sent to us unless you enable cloud backup (section 3). Word pronunciation uses your device\'s built-in text-to-speech; the words you hear are not sent to us.',
           ],
         },
         {
@@ -30,13 +30,19 @@ export default function Privacy() {
           ],
         },
         {
-          heading: '3. Payments',
+          heading: '3. Cloud backup and email',
           paragraphs: [
-            'Premium subscriptions are processed by Stripe. Your card details go directly to Stripe and never touch our servers — we only receive confirmation that a subscription is active, which we store against your account so the app can unlock Premium features. Stripe\'s own privacy policy applies to the payment itself (stripe.com/privacy).',
+            'If you link an email address, we store it (via Supabase authentication) so you can sign in on a new device, and we back up your learning-progress snapshot to our database so it can be restored. The email is used only for sign-in links and account recovery — no newsletters, no marketing. Progress backups are kept while your account exists and are deleted with it.',
           ],
         },
         {
-          heading: '4. What we do NOT do',
+          heading: '4. Payments',
+          paragraphs: [
+            'Web subscriptions are processed by Stripe; purchases in the Apple App Store or Google Play are processed by that store. Your card details go directly to the payment processor and never touch our servers — we only receive confirmation that a subscription is active, which we store against your account so the app can unlock Premium features. The processor\'s own privacy policy applies to the payment itself (e.g. stripe.com/privacy).',
+          ],
+        },
+        {
+          heading: '5. What we do NOT do',
           paragraphs: [],
           bullets: [
             'No advertising and no ad trackers',
@@ -45,7 +51,7 @@ export default function Privacy() {
           ],
         },
         {
-          heading: '5. Service providers',
+          heading: '6. Service providers',
           paragraphs: [
             'We rely on a small number of processors to run the app:',
           ],
@@ -57,19 +63,19 @@ export default function Privacy() {
           ],
         },
         {
-          heading: '6. Your rights (GDPR and similar laws)',
+          heading: '7. Your rights (GDPR, PDPA and similar laws)',
           paragraphs: [
-            'You can access, correct or delete your profile data at any time. Profile deletion is available in the app and removes your data from our database. You also have the right to data portability, to object to processing, and to lodge a complaint with your local data-protection authority. To exercise any right, or for any privacy question, email coficollective@gmail.com.',
+            'You can access and correct your profile data in the app at any time. You can permanently delete your account and all associated data yourself from Profile → Delete account (also reachable directly at /delete-account); server-side deletion is immediate. You also have the right to data portability, to object to processing, and to lodge a complaint with your local data-protection authority. To exercise any right, or for any privacy question, email coficollective@gmail.com and we will respond within 30 days.',
           ],
         },
         {
-          heading: '7. Children',
+          heading: '8. Children',
           paragraphs: [
             'The app is suitable for general audiences and does not knowingly collect personal data from children under 13. Profiles and payments require whatever age your local law sets for consent; parents who believe a child has created a profile can email us to have it removed.',
           ],
         },
         {
-          heading: '8. Changes',
+          heading: '9. Changes',
           paragraphs: [
             'If we change this policy we will update this page and the date at the top. Material changes affecting account holders will be flagged in the app.',
           ],

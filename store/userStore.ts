@@ -58,6 +58,7 @@ interface UserStore extends UserProfile {
   isLoaded:           boolean;
 
   load:             () => Promise<void>;
+  deleteAccount:    () => Promise<string | null>;
   setupProfile:     (data: { username: string; displayName: string; avatarEmoji: string; countryFlag: string; bio: string }) => Promise<string | null>;
   updateProfile:    (data: Partial<UserProfile>) => Promise<void>;
   syncScore:        (stats: RewardStats) => Promise<void>;
@@ -113,6 +114,33 @@ export const useUserStore = create<UserStore>((set, get) => ({
       }
     } catch {
       set({ isLoaded: true });
+    }
+  },
+
+  // Permanently delete the account: server-side rows (auth user cascades to
+  // profile, scores, cloud progress, entitlement) plus everything on-device.
+  // Returns an error message, or null on success.
+  deleteAccount: async () => {
+    try {
+      if (SUPABASE_CONFIGURED && supabase) {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          const { error } = await supabase.rpc('delete_my_account');
+          if (error) {
+            return 'Could not delete server data — check your connection and try again, or email us.';
+          }
+          await supabase.auth.signOut().catch(() => {});
+        }
+      }
+      await AsyncStorage.multiRemove(Object.values(StorageKeys));
+      set({
+        ...DEFAULT_PROFILE,
+        leaderboard: [], myRank: null, isLoadingLeaderboard: false,
+        unlockedRewards: [], newRewards: [], isOnline: false, isLoaded: true,
+      });
+      return null;
+    } catch {
+      return 'Something went wrong. Try again, or email us and we will delete your data manually.';
     }
   },
 
