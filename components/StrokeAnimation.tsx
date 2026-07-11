@@ -3,6 +3,7 @@ import {
   View, Text, StyleSheet, TouchableOpacity, Platform, LayoutChangeEvent,
 } from 'react-native';
 import { Colors } from '../constants/colors';
+import { placeGlyph } from '../lib/glyph';
 
 // "Watch" mode. Instead of hand-authored stroke paths (which never matched the
 // real glyphs), we animate a left-to-right "write-on" reveal of the actual
@@ -10,7 +11,6 @@ import { Colors } from '../constants/colors';
 // numeral because it IS the font's glyph.
 
 const REVEAL_MS = 1900;
-const FONT = '"Noto Sans Thai", "Thonburi", -apple-system, sans-serif';
 
 const GRID_COLOR      = 'rgba(23,21,15,0.10)';
 const GRID_DASH_COLOR = 'rgba(23,21,15,0.22)';
@@ -130,16 +130,9 @@ function RevealCanvas({
     cv.style.width = size + 'px';
     cv.style.height = size + 'px';
     const ctx = cv.getContext('2d')!;
-    const cx = w / 2;
-    const cy = w / 2;
-    // Auto-scale: multi-codepoint vowels (e.g. เอะ) can exceed canvas width at 0.66em
-    let fontSize = w * 0.82;
-    ctx.font = `400 ${fontSize}px ${FONT}`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    const measuredW = ctx.measureText(char).width;
-    if (measuredW > w * 0.88) fontSize = Math.floor(fontSize * (w * 0.88) / measuredW);
-    const fontSpec = `400 ${fontSize}px ${FONT}`;
+    // Ink-box centering: immune to iOS Thai font metrics (Thonburi's huge
+    // ascent/descent shifted and cropped glyphs when centered by baseline).
+    const g = placeGlyph(ctx, char, w);
     let start = 0;
 
     const frame = (now: number) => {
@@ -149,16 +142,14 @@ function RevealCanvas({
       ctx.clearRect(0, 0, w, w);
       drawGrid(ctx, w);
 
-      ctx.font = fontSpec;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
+      ctx.font = g.font;
 
       // Faint target glyph (the goal shape)
       ctx.fillStyle = GHOST_FILL;
-      ctx.fillText(char, cx, cy);
+      ctx.fillText(char, g.x, g.y);
       ctx.lineWidth = Math.max(1, dpr);
       ctx.strokeStyle = OUTLINE_COLOR;
-      ctx.strokeText(char, cx, cy);
+      ctx.strokeText(char, g.x, g.y);
 
       // Revealed (inked) portion, clipped left → right
       ctx.save();
@@ -166,7 +157,7 @@ function RevealCanvas({
       ctx.rect(0, 0, w * t, w);
       ctx.clip();
       ctx.fillStyle = INK_COLOR;
-      ctx.fillText(char, cx, cy);
+      ctx.fillText(char, g.x, g.y);
       ctx.restore();
 
       // Moving pen line at the reveal edge

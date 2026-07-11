@@ -8,6 +8,7 @@ import { initMonitoring } from '../lib/monitoring';
 import { useProgressStore } from '../store/progressStore';
 import { useSrsStore } from '../store/srsStore';
 import { useUserStore } from '../store/userStore';
+import { supabase } from '../lib/supabase';
 
 export default function RootLayout() {
   // Hydrate every store before ANY route renders. Routed screens
@@ -24,6 +25,24 @@ export default function RootLayout() {
     useProgressStore.getState().load();
     useSrsStore.getState().load();
     useUserStore.getState().load();
+  }, []);
+
+  // Track Supabase auth changes. A magic-link sign-in lands with tokens in
+  // the URL and is parsed asynchronously AFTER the stores hydrate — without
+  // this listener the app never learns it's signed in, so magic-link login
+  // looked like it did nothing (and /delete-account showed "not signed in").
+  useEffect(() => {
+    if (!supabase) return;
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      const uid = session?.user.id ?? null;
+      const cur = useUserStore.getState();
+      if (uid && cur.authId !== uid) {
+        useUserStore.setState({ authId: uid, isOnline: true } as any);
+      } else if (!uid && cur.authId && event === 'SIGNED_OUT') {
+        useUserStore.setState({ authId: null, isOnline: false } as any);
+      }
+    });
+    return () => subscription.unsubscribe();
   }, []);
 
   if (!hydrated) {

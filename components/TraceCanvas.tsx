@@ -4,11 +4,11 @@ import {
   TouchableOpacity, Platform, GestureResponderEvent, Animated, Easing,
 } from 'react-native';
 import { Colors } from '../constants/colors';
+import { placeGlyph } from '../lib/glyph';
 
 type Point = { x: number; y: number };
 
 const STROKE = 14;
-const FONT = '"Noto Sans Thai", "Thonburi", -apple-system, sans-serif';
 // Ink-on-paper: dark alpha values readable on the light canvas card.
 const GRID_COLOR      = 'rgba(23,21,15,0.10)';
 const GRID_DASH_COLOR = 'rgba(23,21,15,0.22)';
@@ -82,17 +82,11 @@ function WebTrace({ char, charName, fixedSize }: { char: string; charName?: stri
     ctx.beginPath(); ctx.moveTo(w / 2, 0); ctx.lineTo(w / 2, w); ctx.stroke();
     ctx.setLineDash([]);
 
-    // ghost — auto-scale font so wide vowels (เอะ etc.) don't overflow
+    // ghost — ink-box centered so it never crops or drifts (iOS font metrics)
     if (showRef.current) {
       ctx.fillStyle = GHOST_COLOR;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      let ghostSize = w * 0.82;
-      ctx.font = `300 ${ghostSize}px ${FONT}`;
-      const gw = ctx.measureText(char).width;
-      if (gw > w * 0.88) ghostSize = Math.floor(ghostSize * (w * 0.88) / gw);
-      ctx.font = `300 ${ghostSize}px ${FONT}`;
-      ctx.fillText(char, w / 2, w / 2);
+      const g = placeGlyph(ctx, char, w, 300);
+      ctx.fillText(char, g.x, g.y);
     }
 
     // user ink
@@ -195,16 +189,12 @@ function WebTrace({ char, charName, fixedSize }: { char: string; charName?: stri
     const refCtx = refCv.getContext('2d')!;
     refCtx.fillStyle   = '#fff';
     refCtx.strokeStyle = '#fff';
-    refCtx.textAlign = 'center';
-    refCtx.textBaseline = 'middle';
-    let refFontSize = w * 0.82;
-    refCtx.font = `300 ${refFontSize}px ${FONT}`;
-    const refTW = refCtx.measureText(char).width;
-    if (refTW > w * 0.88) refFontSize = Math.floor(refFontSize * (w * 0.88) / refTW);
-    refCtx.font = `300 ${refFontSize}px ${FONT}`;
+    // Same ink-box placement as the ghost, so the acceptance zone sits
+    // exactly where the learner saw the template.
+    const gRef = placeGlyph(refCtx, char, w, 300);
     refCtx.lineWidth = STROKE * dpr * 3.0; // very generous acceptance zone (finger tracing)
-    refCtx.strokeText(char, w / 2, w / 2);
-    refCtx.fillText(char, w / 2, w / 2);
+    refCtx.strokeText(char, gRef.x, gRef.y);
+    refCtx.fillText(char, gRef.x, gRef.y);
     const refData = refCtx.getImageData(0, 0, w, w).data;
 
     // Build user-ink-only canvas
