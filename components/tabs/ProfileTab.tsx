@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, SafeAreaView,
   TouchableOpacity, TextInput, ActivityIndicator, Platform,
+  Modal, Pressable,
 } from 'react-native';
 
 import { router } from 'expo-router';
@@ -274,12 +275,61 @@ function LevelCard() {
   );
 }
 
+// One-time popup right after profile creation: the profile is in the cloud,
+// but learning progress is device-local until an email is linked — nudge now,
+// while the user is already on the Profile tab.
+function SyncNudgeModal({ visible, onLink, onLater }: {
+  visible: boolean; onLink: () => void; onLater: () => void;
+}) {
+  return (
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={onLater}>
+      <Pressable style={styles.nudgeOverlay} onPress={onLater}>
+        <Pressable style={styles.nudgeCard} onPress={() => {}}>
+          <Text style={styles.nudgeEmoji}>☁️</Text>
+          <Text style={styles.nudgeTitle}>Profile created!</Text>
+          <Text style={styles.nudgeBody}>
+            One more step: your learning progress lives only on this device.
+            Link your email and everything backs up automatically — so you can
+            restore it if you ever switch or lose your phone.
+          </Text>
+          <TouchableOpacity style={styles.nudgeBtn} onPress={onLink} activeOpacity={0.85}>
+            <Text style={styles.nudgeBtnText}>LINK MY EMAIL</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={onLater} activeOpacity={0.7} style={styles.nudgeLaterWrap}>
+            <Text style={styles.nudgeLater}>Maybe later</Text>
+          </TouchableOpacity>
+        </Pressable>
+      </Pressable>
+    </Modal>
+  );
+}
+
 export default function ProfileTab() {
   const store = useUserStore();
   const { xp, level, hearts, gems, isPremium, badges, dailyXp, dailyGoal } = useProgressStore();
   const { streak, getStats } = useSrsStore();
   const stats = getStats();
   const [editing, setEditing] = useState(false);
+
+  // Email-sync nudge: fires once when isSetup flips false → true in this
+  // session with a cloud account (authId set). Local-fallback profiles have
+  // no authId — linking an email can't work there, so no nudge.
+  const [syncNudge, setSyncNudge] = useState(false);
+  const wasSetup = useRef(store.isSetup);
+  const scrollRef = useRef<ScrollView>(null);
+  const syncCardY = useRef(0);
+  useEffect(() => {
+    if (store.isSetup && !wasSetup.current && store.authId) setSyncNudge(true);
+    wasSetup.current = store.isSetup;
+  }, [store.isSetup, store.authId]);
+
+  const goToSyncCard = () => {
+    setSyncNudge(false);
+    // Give the modal fade a beat, then bring the Cloud Sync card into view.
+    setTimeout(() => {
+      scrollRef.current?.scrollTo({ y: Math.max(0, syncCardY.current - 80), animated: true });
+    }, 250);
+  };
 
   const xpForLevel = level * 100;
   const xpThisLevel = xp - (level - 1) * 100;
@@ -293,7 +343,9 @@ export default function ProfileTab() {
     <SafeAreaView style={styles.safe}>
       {editing && <ProfileEdit onDone={() => setEditing(false)} />}
 
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <SyncNudgeModal visible={syncNudge} onLink={goToSyncCard} onLater={() => setSyncNudge(false)} />
+
+      <ScrollView ref={scrollRef} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
 
         <View style={styles.profileCard}>
           <TouchableOpacity style={styles.editBtn} onPress={() => setEditing(true)}>
@@ -331,7 +383,9 @@ export default function ProfileTab() {
 
         <LevelCard />
 
-        <CloudSyncCard />
+        <View onLayout={e => { syncCardY.current = e.nativeEvent.layout.y; }}>
+          <CloudSyncCard />
+        </View>
 
         {unlockedContent.length > 0 && (
           <>
@@ -574,4 +628,28 @@ const styles = StyleSheet.create({
   legalLink: { color: Colors.textDim, fontSize: 11, fontFamily: Fonts.body, textDecorationLine: 'underline' },
   legalDot: { color: Colors.textDim, fontSize: 11 },
   legalContact: { color: Colors.textDim, fontSize: 10, fontFamily: Fonts.mono, opacity: 0.7 },
+
+  // Email-sync nudge popup
+  nudgeOverlay: {
+    flex: 1, backgroundColor: 'rgba(23,21,15,0.55)',
+    alignItems: 'center', justifyContent: 'center', padding: 28,
+  },
+  nudgeCard: {
+    backgroundColor: Colors.card, borderRadius: 10, padding: 24,
+    width: '100%', maxWidth: 360, alignItems: 'center', gap: 10,
+    borderWidth: 2, borderColor: Colors.borderStrong,
+    ...(Platform.OS === 'web' ? { boxShadow: `0 6px 0 0 ${Colors.borderStrong}` } as any : {}),
+  },
+  nudgeEmoji: { fontSize: 40 },
+  nudgeTitle: { color: Colors.text, fontSize: 19, fontFamily: Fonts.display, fontWeight: '700', textAlign: 'center' },
+  nudgeBody: { color: Colors.textDim, fontSize: 13, fontFamily: Fonts.body, lineHeight: 20, textAlign: 'center' },
+  nudgeBtn: {
+    backgroundColor: Colors.ember, borderRadius: 8, paddingVertical: 13,
+    alignItems: 'center', width: '100%', marginTop: 6,
+    borderWidth: 2, borderColor: Colors.borderStrong,
+    ...(Platform.OS === 'web' ? { boxShadow: `0 4px 0 0 ${Colors.borderStrong}` } as any : {}),
+  },
+  nudgeBtnText: { color: Colors.onBrand, fontSize: 13, fontFamily: Fonts.hud, fontWeight: '700', letterSpacing: 1 },
+  nudgeLaterWrap: { paddingVertical: 6 },
+  nudgeLater: { color: Colors.textDim, fontSize: 12, fontFamily: Fonts.hud },
 });
