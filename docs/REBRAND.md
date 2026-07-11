@@ -39,24 +39,22 @@ the site comes right back up at the new, branded URL:
 Until there's a custom domain, keeping the repo public is the only free way
 to keep the app online on GitHub Pages.
 
-## Rename checklist — STATUS: code side EXECUTED (July 2026)
+## Rename checklist — ✅ COMPLETE (July 2026)
 
-All code/config changes for the `sanuk-thai` rename are done and deployed:
-base path, build rewrites, OG/social URLs, service-worker path, update
-checker, auth redirect URL, legal/docs links — every `/thaiapp` path is now
-`/sanuk-thai`. Local storage keys (`@thaiapp_*`) deliberately unchanged so
-nobody loses progress.
+Live at **https://murcielay2k.github.io/sanuk-thai/**. Everything done:
 
-Remaining — owner does (GitHub → repo → Settings → General):
-1. **Rename repository to `sanuk-thai`.** The moment this is saved, the site
-   is live at `https://murcielay2k.github.io/sanuk-thai/`. Until then the
-   deployed build is dark (old URL serves new-path assets).
+- [x] Code/config: base path, build rewrites, OG/social URLs, service-worker
+      path, update checker, auth redirect URL, legal/docs links — every
+      `/thaiapp` path migrated to `/sanuk-thai`. Local storage keys
+      (`@thaiapp_*`) deliberately unchanged, so no user lost progress.
+- [x] GitHub → repo renamed to `sanuk-thai`.
+- [x] Supabase → Authentication → URL Configuration → Site URL + Redirect
+      URLs → new URL.
+- [x] Stripe Payment Link → after-payment redirect → new URL.
+- [x] Verified live and working end to end.
 
-External consoles (owner, same day):
-2. Supabase → Authentication → URL Configuration: Site URL + Redirect URLs
-    → new URL.
-11. Stripe Payment Link → after-payment redirect → new URL.
-12. Tell existing users (there aren't many yet) to re-add the home-screen app.
+If any user still has the old home-screen icon installed, it now 404s —
+they need to open the new URL in Safari/Chrome once and re-add it.
 
 ## Private checklist (only when off GitHub Pages)
 
