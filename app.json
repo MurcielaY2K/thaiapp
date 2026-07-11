@@ -1,11 +1,11 @@
 {
   "expo": {
     "name": "Sanuk Thai",
-    "slug": "thaiapp",
+    "slug": "sanuk-thai",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "thaiapp",
+    "scheme": "sanukthai",
     "userInterfaceStyle": "dark",
     "splash": {
       "resizeMode": "contain",
@@ -13,14 +13,14 @@
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.thaiapp.learn"
+      "bundleIdentifier": "com.sanukthai.app"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#f0eee7"
       },
-      "package": "com.thaiapp.learn"
+      "package": "com.sanukthai.app"
     },
     "web": {
       "bundler": "metro",
