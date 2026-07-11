@@ -6,7 +6,7 @@ accuracy scanner), and an illustrated reading / phrasebook section with
 text-to-speech. Built with Expo + React Native Web and shipped as a static
 PWA to GitHub Pages.
 
-**Live:** https://murcielay2k.github.io/thaiapp/
+**Live:** https://murcielay2k.github.io/sanuk-thai/
 
 ---
 
@@ -173,8 +173,8 @@ npm run build:web    # static export → dist/
 
 `build:web` runs `expo export --platform web`, then post-processes `dist/`:
 adds `.nojekyll`, copies the service worker, and rewrites asset paths to the
-`/thaiapp` base (GitHub Pages subpath). The base path is configured in
-`app.json` via `experiments.baseUrl: "/thaiapp"`.
+`/sanuk-thai` base (GitHub Pages subpath). The base path is configured in
+`app.json` via `experiments.baseUrl: "/sanuk-thai"`.
 
 **Deploy** (publishes `dist/` to the `gh-pages` branch via subtree split).
 

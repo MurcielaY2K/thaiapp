@@ -1,4 +1,4 @@
-// Minimal service worker that claims /thaiapp/ scope so it takes priority
+// Minimal service worker that claims /sanuk-thai/ scope so it takes priority
 // over any broader-scoped SW installed by the root site.
 // Network-first: users always get the latest deploy when online; the cache
 // is only a fallback for offline use.

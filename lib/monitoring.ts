@@ -11,7 +11,7 @@ export function initMonitoring(): void {
     const Sentry = require('@sentry/browser') as typeof import('@sentry/browser');
     Sentry.init({
       dsn,
-      release: 'thaiapp@1.0.0',
+      release: 'sanuk-thai@1.0.0',
       // Learning app, no PII needed — keep payloads lean.
       sendDefaultPii: false,
       tracesSampleRate: 0,

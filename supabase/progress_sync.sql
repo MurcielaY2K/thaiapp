@@ -3,8 +3,8 @@
 --
 -- ALSO REQUIRED (dashboard, once):
 --   Authentication → URL Configuration →
---     Site URL:          https://murcielay2k.github.io/thaiapp/
---     Redirect URLs: add https://murcielay2k.github.io/thaiapp/
+--     Site URL:          https://murcielay2k.github.io/sanuk-thai/
+--     Redirect URLs: add https://murcielay2k.github.io/sanuk-thai/
 --   Authentication → Providers → Email: enabled (magic link / OTP).
 --
 -- The app stores each user's learning progress as a single JSON snapshot,

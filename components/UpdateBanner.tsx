@@ -12,7 +12,7 @@ import { BUILD_ID } from '../constants/version';
 // (refresh only happens when they tap UPDATE).
 
 const CHECK_MS = 5 * 60 * 1000;
-const VERSION_URL = '/thaiapp/version.json';
+const VERSION_URL = '/sanuk-thai/version.json';
 
 export default function UpdateBanner() {
   const [available, setAvailable] = useState(false);

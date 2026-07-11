@@ -13,8 +13,8 @@
 --   Authentication → Providers → Anonymous  → Enable
 --   Authentication → Providers → Email       → Enable (magic link / OTP)
 --   Authentication → URL Configuration →
---       Site URL:      https://murcielay2k.github.io/thaiapp/
---       Redirect URLs: https://murcielay2k.github.io/thaiapp/
+--       Site URL:      https://murcielay2k.github.io/sanuk-thai/
+--       Redirect URLs: https://murcielay2k.github.io/sanuk-thai/
 -- ============================================================================
 
 create extension if not exists "uuid-ossp";

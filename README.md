@@ -8,7 +8,7 @@
 3,100+ words · 45 learning worlds · reading & writing practice · global leaderboard</p>
 
 <p align="center">
-  <a href="https://murcielay2k.github.io/thaiapp/">🌐 Play now — free in your browser</a>
+  <a href="https://murcielay2k.github.io/sanuk-thai/">🌐 Play now — free in your browser</a>
 </p>
 
 ---
@@ -58,10 +58,10 @@ npm run deploy:web    # one-command release (see docs/UPDATES.md)
 | [docs/AUDIT.md](./docs/AUDIT.md) | Security & quality audit (July 2026) |
 | [docs/PAYMENTS_SETUP.md](./docs/PAYMENTS_SETUP.md) | Stripe webhook + entitlements deployment |
 
-**Legal:** [Privacy](https://murcielay2k.github.io/thaiapp/privacy) ·
-[Terms](https://murcielay2k.github.io/thaiapp/terms) ·
-[Refunds](https://murcielay2k.github.io/thaiapp/refunds) ·
-[Account deletion](https://murcielay2k.github.io/thaiapp/delete-account)
+**Legal:** [Privacy](https://murcielay2k.github.io/sanuk-thai/privacy) ·
+[Terms](https://murcielay2k.github.io/sanuk-thai/terms) ·
+[Refunds](https://murcielay2k.github.io/sanuk-thai/refunds) ·
+[Account deletion](https://murcielay2k.github.io/sanuk-thai/delete-account)
 
 ## License
 

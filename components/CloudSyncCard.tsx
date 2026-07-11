@@ -9,7 +9,7 @@ import { Fonts } from '../constants/typography';
 
 function redirectUrl(): string | undefined {
   if (Platform.OS === 'web' && typeof window !== 'undefined') {
-    return `${window.location.origin}/thaiapp/`;
+    return `${window.location.origin}/sanuk-thai/`;
   }
   return undefined;
 }

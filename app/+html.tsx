@@ -24,15 +24,15 @@ export default function Root({ children }: PropsWithChildren) {
         <meta property="og:site_name" content="Sanuk Thai" />
         <meta property="og:title" content="Sanuk Thai — Learn Thai" />
         <meta property="og:description" content="Sanuk Thai: learn Thai with 3,100+ words, reading and writing practice, quizzes and a global leaderboard. Free to play, right in your browser." />
-        <meta property="og:url" content="https://murcielay2k.github.io/thaiapp/" />
-        <meta property="og:image" content="https://murcielay2k.github.io/thaiapp/og.png" />
+        <meta property="og:url" content="https://murcielay2k.github.io/sanuk-thai/" />
+        <meta property="og:image" content="https://murcielay2k.github.io/sanuk-thai/og.png" />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Sanuk Thai — Learn Thai" />
         <meta name="twitter:description" content="Sanuk Thai: learn Thai with 3,100+ words, reading and writing practice, quizzes and a global leaderboard." />
-        <meta name="twitter:image" content="https://murcielay2k.github.io/thaiapp/og.png" />
-        <link rel="apple-touch-icon" href="/thaiapp/apple-touch-icon.png" />
+        <meta name="twitter:image" content="https://murcielay2k.github.io/sanuk-thai/og.png" />
+        <link rel="apple-touch-icon" href="/sanuk-thai/apple-touch-icon.png" />
         {/* Sanuk Spirit Realm — Google Fonts */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -88,7 +88,7 @@ export default function Root({ children }: PropsWithChildren) {
               })();
               (function () {
                 if (!('serviceWorker' in navigator)) return;
-                var OUR_SW = '/thaiapp/service-worker.js';
+                var OUR_SW = '/sanuk-thai/service-worker.js';
                 // Silently unregister any leftover service worker that isn't
                 // ours (e.g. an old root-scope one from a previous deploy), then
                 // register the current one. We deliberately do NOT force a

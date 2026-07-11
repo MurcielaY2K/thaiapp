@@ -18,7 +18,7 @@ while testing). Flip `constants/features.ts` to launch the paywall.
 
 ### 🔴 A1. Deep-linked routes bypassed progression/paywall and could wipe saved progress — FIXED
 Routed screens (`/lesson`, `/session`, `/write`, `/read`) never hydrated the
-zustand stores. Opening a crafted URL like `…/thaiapp/lesson?lessonId=w12f-cp`:
+zustand stores. Opening a crafted URL like `…/sanuk-thai/lesson?lessonId=w12f-cp`:
 1. played **any** lesson directly — skipping progression locks and (when the
    paywall is live) `premium-locked` gating, and
 2. worse, rendered against **empty** stores, so the first write
@@ -84,7 +84,7 @@ export emits inline scripts. Revisit if the app moves to a host with headers.
   HTML shell; all user-generated content (usernames, bios, leaderboard,
   avatars, flags) renders through RN `Text`, which escapes. Payment link opened
   with `noopener,noreferrer`.
-- **Service worker** — scoped to `/thaiapp/`, network-first with same-origin
+- **Service worker** — scoped to `/sanuk-thai/`, network-first with same-origin
   `res.ok` cache fallback, self-heals foreign workers without forced reloads.
 - **Dependencies** — `npm audit`: 39 findings, **all in the dev/build
   toolchain** (metro/`ws` etc.), none shipped in the static bundle. Runtime
@@ -106,6 +106,6 @@ export emits inline scripts. Revisit if the app moves to a host with headers.
 1. Run in Supabase SQL editor (idempotent): `schema.sql`, `hardening.sql`
    *(updated in this audit)*, `progress_sync.sql` *(updated)*, `entitlements.sql`.
 2. Enable **Authentication → Providers → Anonymous** and **Email** (magic link).
-3. Set Site URL / Redirect URL to `https://murcielay2k.github.io/thaiapp/`.
+3. Set Site URL / Redirect URL to `https://murcielay2k.github.io/sanuk-thai/`.
 4. Deploy the Stripe webhook per `docs/PAYMENTS_SETUP.md`.
 5. Before charging money: set `PREMIUM_ON_HOLD = false`.

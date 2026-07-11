@@ -39,23 +39,21 @@ the site comes right back up at the new, branded URL:
 Until there's a custom domain, keeping the repo public is the only free way
 to keep the app online on GitHub Pages.
 
-## Rename checklist (when you decide — tell Claude "do the rename to X")
+## Rename checklist — STATUS: code side EXECUTED (July 2026)
 
-Owner does (GitHub → repo → Settings):
-1. Rename repository to `sanuk-thai`.
+All code/config changes for the `sanuk-thai` rename are done and deployed:
+base path, build rewrites, OG/social URLs, service-worker path, update
+checker, auth redirect URL, legal/docs links — every `/thaiapp` path is now
+`/sanuk-thai`. Local storage keys (`@thaiapp_*`) deliberately unchanged so
+nobody loses progress.
 
-Code/config changes (Claude does, same session):
-2. `app.json`: `web.baseUrl` + `experiments.baseUrl` → `/sanuk-thai`.
-3. `package.json build:web`: the `/thaiapp/` path rewrites → `/sanuk-thai/`.
-4. `app/+html.tsx`: OG/twitter URLs, apple-touch-icon, service-worker path.
-5. `components/UpdateBanner.tsx`: `VERSION_URL`.
-6. `components/CloudSyncCard.tsx`: `redirectUrl()` path.
-7. `public/service-worker.js` scope comments + `OUR_SW` path in +html.tsx.
-8. Legal pages + docs: replace `murcielay2k.github.io/thaiapp` everywhere.
-9. Rebuild, deploy, verify all routes + PWA + magic link on the new URL.
+Remaining — owner does (GitHub → repo → Settings → General):
+1. **Rename repository to `sanuk-thai`.** The moment this is saved, the site
+   is live at `https://murcielay2k.github.io/sanuk-thai/`. Until then the
+   deployed build is dark (old URL serves new-path assets).
 
 External consoles (owner, same day):
-10. Supabase → Authentication → URL Configuration: Site URL + Redirect URLs
+2. Supabase → Authentication → URL Configuration: Site URL + Redirect URLs
     → new URL.
 11. Stripe Payment Link → after-payment redirect → new URL.
 12. Tell existing users (there aren't many yet) to re-add the home-screen app.

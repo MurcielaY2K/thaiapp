@@ -5,10 +5,10 @@ Legal pages ship inside the app AND are publicly reachable (required):
 
 | Document | Public URL (paste into consoles) |
 |---|---|
-| Privacy Policy | https://murcielay2k.github.io/thaiapp/privacy |
-| Terms of Service | https://murcielay2k.github.io/thaiapp/terms |
-| Refund Policy | https://murcielay2k.github.io/thaiapp/refunds |
-| **Account deletion** (Play "Data deletion" URL) | https://murcielay2k.github.io/thaiapp/delete-account |
+| Privacy Policy | https://murcielay2k.github.io/sanuk-thai/privacy |
+| Terms of Service | https://murcielay2k.github.io/sanuk-thai/terms |
+| Refund Policy | https://murcielay2k.github.io/sanuk-thai/refunds |
+| **Account deletion** (Play "Data deletion" URL) | https://murcielay2k.github.io/sanuk-thai/delete-account |
 | Support contact | coficollective@gmail.com ← confirm this is the address you want on record |
 
 Account deletion is self-serve and immediate: `delete_my_account()` RPC removes

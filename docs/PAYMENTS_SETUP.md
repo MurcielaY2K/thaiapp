@@ -46,7 +46,7 @@ supabase secrets set STRIPE_WEBHOOK_SECRET=whsec_...
 ```
 
 Also confirm the Payment Link's after-payment redirect is still
-`https://murcielay2k.github.io/thaiapp/?payment_success=1` (the param now only
+`https://murcielay2k.github.io/sanuk-thai/?payment_success=1` (the param now only
 triggers a server re-check, it grants nothing).
 
 ## Test matrix (run in Stripe test mode first)
