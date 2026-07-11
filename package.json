@@ -7,8 +7,9 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "build:web": "EXPO_NO_DOCTOR=1 EXPO_OFFLINE=1 expo export --platform web && touch dist/.nojekyll && cp public/service-worker.js dist/service-worker.js && find dist -name '*.html' -exec sed -i 's|src=\"/_expo/|src=\"/thaiapp/_expo/|g; s|href=\"/_expo/|href=\"/thaiapp/_expo/|g' {} + && find dist -name '*.html' -exec sed -i 's|</head>|<script>if(\"serviceWorker\"in navigator)navigator.serviceWorker.register(\"/thaiapp/service-worker.js\",{scope:\"/thaiapp/\"});</script></head>|g' {} +",
-    "lint": "expo lint"
+    "build:web": "node scripts/gen-version.mjs && EXPO_NO_DOCTOR=1 EXPO_OFFLINE=1 expo export --platform web && touch dist/.nojekyll && cp public/service-worker.js dist/service-worker.js && find dist -name '*.html' -exec sed -i 's|src=\"/_expo/|src=\"/thaiapp/_expo/|g; s|href=\"/_expo/|href=\"/thaiapp/_expo/|g' {} + && find dist -name '*.html' -exec sed -i 's|</head>|<script>if(\"serviceWorker\"in navigator)navigator.serviceWorker.register(\"/thaiapp/service-worker.js\",{scope:\"/thaiapp/\"});</script></head>|g' {} +",
+    "lint": "expo lint",
+    "deploy:web": "bash scripts/deploy-web.sh"
   },
   "dependencies": {
     "@expo/vector-icons": "^14.0.2",

@@ -18,6 +18,7 @@ import FlagPicker from '../FlagPicker';
 import CloudSyncCard from '../CloudSyncCard';
 import PixelAvatar from '../PixelAvatar';
 import PixelFlag from '../PixelFlag';
+import { APP_VERSION } from '../../constants/version';
 
 function Avatar({ emoji, frame, size = 72 }: { emoji: string; frame: FrameId; size?: number }) {
   const { border, glow } = FRAME_STYLES[frame];
@@ -446,7 +447,7 @@ export default function ProfileTab() {
               <Text style={styles.legalLink}>Delete account</Text>
             </TouchableOpacity>
           </View>
-          <Text style={styles.legalContact}>coficollective@gmail.com · v1.0.0</Text>
+          <Text style={styles.legalContact}>coficollective@gmail.com · v{APP_VERSION}</Text>
         </View>
 
       </ScrollView>

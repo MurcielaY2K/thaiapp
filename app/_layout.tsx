@@ -9,6 +9,7 @@ import { useProgressStore } from '../store/progressStore';
 import { useSrsStore } from '../store/srsStore';
 import { useUserStore } from '../store/userStore';
 import { supabase } from '../lib/supabase';
+import UpdateBanner from '../components/UpdateBanner';
 
 export default function RootLayout() {
   // Hydrate every store before ANY route renders. Routed screens
@@ -63,6 +64,7 @@ export default function RootLayout() {
         <Stack.Screen name="refunds" options={{ animation: 'fade' }} />
         <Stack.Screen name="delete-account" options={{ animation: 'fade' }} />
       </Stack>
+      <UpdateBanner />
     </GestureHandlerRootView>
   );
 }
