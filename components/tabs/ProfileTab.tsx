@@ -19,6 +19,7 @@ import CloudSyncCard from '../CloudSyncCard';
 import PixelAvatar from '../PixelAvatar';
 import PixelFlag from '../PixelFlag';
 import { APP_VERSION } from '../../constants/version';
+import { containsBlockedContent, isDisallowedUsername } from '../../lib/contentFilter';
 
 function Avatar({ emoji, frame, size = 72 }: { emoji: string; frame: FrameId; size?: number }) {
   const { border, glow } = FRAME_STYLES[frame];
@@ -56,6 +57,14 @@ function ProfileSetup() {
     if (username.trim().length < 3) { setError('Username must be at least 3 characters'); return; }
     if (username.trim().length > 20) { setError('Username max 20 characters'); return; }
     if (!/^[a-zA-Z0-9_]+$/.test(username.trim())) { setError('Only letters, numbers and _ allowed'); return; }
+    if (isDisallowedUsername(username) || containsBlockedContent(displayName)) {
+      setError('That name isn\'t allowed. Please choose another.');
+      return;
+    }
+    if (containsBlockedContent(bio)) {
+      setError('Please remove inappropriate language from your bio.');
+      return;
+    }
     setLoading(true);
     setError('');
     const err = await setupProfile({ username, displayName, avatarEmoji: avatar, countryFlag: flag, bio });
@@ -165,10 +174,20 @@ function ProfileEdit({ onDone }: { onDone: () => void }) {
   const [avatarOpen, setAvatarOpen]   = useState(false);
   const [flagOpen, setFlagOpen]       = useState(false);
   const [saving, setSaving]           = useState(false);
+  const [error, setError]             = useState('');
 
   const unlockedFrames = store.getUnlockedFrames();
 
   const save = async () => {
+    if (containsBlockedContent(displayName)) {
+      setError('That display name isn\'t allowed.');
+      return;
+    }
+    if (containsBlockedContent(bio)) {
+      setError('Please remove inappropriate language from your bio.');
+      return;
+    }
+    setError('');
     setSaving(true);
     await store.updateProfile({ displayName, bio, avatarEmoji: avatar, countryFlag: flag, profileFrame: frame });
     setSaving(false);
@@ -207,6 +226,8 @@ function ProfileEdit({ onDone }: { onDone: () => void }) {
         />
         <Text style={styles.fieldHint}>{bio.length}/140</Text>
       </View>
+
+      {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
       <Text style={[styles.fieldLabel, { paddingHorizontal: 0, marginBottom: 8 }]}>PROFILE FRAME</Text>
       <View style={styles.frameRow}>

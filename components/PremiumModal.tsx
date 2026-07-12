@@ -5,7 +5,7 @@ import {
 import { router } from 'expo-router';
 import { Colors } from '../constants/colors';
 import { Fonts } from '../constants/typography';
-import { STRIPE_PAYMENT_LINK, paymentLinkFor, STRIPE_CHECKOUT_ENABLED } from '../constants/stripe';
+import { PREMIUM_TIERS, availableTiers, paymentLinkFor, STRIPE_CHECKOUT_ENABLED, PremiumTier } from '../constants/stripe';
 import { supabase } from '../lib/supabase';
 import { WORLDS, ALL_LESSONS } from '../data/worlds';
 import { track } from '../lib/analytics';
@@ -23,10 +23,10 @@ const PERKS = [
   { icon: '🏆', text: 'All badges & achievements' },
 ];
 
-async function openStripe() {
+async function openStripe(tier: PremiumTier) {
   // Web only — never open an external payment flow inside a store build.
   if (!STRIPE_CHECKOUT_ENABLED) return;
-  track('checkout_click');
+  track('checkout_click', { tier: tier.id });
   // The checkout must carry the buyer's Supabase auth uuid so the Stripe
   // webhook can grant the entitlement to this user. Sign in anonymously
   // first if there's no session yet.
@@ -44,7 +44,7 @@ async function openStripe() {
       // an unlinked payment can be linked manually from the dashboard.
     }
   }
-  const url = authId ? paymentLinkFor(authId) : STRIPE_PAYMENT_LINK;
+  const url = paymentLinkFor(tier, authId);
   if (Platform.OS === 'web' && typeof window !== 'undefined') {
     window.open(url, '_blank', 'noopener,noreferrer');
   } else {
@@ -54,6 +54,12 @@ async function openStripe() {
 
 export default function PremiumModal({ visible, onClose }: Props) {
   React.useEffect(() => { if (visible) track('paywall_view'); }, [visible]);
+  // Tiers without a Stripe link yet are hidden; preselect the highlighted one.
+  const tiers = availableTiers();
+  const [tierId, setTierId] = React.useState(
+    (tiers.find(t => t.highlight) ?? tiers[0])?.id ?? 'monthly',
+  );
+  const tier = tiers.find(t => t.id === tierId) ?? tiers[0];
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <Pressable style={styles.overlay} onPress={onClose}>
@@ -65,13 +71,37 @@ export default function PremiumModal({ visible, onClose }: Props) {
 
           <Text style={styles.title}>Unlock Thai{'\n'}Premium</Text>
 
-          <View style={styles.priceRow}>
-            <Text style={styles.price}>฿199</Text>
-            <View style={styles.priceMeta}>
-              <Text style={styles.pricePer}>/ month</Text>
-              <Text style={styles.priceSub}>Cancel anytime</Text>
+          {tiers.length > 1 ? (
+            <View style={styles.tierRow}>
+              {tiers.map(t => {
+                const active = t.id === tierId;
+                return (
+                  <TouchableOpacity
+                    key={t.id}
+                    style={[styles.tier, active && styles.tierActive]}
+                    onPress={() => setTierId(t.id)}
+                    activeOpacity={0.85}
+                  >
+                    {t.highlight && <Text style={styles.tierTag}>BEST VALUE</Text>}
+                    <Text style={[styles.tierLabel, active && styles.tierLabelActive]}>{t.label}</Text>
+                    <Text style={[styles.tierPrice, active && styles.tierPriceActive]}>{t.price}</Text>
+                    <Text style={styles.tierPer}>{t.per}</Text>
+                  </TouchableOpacity>
+                );
+              })}
             </View>
-          </View>
+          ) : tier ? (
+            <View style={styles.priceRow}>
+              <Text style={styles.price}>{tier.price}</Text>
+              <View style={styles.priceMeta}>
+                <Text style={styles.pricePer}>{tier.per}</Text>
+                <Text style={styles.priceSub}>{tier.note ?? ''}</Text>
+              </View>
+            </View>
+          ) : null}
+          {tiers.length > 1 && tier?.note ? (
+            <Text style={styles.tierNote}>{tier.note}</Text>
+          ) : null}
 
           <View style={styles.divider} />
 
@@ -86,9 +116,15 @@ export default function PremiumModal({ visible, onClose }: Props) {
 
           {STRIPE_CHECKOUT_ENABLED ? (
             <>
-              <TouchableOpacity style={styles.stripeBtn} onPress={openStripe} activeOpacity={0.88}>
+              <TouchableOpacity
+                style={styles.stripeBtn}
+                onPress={() => tier && openStripe(tier)}
+                activeOpacity={0.88}
+              >
                 <Text style={styles.stripeLogo}>stripe</Text>
-                <Text style={styles.stripeBtnText}>Subscribe with Stripe</Text>
+                <Text style={styles.stripeBtnText}>
+                  {tier?.id === 'lifetime' ? 'Buy once with Stripe' : 'Subscribe with Stripe'}
+                </Text>
                 <Text style={styles.stripeArrow}>›</Text>
               </TouchableOpacity>
 
@@ -167,6 +203,23 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 
+  tierRow: { flexDirection: 'row', gap: 8, width: '100%' },
+  tier: {
+    flex: 1, alignItems: 'center', gap: 2, paddingVertical: 12, paddingHorizontal: 4,
+    borderRadius: 10, borderWidth: 2, borderColor: Colors.border, backgroundColor: Colors.bgInset,
+  },
+  tierActive: { borderColor: Colors.gold, backgroundColor: 'rgba(255,215,0,0.10)' },
+  tierTag: {
+    position: 'absolute', top: -9, backgroundColor: Colors.gold, color: '#17150f',
+    fontSize: 8, fontFamily: Fonts.hud, fontWeight: '700', letterSpacing: 0.5,
+    paddingHorizontal: 6, paddingVertical: 1, borderRadius: 6, overflow: 'hidden',
+  },
+  tierLabel: { color: Colors.textDim, fontSize: 10, fontFamily: Fonts.hud, letterSpacing: 1 },
+  tierLabelActive: { color: Colors.text },
+  tierPrice: { color: Colors.textDim, fontSize: 18, fontFamily: Fonts.hud, fontWeight: '700' },
+  tierPriceActive: { color: Colors.gold },
+  tierPer: { color: Colors.textDim, fontSize: 10 },
+  tierNote: { color: Colors.textDim, fontSize: 12, textAlign: 'center' },
   priceRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   price: { color: Colors.gold, fontSize: 44, fontFamily: Fonts.hud },
   priceMeta: { gap: 2 },

@@ -55,11 +55,12 @@ Recommended tiers:
 | **Annual (push this)** | ฿1,190 / $34.99 ("save 50%") |
 | Lifetime (launch offer) | ฿1,990 / $59.99 |
 
-To implement: create Annual + Lifetime Payment Links in Stripe (lifetime =
-one-time payment; the webhook + entitlements already handle it — a one-time
-`checkout.session.completed` with no subscription grants a never-expiring
-entitlement). Then ask Claude to build the 3-tier picker into PremiumModal
-and flip `PREMIUM_ON_HOLD = false`.
+**The 3-tier picker UI is already built** (PremiumModal + constants/stripe.ts).
+To go live: create the Annual + Lifetime Payment Links in Stripe (details in
+the comments in `constants/stripe.ts`; lifetime = one-time payment — the
+webhook + entitlements already handle it), paste the two URLs into
+`PREMIUM_TIERS`, deploy, and flip `PREMIUM_ON_HOLD = false`. Tiers without a
+link stay hidden, so this can go live one tier at a time.
 **Grandfather early testers**: announce the flip in-app a week ahead.
 
 ## 📱 Step 5 — App stores (2–3 weeks, mostly waiting)
@@ -88,6 +89,5 @@ and flip `PREMIUM_ON_HOLD = false`.
 - Sentence/phrase questions woven into checkpoint lessons (phrasebook data
   already exists in `data/phrases.ts` — content-design pass with Claude).
 - Word-by-word read-along using recorded audio (currently Web Speech only).
-- Profanity blocklist for usernames/bios before scale.
 - Leaderboard cold-start: seed with your own few profiles; add a friendly
   "be the first from your country" empty state.

@@ -14,6 +14,7 @@ export EXPO_PUBLIC_BASE_PATH="$BASE_PATH"
 export EXPO_PUBLIC_SITE_ORIGIN="$SITE_ORIGIN"
 
 node scripts/gen-version.mjs
+node scripts/gen-seo.mjs
 EXPO_NO_DOCTOR=1 EXPO_OFFLINE=1 expo export --platform web
 touch dist/.nojekyll
 cp public/service-worker.js dist/service-worker.js
