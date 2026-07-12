@@ -1,6 +1,17 @@
 import { ScrollViewStyleReset } from 'expo-router/html';
 import { type PropsWithChildren } from 'react';
 
+// Same source builds for two hosts (see scripts/build-web.sh): GitHub Pages
+// at a subpath, or Cloudflare Pages at the domain root. Both env vars are
+// inlined at build time by Expo (EXPO_PUBLIC_* are statically replaced), so
+// this resolves to plain string literals in the shipped HTML — no runtime cost.
+const BASE_PATH   = process.env.EXPO_PUBLIC_BASE_PATH   ?? '/sanuk-thai';
+const SITE_ORIGIN = process.env.EXPO_PUBLIC_SITE_ORIGIN ?? 'https://murcielay2k.github.io';
+const SITE_URL    = `${SITE_ORIGIN}${BASE_PATH}/`;
+const OG_IMAGE    = `${SITE_URL}og.png`;
+const SW_PATH     = `${BASE_PATH}/service-worker.js`;
+const SW_SCOPE    = `${BASE_PATH}/`;
+
 export default function Root({ children }: PropsWithChildren) {
   return (
     <html lang="th">
@@ -24,15 +35,15 @@ export default function Root({ children }: PropsWithChildren) {
         <meta property="og:site_name" content="Sanuk Thai" />
         <meta property="og:title" content="Sanuk Thai — Learn Thai" />
         <meta property="og:description" content="Sanuk Thai: learn Thai with 3,100+ words, reading and writing practice, quizzes and a global leaderboard. Free to play, right in your browser." />
-        <meta property="og:url" content="https://murcielay2k.github.io/sanuk-thai/" />
-        <meta property="og:image" content="https://murcielay2k.github.io/sanuk-thai/og.png" />
+        <meta property="og:url" content={SITE_URL} />
+        <meta property="og:image" content={OG_IMAGE} />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Sanuk Thai — Learn Thai" />
         <meta name="twitter:description" content="Sanuk Thai: learn Thai with 3,100+ words, reading and writing practice, quizzes and a global leaderboard." />
-        <meta name="twitter:image" content="https://murcielay2k.github.io/sanuk-thai/og.png" />
-        <link rel="apple-touch-icon" href="/sanuk-thai/apple-touch-icon.png" />
+        <meta name="twitter:image" content={OG_IMAGE} />
+        <link rel="apple-touch-icon" href={`${BASE_PATH}/apple-touch-icon.png`} />
         {/* Sanuk Spirit Realm — Google Fonts */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -88,7 +99,7 @@ export default function Root({ children }: PropsWithChildren) {
               })();
               (function () {
                 if (!('serviceWorker' in navigator)) return;
-                var OUR_SW = '/sanuk-thai/service-worker.js';
+                var OUR_SW = '${SW_PATH}';
                 // Silently unregister any leftover service worker that isn't
                 // ours (e.g. an old root-scope one from a previous deploy), then
                 // register the current one. We deliberately do NOT force a
@@ -104,7 +115,7 @@ export default function Root({ children }: PropsWithChildren) {
                 // updateViaCache 'none' re-fetches the SW script on every
                 // navigation, so new deploys roll out without a hard refresh.
                 navigator.serviceWorker
-                  .register(OUR_SW, { updateViaCache: 'none' })
+                  .register(OUR_SW, { updateViaCache: 'none', scope: '${SW_SCOPE}' })
                   .catch(function () {});
               })();
             `,

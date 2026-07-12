@@ -12,7 +12,10 @@ import { BUILD_ID } from '../constants/version';
 // (refresh only happens when they tap UPDATE).
 
 const CHECK_MS = 5 * 60 * 1000;
-const VERSION_URL = '/sanuk-thai/version.json';
+// Same source builds for a GitHub Pages subpath or a Cloudflare Pages root
+// domain (see scripts/build-web.sh) — this env var is inlined at build time.
+const BASE_PATH = process.env.EXPO_PUBLIC_BASE_PATH ?? '/sanuk-thai';
+const VERSION_URL = `${BASE_PATH}/version.json`;
 
 export default function UpdateBanner() {
   const [available, setAvailable] = useState(false);

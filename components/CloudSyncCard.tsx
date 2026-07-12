@@ -7,9 +7,14 @@ import { useUserStore } from '../store/userStore';
 import { Colors } from '../constants/colors';
 import { Fonts } from '../constants/typography';
 
+// window.location.origin already adapts to whatever domain is actually
+// serving the app — only the subpath suffix needs the build-time constant
+// (see scripts/build-web.sh: GitHub Pages subpath vs Cloudflare Pages root).
+const BASE_PATH = process.env.EXPO_PUBLIC_BASE_PATH ?? '/sanuk-thai';
+
 function redirectUrl(): string | undefined {
   if (Platform.OS === 'web' && typeof window !== 'undefined') {
-    return `${window.location.origin}/sanuk-thai/`;
+    return `${window.location.origin}${BASE_PATH}/`;
   }
   return undefined;
 }
