@@ -3,6 +3,7 @@ import {
   View, Text, StyleSheet, TouchableOpacity, SafeAreaView, ScrollView, Platform,
 } from 'react-native';
 import { router } from 'expo-router';
+import { speakThai } from '../lib/audio';
 import { Colors } from '../constants/colors';
 import PixelSprite from '../components/PixelSprite';
 import { SPRITES } from '../data/sprites';
@@ -16,16 +17,7 @@ function thaiVoice() {
 }
 
 function speak(text: string, rate = 0.75) {
-  if (Platform.OS !== 'web') return;
-  const w = window as any;
-  if (!w.speechSynthesis) return;
-  w.speechSynthesis.cancel();
-  const u = new w.SpeechSynthesisUtterance(text);
-  u.lang = 'th-TH';
-  u.rate = rate;
-  const thai = thaiVoice();
-  if (thai) u.voice = thai;
-  w.speechSynthesis.speak(u);
+  speakThai(text, rate);
 }
 
 // Speak a single token and resolve when it finishes — used to drive the

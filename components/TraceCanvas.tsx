@@ -4,6 +4,7 @@ import {
   TouchableOpacity, Platform, GestureResponderEvent, Animated, Easing,
 } from 'react-native';
 import { Colors } from '../constants/colors';
+import { speakThai } from '../lib/audio';
 import { placeGlyph } from '../lib/glyph';
 
 type Point = { x: number; y: number };
@@ -16,19 +17,8 @@ const GHOST_COLOR     = 'rgba(23,21,15,0.20)';
 const HIT_COLOR       = 'rgba(63,157,88,0.42)';
 const MISS_COLOR      = 'rgba(232,74,82,0.40)';
 
-function speak(text: string, lang = 'th-TH') {
-  if (Platform.OS !== 'web') return;
-  const w = window as any;
-  if (!w.speechSynthesis) return;
-  w.speechSynthesis.cancel();
-  const u = new w.SpeechSynthesisUtterance(text);
-  u.lang = lang; u.rate = 0.7;
-  if (lang.startsWith('th')) {
-    const thai = (w.speechSynthesis.getVoices?.() ?? [])
-      .find((v: any) => /th(-|_)?/i.test(v.lang));
-    if (thai) u.voice = thai;
-  }
-  w.speechSynthesis.speak(u);
+function speak(text: string) {
+  speakThai(text, 0.7);
 }
 
 export default function TraceCanvas({ char, charName, size }: { char: string; charName?: string; size?: number }) {

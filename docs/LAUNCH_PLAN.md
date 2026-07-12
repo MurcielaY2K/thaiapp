@@ -1,100 +1,93 @@
-# ภาษาไทย Thai App — Commercial Launch Plan
+# Sanuk Thai — path to a paid launch
 
-Goal: paying customers fast, without launching broken. Four phases, ~4–6 weeks.
-Pre-reqs come from `AUDIT.md` — the plan sequences them so marketing never waits on code.
+State of play (July 2026): infrastructure is done (sync, entitlements, legal,
+updates, security, dual-host builds). What stands between here and charging
+money is **content quality + distribution**, in this order.
 
----
+## ✅ Just shipped (this session)
 
-## Phase 0 — Test & Harden (now → ~1 week)  *Premium is ON HOLD*
+- **New elephant mascot** — redrawn side-view pixel elephant (icon, favicon,
+  apple-touch, adaptive icon, OG card, in-app avatar sprite).
+- **Audio system** — `lib/audio.ts` plays pre-recorded MP3s when they exist
+  and falls back to the *best available* Thai system voice (ranked, cached)
+  instead of the first one. All speech call sites now route through it.
+- **Audio pipeline** — `scripts/gen-audio.mjs` batch-generates near-native
+  neural TTS clips for lesson words + alphabet names (needs a key, see below).
+- **Self-hosted analytics** — `supabase/analytics.sql` + `lib/analytics.ts`;
+  9 funnel events (app_open, level_picked, lesson_start/complete/fail,
+  profile_created, email_linked, paywall_view, checkout_click). No PII, no
+  third-party trackers. Retention/funnel queries included in the SQL file.
+- **Native-review package** — `docs/audit/vocab-audit.csv` (3,062 words,
+  lesson words first, reviewer columns ready).
 
-Everything is free right now (`PREMIUM_ON_HOLD = true`) — use it.
+## 🔑 Step 1 — Native-quality audio (highest leverage, ~1 hour of your time)
 
-**Testing checklist (all layers):**
-- [ ] Learn path: every lesson in all 5 worlds start-to-finish (hearts off, so no friction)
-- [ ] Practice/SRS: session flow, streak bump, star scoring, TTS on iPhone/Android/desktop
-- [ ] Write: watch + trace + accuracy scanner on a real phone (pointer capture!)
-- [ ] Read: all stories & 16 phrase categories, read-all highlight, speed control
-- [ ] Database: all 55 categories render, search, and speak
-- [ ] Profile/leaderboard: signup, username collision, score sync, rank display
-- [ ] Rewards/gems/badges: unlock toasts, frames, avatar packs
-- [ ] Fresh-device onboarding + a second device for the same profile
-- [ ] Offline / flaky network behaviour, and a service-worker update (no stale app)
+1. Create a Google Cloud account → enable **Cloud Text-to-Speech API** →
+   create an API key. (Or Azure Speech: key + region.) Free tier covers this
+   entire batch with huge margin.
+2. Run: `GOOGLE_TTS_KEY=your-key node scripts/gen-audio.mjs`
+3. `npm run deploy:web`
+Every lesson word now sounds near-native on every device. Re-run any time —
+it's incremental.
 
-**Parallel build work:** icons/favicon/OG tags, legal pages, Sentry + analytics, CI.
-**Exit criteria:** zero blocking bugs; analytics events flowing.
+## 🔑 Step 2 — Native speaker review (~$100–200, one week)
 
-## Phase 1 — Monetization done right (week 2)
+1. Post on Upwork/Fastwork: "Review Thai vocabulary entries for a
+   language-learning app: check romanization + translation. CSV provided."
+   (Fastwork.co is the Thai freelance platform — cheaper, native reviewers.)
+2. Send `docs/audit/vocab-audit.csv` — reviewer fills `reviewer_ok` /
+   `reviewer_correction` columns. Lesson words (top of the file) first.
+3. Return the CSV to Claude → corrections applied in one pass.
 
-1. Supabase `entitlements` table + Stripe webhook Edge Function (AUDIT C1).
-2. Email sign-in (magic link) as an upgrade from anonymous — required to buy.
-3. Backend hardening: DB constraints, score clamping, `auth_id` hidden (C3/H1).
-4. Cloud progress sync (H2) — the paid promise: "your Thai, on every device".
-5. Re-price before flipping the flag:
-   - **Free tier:** first world + database browsing + 1 SRS session/day (hearts).
-   - **Premium ฿99–149/mo or ฿990/yr** (undercut tutoring, not Duolingo's free tier).
-   - **Founder lifetime ฿1,490, first 100 customers** — creates urgency, funds Phase 3.
-   - 7-day free trial via Stripe.
-6. Flip `PREMIUM_ON_HOLD = false`. Verify: buy → unlock, cancel → re-lock, refund → re-lock, new device → restore.
+## 🔑 Step 3 — Run the analytics SQL, watch for 2 weeks
 
-## Phase 2 — Soft launch / beta (weeks 2–4, overlaps Phase 1)
+Paste `supabase/analytics.sql` in the Supabase SQL editor (one Run). The app
+is already instrumented. Before making any pricing/paywall decision, look at:
+day-7 retention, lesson_complete per device, and where the funnel leaks.
+Queries are at the bottom of the SQL file.
 
-Target: **100 real learners, 10 paying, testimonials in hand.**
+## 💰 Step 4 — Pricing & paywall flip (only after 1–3)
 
-- Custom domain (e.g. `learnthai.app` style) on GitHub Pages — a `github.io` URL
-  doesn't sell subscriptions.
-- Recruit where Thai learners already are:
-  - Reddit r/LearnThai (~60k), r/Thailand
-  - Facebook: "Thai Language Learners", Bangkok/Chiang Mai/Phuket expat groups
-  - Discord Thai-learning servers; ThaiVisa/ASEAN NOW forums
-  - Offer beta users the founder-lifetime price for feedback + a testimonial
-- Instrument the funnel: visit → first lesson complete (activation) → D1/D7 return →
-  trial start → paid. Fix the biggest drop-off each week.
-- Collect 5–10 quotable testimonials and screen recordings.
+Recommended tiers:
+| Tier | Price |
+|---|---|
+| Monthly | ฿199 / $5.99 |
+| **Annual (push this)** | ฿1,190 / $34.99 ("save 50%") |
+| Lifetime (launch offer) | ฿1,990 / $59.99 |
 
-## Phase 3 — Public launch (weeks 4–6)
+To implement: create Annual + Lifetime Payment Links in Stripe (lifetime =
+one-time payment; the webhook + entitlements already handle it — a one-time
+`checkout.session.completed` with no subscription grants a never-expiring
+entitlement). Then ask Claude to build the 3-tier picker into PremiumModal
+and flip `PREMIUM_ON_HOLD = false`.
+**Grandfather early testers**: announce the flip in-app a week ahead.
 
-**The demo IS the marketing.** The trace-the-letter scanner and word-by-word reader
-are unusually visual — lead every asset with a 15–30s screen capture.
+## 📱 Step 5 — App stores (2–3 weeks, mostly waiting)
 
-- **Landing page** on the custom domain: hero video, testimonials, pricing, FAQ, legal.
-- **Short-form video** (TikTok/IG Reels/YT Shorts): "Can you write ก?" trace-scan
-  clips, "How to order noodles in Thai" phrasebook clips — 3–5/week. This audience
-  (expats/travellers in Thailand) is heavily on TikTok.
-- **Product Hunt** launch (Tuesday–Thursday) with the beta cohort primed to comment.
-- **YouTube Thai-learning channels**: offer creators 30–50% affiliate codes rather
-  than paying upfront.
-- **SEO seeds:** the phrasebook categories are ready-made articles ("50 Thai words
-  for the market", "Thai for the gym") linking into the app.
-- **Communities:** honest "I built this" posts in the Phase-2 channels with the
-  founder deal — these convert best when you're already a known contributor.
+1. Apple Developer ($99/yr) + Google Play ($25 one-time) accounts.
+2. Expo SDK upgrade 51 → latest, then `eas build` (identifiers/copy/compliance
+   already prepared: `docs/STORE_LISTING.md`, `docs/STORE_COPY.md`).
+3. `eas update` gives store apps the same instant-update flow the web has.
+4. In-app purchases: RevenueCat (free tier) feeding the same entitlements
+   table — required before charging inside store apps (web Stripe stays).
 
-## Phase 4 — Post-launch growth (ongoing)
+## 📣 Step 6 — Distribution (ongoing, the actual hard part)
 
-- **App stores** via Expo EAS (the codebase is already Expo) — App Store/Play unlock
-  the biggest channel + native IAP; requires the SDK upgrade (AUDIT H4).
-- **Growth loops already built, just amplify:** streaks (add push/email streak
-  reminders), leaderboard (weekly league resets), gems (referral: give 50/get 50).
-- **Share cards:** "🔥 30-day streak / 500 words mastered" image share button.
-- **Content cadence:** one new world/unit per month from the 2,013-word database
-  (auto-generated lessons, AUDIT improvement #8) — announce each to the email list.
-- **B2B angle later:** Thai schools for expats, corporate relocation packages.
+- Wedge: **Duolingo has no Thai course.** Target searches/communities asking
+  "Duolingo for Thai": r/learnthai, Facebook expat groups (Chiang Mai/BKK),
+  TikTok/IG short-form ("3 Thai words tourists always get wrong" style).
+- Post the web app to Product Hunt / Hacker News once audio (Step 1) ships.
+- Custom domain (`sanukthai.com` + Cloudflare Pages, playbook in
+  docs/REBRAND.md) before any promotion push — links people share should be
+  the brand, not github.io.
 
----
+## Later / nice-to-have
 
-## KPIs
-
-| Metric | Beta target | Launch target |
-|---|---|---|
-| Activation (first lesson complete) | 60% | 70% |
-| D7 retention | 20% | 30% |
-| Trial → paid | 25% | 35% |
-| Paying customers | 10 | 100 in first 60 days |
-| MRR | ฿1.5k | ฿10–15k |
-
-## Launch-week gate (all must be true)
-- [ ] Entitlements verified server-side (buy/cancel/refund/restore all tested)
-- [ ] Legal pages live + cancel path in-app
-- [ ] Leaderboard clamped; auth_id hidden
-- [ ] Icons/OG/custom domain live
-- [ ] Sentry quiet for 7 days; analytics funnel visible
-- [ ] CI green on main; deploy automated
+- Push-notification streak reminders (web push works on iOS home-screen apps
+  now; needs a small Supabase edge function + VAPID keys — ask Claude).
+- Sentence/phrase questions woven into checkpoint lessons (phrasebook data
+  already exists in `data/phrases.ts` — content-design pass with Claude).
+- Word-by-word read-along using recorded audio (currently Web Speech only).
+- Profanity blocklist for usernames/bios before scale.
+- Leaderboard cold-start: seed with your own few profiles; add a friendly
+  "be the first from your country" empty state.

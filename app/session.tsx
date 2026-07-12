@@ -10,22 +10,11 @@ import { VOCABULARY } from '../data/vocabulary';
 import { Colors } from '../constants/colors';
 import { Fonts } from '../constants/typography';
 import PixelSprite from '../components/PixelSprite';
+import { speakThai as speak } from '../lib/audio';
 import { SPRITES } from '../data/sprites';
 
 const ALL_ENGLISH = VOCABULARY.map(w => w.en);
 
-function speak(text: string) {
-  if (Platform.OS !== 'web') return;
-  const w = window as any;
-  if (!w.speechSynthesis) return;
-  w.speechSynthesis.cancel();
-  const u = new w.SpeechSynthesisUtterance(text);
-  u.lang = 'th-TH'; u.rate = 0.75;
-  const thai = (w.speechSynthesis.getVoices?.() ?? [])
-    .find((v: any) => /th(-|_)?/i.test(v.lang));
-  if (thai) u.voice = thai;
-  w.speechSynthesis.speak(u);
-}
 
 function makeOptions(correct: string): string[] {
   const others = ALL_ENGLISH

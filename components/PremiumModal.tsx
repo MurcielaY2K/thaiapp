@@ -8,6 +8,7 @@ import { Fonts } from '../constants/typography';
 import { STRIPE_PAYMENT_LINK, paymentLinkFor, STRIPE_CHECKOUT_ENABLED } from '../constants/stripe';
 import { supabase } from '../lib/supabase';
 import { WORLDS, ALL_LESSONS } from '../data/worlds';
+import { track } from '../lib/analytics';
 
 interface Props {
   visible: boolean;
@@ -25,6 +26,7 @@ const PERKS = [
 async function openStripe() {
   // Web only — never open an external payment flow inside a store build.
   if (!STRIPE_CHECKOUT_ENABLED) return;
+  track('checkout_click');
   // The checkout must carry the buyer's Supabase auth uuid so the Stripe
   // webhook can grant the entitlement to this user. Sign in anonymously
   // first if there's no session yet.
@@ -51,6 +53,7 @@ async function openStripe() {
 }
 
 export default function PremiumModal({ visible, onClose }: Props) {
+  React.useEffect(() => { if (visible) track('paywall_view'); }, [visible]);
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <Pressable style={styles.overlay} onPress={onClose}>

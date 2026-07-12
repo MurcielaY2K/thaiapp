@@ -7,6 +7,7 @@ import {
 } from '../data/rewards';
 
 import { StorageKeys } from '../constants/storageKeys';
+import { track } from '../lib/analytics';
 
 const PROFILE_KEY  = StorageKeys.profile;
 const REWARDS_KEY  = StorageKeys.rewards;
@@ -157,6 +158,7 @@ export const useUserStore = create<UserStore>((set, get) => ({
       };
       set({ ...update, isOnline: false } as any);
       await AsyncStorage.setItem(PROFILE_KEY, JSON.stringify({ ...get(), ...update }));
+      track('profile_created', { online: false });
       return null;
     };
 
@@ -211,6 +213,7 @@ export const useUserStore = create<UserStore>((set, get) => ({
       };
       set({ ...update, isOnline: true } as any);
       await AsyncStorage.setItem(PROFILE_KEY, JSON.stringify({ ...get(), ...update }));
+      track('profile_created', { online: true });
       return null;
     } catch {
       // Backend not reachable / not fully set up — fall back to a local

@@ -10,6 +10,8 @@ import { useProgressStore } from '../store/progressStore';
 import { Colors } from '../constants/colors';
 import { Fonts } from '../constants/typography';
 import PixelSprite from '../components/PixelSprite';
+import { speakThai, speechAvailable } from '../lib/audio';
+import { track } from '../lib/analytics';
 import { SPRITES } from '../data/sprites';
 
 // Reference-only dictionary words never appear in lessons or as distractors.
@@ -65,9 +67,7 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
-function speechAvailable(): boolean {
-  return typeof window !== 'undefined' && !!window.speechSynthesis;
-}
+
 
 function buildQuestions(lesson: Lesson, level: Level): Question[] {
   const world = WORLDS.find(w => w.id === lesson.worldId);
@@ -100,17 +100,6 @@ function buildQuestions(lesson: Lesson, level: Level): Question[] {
   });
 }
 
-function speakThai(text: string) {
-  if (!speechAvailable()) return;
-  window.speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang = 'th-TH';
-  u.rate = 0.8;
-  const voices = window.speechSynthesis.getVoices();
-  const thai = voices.find(v => v.lang.startsWith('th'));
-  if (thai) u.voice = thai;
-  window.speechSynthesis.speak(u);
-}
 
 const PROMPTS: Record<Mode, string> = {
   meaning: 'WHAT DOES THIS MEAN?',
@@ -147,6 +136,10 @@ export default function LessonScreen() {
     cardScale.setValue(0.92);
     Animated.spring(cardScale, { toValue: 1, useNativeDriver: true, tension: 140, friction: 8 }).start();
   }, [cardScale]);
+
+  useEffect(() => {
+    if (lesson && isUnlocked && qIdx === 0) track('lesson_start', { lesson: lesson.id });
+  }, []);
 
   useEffect(() => {
     animateCardIn();
@@ -210,6 +203,7 @@ export default function LessonScreen() {
     if (pct < threshold) {
       setCorrect(finalCorrect);
       setPhase('fail');
+      track('lesson_fail', { lesson: lesson.id, pct: Math.round(pct * 100) });
       return;
     }
 
@@ -220,6 +214,7 @@ export default function LessonScreen() {
     setLessonStars(lesson.id, stars);
     setCorrect(finalCorrect);
     setPhase('pass');
+    track('lesson_complete', { lesson: lesson.id, stars, pct: Math.round(pct * 100) });
   };
 
   if (!lesson || !isUnlocked) {

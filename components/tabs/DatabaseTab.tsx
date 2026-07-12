@@ -5,6 +5,7 @@ import {
 } from 'react-native';
 import { VOCABULARY, Word } from '../../data/vocabulary';
 import { Colors } from '../../constants/colors';
+import { speakThai } from '../../lib/audio';
 import { Fonts } from '../../constants/typography';
 
 const CATEGORIES = ['all', 'greetings', 'numbers', 'time', 'food', 'places', 'colors', 'family', 'verbs', 'adjectives', 'personal', 'weather', 'feelings', 'jobs', 'transport', 'car', 'travel', 'home', 'kitchen', 'bedroom', 'bathroom', 'garden', 'housework', 'shopping', 'fruit', 'vegetables', 'seafood', 'meat', 'bakery', 'dairy', 'pharmacy', 'beauty', 'baby', 'stationery', 'store', 'clothing', 'tools', 'shops', 'breakfast', 'meals', 'dishes', 'desserts', 'eatingout', 'fastfood', 'tech', 'education', 'office', 'bank', 'post', 'leisure', 'sightseeing', 'nightlife', 'hotel', 'beach', 'music', 'photography', 'games', 'crafts', 'sport', 'fitness', 'health', 'body', 'animals', 'plants', 'nature', 'celebrations', 'dictionary'];
@@ -105,15 +106,7 @@ function catColor(cat: string): string {
 }
 
 function speak(text: string) {
-  if (typeof window === 'undefined' || !window.speechSynthesis) return;
-  window.speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang = 'th-TH';
-  u.rate = 0.8;
-  const voices = window.speechSynthesis.getVoices();
-  const thai = voices.find(v => v.lang.startsWith('th'));
-  if (thai) u.voice = thai;
-  window.speechSynthesis.speak(u);
+  speakThai(text, 0.8);
 }
 
 function WordRow({ word }: { word: Word }) {

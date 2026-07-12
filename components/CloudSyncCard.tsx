@@ -6,6 +6,7 @@ import { pushProgress, pullAndMerge, restoreProfileFromCloud, getSyncStatus, onS
 import { useUserStore } from '../store/userStore';
 import { Colors } from '../constants/colors';
 import { Fonts } from '../constants/typography';
+import { track } from '../lib/analytics';
 
 // window.location.origin already adapts to whatever domain is actually
 // serving the app — only the subpath suffix needs the build-time constant
@@ -48,6 +49,7 @@ export default function CloudSyncCard() {
       { emailRedirectTo: redirectUrl() },
     );
     setBusy(false);
+    if (!error) track('email_linked');
     setMsg(error ? error.message : '📬 Check your inbox and confirm the link to finish.');
   };
 

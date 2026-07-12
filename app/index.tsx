@@ -14,6 +14,7 @@ import ProfileTab from '../components/tabs/ProfileTab';
 import RewardToast from '../components/RewardToast';
 import LevelPicker from '../components/LevelPicker';
 import { initProgressSync, restoreProfileFromCloud, pullAndMerge } from '../lib/progressSync';
+import { track } from '../lib/analytics';
 
 function consumeStripeSuccess(): boolean {
   if (Platform.OS !== 'web' || typeof window === 'undefined') return false;
@@ -81,7 +82,7 @@ export default function HomeScreen() {
   // so lessons can be tailored from question one. Wait for load so we don't
   // flash it at returning users who already chose.
   if (progressLoaded && skillLevel === null) {
-    return <LevelPicker onPick={setSkillLevel} />;
+    return <LevelPicker onPick={(l) => { track('level_picked', { level: l }); setSkillLevel(l); }} />;
   }
 
   return (
