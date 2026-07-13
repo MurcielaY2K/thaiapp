@@ -6,6 +6,7 @@ import {
 import { router, useLocalSearchParams } from 'expo-router';
 import { getLessonById, getNextLesson, Lesson, WORLDS } from '../data/worlds';
 import { VOCABULARY, Word } from '../data/vocabulary';
+import { PHRASE_CATEGORIES } from '../data/phrases';
 import { useProgressStore } from '../store/progressStore';
 import { Colors } from '../constants/colors';
 import { Fonts } from '../constants/typography';
@@ -26,7 +27,9 @@ const PASS_CHECKPOINT = 0.8;
 //  reverse: see English   → pick Thai      (tier 2+)
 //  listen:  hear Thai     → pick English   (tier 3+)
 //  reading: see phonetics → pick Thai      (tier 4)
-type Mode = 'meaning' | 'reverse' | 'listen' | 'reading';
+//  phrase:  see an English sentence → pick the Thai phrase (checkpoints only;
+//           beginners pick between romanizations instead of Thai script)
+type Mode = 'meaning' | 'reverse' | 'listen' | 'reading' | 'phrase';
 const TIER_MODES: Record<number, Mode[]> = {
   1: ['meaning', 'meaning', 'meaning'],
   2: ['meaning', 'meaning', 'reverse'],
@@ -69,6 +72,75 @@ function shuffle<T>(arr: T[]): T[] {
 
 
 
+// ── Phrase questions (checkpoints only) ─────────────────────────────────────
+// Checkpoints end with a few "How do you say…" questions built from the
+// phrasebook (data/phrases.ts), drawn from the categories closest to the
+// world's topic. The full Thai sentence is spoken as answer feedback.
+
+// Base world id (w1..w17 — lap worlds like 'w9c' share their base's topics)
+// → phrasebook category keys, most relevant first.
+const WORLD_PHRASE_KEYS: Record<string, string[]> = {
+  w1:  ['greetings', 'essentials'],
+  w2:  ['food'],
+  w3:  ['travel', 'time'],
+  w4:  ['family', 'feelings'],
+  w5:  ['feelings', 'essentials'],
+  w6:  ['hotel'],
+  w7:  ['shopping'],
+  w8:  ['shopping', 'food'],
+  w9:  ['food'],
+  w10: ['travel'],
+  w11: ['shopping', 'time'],
+  w12: ['health'],
+  w13: ['health', 'numbers'],
+  w14: ['weather'],
+  w15: ['online', 'about'],
+  w16: ['movies', 'slang'],
+  w17: ['about', 'greetings'],
+};
+
+interface PhraseEntry { th: string; rom: string; en: string }
+
+function phrasePool(worldId: string): { topic: PhraseEntry[]; all: PhraseEntry[] } {
+  const base = worldId.match(/^w\d+/)?.[0] ?? worldId;
+  const keys = WORLD_PHRASE_KEYS[base] ?? [];
+  const toEntries = (catKeys: string[]) => PHRASE_CATEGORIES
+    .filter(c => catKeys.length === 0 || catKeys.includes(c.key))
+    .flatMap(c => c.sentences)
+    .map(s => ({
+      th: s.tokens.map(t => t.th).join(''),
+      rom: s.tokens.map(t => t.rom).join(' '),
+      en: s.en,
+    }));
+  const topic = toEntries(keys);
+  return { topic: topic.length >= 4 ? topic : toEntries([]), all: toEntries([]) };
+}
+
+function buildPhraseQuestions(worldId: string, tier: number, level: Level): Question[] {
+  const { topic, all } = phrasePool(worldId);
+  const count = tier >= 3 ? 3 : 2;
+  // Beginners don't read Thai script yet — they choose between romanizations.
+  const field: 'th' | 'rom' = level === 'beginner' ? 'rom' : 'th';
+
+  const picked: PhraseEntry[] = [];
+  const usedEn = new Set<string>();
+  for (const s of shuffle(topic)) {
+    if (picked.length >= count) break;
+    if (!usedEn.has(s.en)) { usedEn.add(s.en); picked.push(s); }
+  }
+
+  return picked.map(sentence => {
+    const seen = new Set([sentence[field]]);
+    const distractors: string[] = [];
+    for (const s of shuffle(all)) {
+      if (distractors.length >= 3) break;
+      if (!seen.has(s[field])) { seen.add(s[field]); distractors.push(s[field]); }
+    }
+    const word: Word = { id: `phrase:${sentence.th}`, th: sentence.th, rom: sentence.rom, en: sentence.en, category: 'phrase' };
+    return { word, mode: 'phrase' as Mode, choices: shuffle([sentence[field], ...distractors]), answer: sentence[field] };
+  });
+}
+
 function buildQuestions(lesson: Lesson, level: Level): Question[] {
   const world = WORLDS.find(w => w.id === lesson.worldId);
   const tier = world?.tier ?? 1;
@@ -84,7 +156,7 @@ function buildQuestions(lesson: Lesson, level: Level): Question[] {
   // same-category look-alikes (advanced always, intermediate from tier 2 up).
   const hardDistractors = level === 'advanced' || (level !== 'beginner' && tier >= 2);
 
-  return selected.map((word, i) => {
+  const questions = selected.map((word, i) => {
     const mode = modes[i % modes.length];
     const field: 'en' | 'th' = (mode === 'reverse' || mode === 'reading') ? 'th' : 'en';
 
@@ -98,6 +170,12 @@ function buildQuestions(lesson: Lesson, level: Level): Question[] {
     }
     return { word, mode, choices: shuffle([word[field], ...distractors]), answer: word[field] };
   });
+
+  // Checkpoints graduate with real phrases from the world's topic.
+  if (lesson.type === 'checkpoint') {
+    questions.push(...buildPhraseQuestions(lesson.worldId, tier, level));
+  }
+  return questions;
 }
 
 
@@ -106,6 +184,7 @@ const PROMPTS: Record<Mode, string> = {
   reverse: 'HOW DO YOU SAY THIS IN THAI?',
   listen: 'WHAT DID YOU HEAR?',
   reading: 'WHICH WORD READS LIKE THIS?',
+  phrase: 'HOW DO YOU SAY THIS PHRASE?',
 };
 
 type Phase = 'quiz' | 'pass' | 'fail' | 'hearts';
@@ -246,7 +325,7 @@ export default function LessonScreen() {
   const q = questions[qIdx];
   const isCorrect = selected === q.answer;
   const progress = qIdx / questions.length;
-  const thaiChoices = q.mode === 'reverse' || q.mode === 'reading';
+  const thaiChoices = q.mode === 'reverse' || q.mode === 'reading' || (q.mode === 'phrase' && !romAlways);
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -311,6 +390,16 @@ export default function LessonScreen() {
               {selected && <Text style={styles.thaiWordSmall}>{q.word.th} — {q.word.en}</Text>}
             </>
           )}
+
+          {q.mode === 'phrase' && (
+            <>
+              <Text style={styles.phraseEn}>“{q.word.en}”</Text>
+              {/* Reveal the representation the choices didn't show */}
+              {selected && (romAlways
+                ? <Text style={styles.thaiWordSmall}>{q.word.th}</Text>
+                : <Text style={styles.romText}>{q.word.rom}</Text>)}
+            </>
+          )}
         </Animated.View>
 
         {/* Choices */}
@@ -344,6 +433,7 @@ export default function LessonScreen() {
               >
                 <Text style={[
                   thaiChoices ? styles.choiceThai : styles.choiceText,
+                  q.mode === 'phrase' && thaiChoices ? styles.choicePhraseThai : null,
                   { color: textColor },
                 ]}>
                   {choice}
@@ -542,6 +632,14 @@ const styles = StyleSheet.create({
     ...(Platform.OS === 'web' ? { boxShadow: `0 4px 0 0 ${Colors.borderStrong}` } as any : {}),
   },
   listenIcon: { fontSize: 40 },
+  phraseEn: {
+    color: Colors.text,
+    fontSize: 24,
+    fontFamily: Fonts.body,
+    fontWeight: '700',
+    textAlign: 'center',
+    lineHeight: 32,
+  },
   romText: { color: Colors.lavenderDark, fontSize: 18, fontFamily: Fonts.mono },
   speakerHint: { color: Colors.textMuted, fontSize: 11, fontFamily: Fonts.body, marginTop: 4 },
 
@@ -557,6 +655,8 @@ const styles = StyleSheet.create({
   },
   choiceText: { fontSize: 15, fontFamily: Fonts.body, fontWeight: '600', flex: 1 },
   choiceThai: { fontSize: 22, fontFamily: Fonts.body, fontWeight: '500', flex: 1 },
+  // Full sentences need a bit less size to stay on one or two lines
+  choicePhraseThai: { fontSize: 18, lineHeight: 26 },
   choiceMark: { color: Colors.correct, fontSize: 18, fontWeight: '700' },
   choiceMarkWrong: { color: Colors.wrong, fontSize: 18, fontWeight: '700' },
 

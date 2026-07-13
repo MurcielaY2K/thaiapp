@@ -19,6 +19,10 @@ money is **content quality + distribution**, in this order.
   third-party trackers. Retention/funnel queries included in the SQL file.
 - **Native-review package** — `docs/audit/vocab-audit.csv` (3,062 words,
   lesson words first, reviewer columns ready).
+- **Phrase questions in checkpoints** — every checkpoint now ends with 2–3
+  "How do you say this phrase?" questions built from the phrasebook
+  (`data/phrases.ts`), matched to the world's topic. Beginners choose between
+  romanizations; everyone else picks the Thai sentence.
 
 ## 🔑 Step 1 — Native-quality audio (highest leverage, ~1 hour of your time)
 
@@ -86,8 +90,6 @@ link stay hidden, so this can go live one tier at a time.
 
 - Push-notification streak reminders (web push works on iOS home-screen apps
   now; needs a small Supabase edge function + VAPID keys — ask Claude).
-- Sentence/phrase questions woven into checkpoint lessons (phrasebook data
-  already exists in `data/phrases.ts` — content-design pass with Claude).
 - Word-by-word read-along using recorded audio (currently Web Speech only).
 - Leaderboard cold-start: seed with your own few profiles; add a friendly
   "be the first from your country" empty state.
