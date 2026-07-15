@@ -61,13 +61,22 @@ Recommended tiers:
 | **Annual (push this)** | ฿1,190 / $34.99 ("save 50%") |
 | Lifetime (launch offer) | ฿1,990 / $59.99 |
 
-**The 3-tier picker UI is already built** (PremiumModal + constants/stripe.ts).
-To go live: create the Annual + Lifetime Payment Links in Stripe (details in
-the comments in `constants/stripe.ts`; lifetime = one-time payment — the
-webhook + entitlements already handle it), paste the two URLs into
-`PREMIUM_TIERS`, deploy, and flip `PREMIUM_ON_HOLD = false`. Tiers without a
-link stay hidden, so this can go live one tier at a time.
+✅ **All three live Stripe Payment Links are created and wired in**
+(`constants/stripe.ts`, account TARS Unlimited): Monthly ฿199 recurring,
+Annual ฿1,190 recurring (highlighted), Lifetime ฿1,990 one-time — all
+redirect back with `?payment_success=1`. The original "monthly" link was
+accidentally a one-time ฿199 payment and has been **deactivated** in Stripe
+(re-enable from dashboard → Payment Links if ever needed).
+To go live: flip `PREMIUM_ON_HOLD = false` in `constants/features.ts` and
+deploy. That is the only step left.
 **Grandfather early testers**: announce the flip in-app a week ahead.
+
+⚠️ **Supabase URL config needs updating** (magic links currently fail with
+"requested path is invalid" after the /thaiapp → /sanuk-thai rename):
+Supabase Dashboard → Authentication → URL Configuration →
+Site URL = `https://murcielay2k.github.io/sanuk-thai`, and add
+`https://murcielay2k.github.io/sanuk-thai/**` to Redirect URLs (add
+`https://sanukthai.com/**` too once the domain is live).
 
 ## 📱 Step 5 — App stores (2–3 weeks, mostly waiting)
 

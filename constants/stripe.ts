@@ -8,18 +8,19 @@ import { Platform } from 'react-native';
 export const STRIPE_CHECKOUT_ENABLED = Platform.OS === 'web';
 
 // ── Premium tiers ────────────────────────────────────────────────────────────
-// Each tier is a Stripe Payment Link (dashboard.stripe.com → Payment Links).
-// A tier with an empty link is HIDDEN in the app, so tiers can be created in
-// Stripe one at a time and go live by pasting the URL here.
+// Each tier is a LIVE Stripe Payment Link (account: TARS Unlimited).
+// A tier with an empty link is HIDDEN in the app.
+//   Monthly  — price_1TtQpl03JKicqGtdhxA2NW4R, ฿199 THB recurring monthly
+//   Annual   — price_1TtQq903JKicqGtdrPBbtEq7, ฿1,190 THB recurring yearly
+//   Lifetime — price_1TtQqS03JKicqGtdE9Z3JGUE, ฿1,990 THB one-time
+// All redirect to .../sanuk-thai/?payment_success=1 after payment. The webhook
+// + entitlements table handle all three: a one-time checkout.session.completed
+// (no subscription) grants an entitlement with no period end = never expires.
 //
-// Creating the missing links:
-//   Annual   — product "Sanuk Thai Premium (Annual)",  ฿1,190 THB, recurring yearly
-//   Lifetime — product "Sanuk Thai Premium (Lifetime)", ฿1,990 THB, ONE-TIME payment
-//   Both: After payment → redirect to
-//     https://murcielay2k.github.io/sanuk-thai/?payment_success=1
-// The existing webhook + entitlements table already handle all three: a
-// one-time checkout.session.completed (no subscription) grants an
-// entitlement with no period end = never expires. No backend changes needed.
+// NOTE: the original monthly link (buy.stripe.com/fZuaEPai75mJ5d6asJ77O03,
+// product "Sanuk Thai 2026") was accidentally a ONE-TIME ฿199 payment, not a
+// subscription — replaced 2026-07 by the recurring link below. Deactivate the
+// old link in the Stripe dashboard so nobody buys lifetime access for ฿199.
 
 export interface PremiumTier {
   id: 'monthly' | 'annual' | 'lifetime';
@@ -35,17 +36,17 @@ export const PREMIUM_TIERS: PremiumTier[] = [
   {
     id: 'monthly', label: 'MONTHLY', price: '฿199', per: '/ month',
     note: 'Cancel anytime',
-    link: 'https://buy.stripe.com/fZuaEPai75mJ5d6asJ77O03',
+    link: 'https://buy.stripe.com/8x26ozeyndTf9tm44l77O04',
   },
   {
     id: 'annual', label: 'ANNUAL', price: '฿1,190', per: '/ year',
     note: 'Save 50%', highlight: true,
-    link: '', // paste the Annual Payment Link here to go live
+    link: 'https://buy.stripe.com/fZu9ALeyn3eBfRKgR777O05',
   },
   {
     id: 'lifetime', label: 'LIFETIME', price: '฿1,990', per: 'one-time',
     note: 'Pay once, keep forever',
-    link: '', // paste the Lifetime Payment Link here to go live
+    link: 'https://buy.stripe.com/4gMaEP89Z8yV34Y30h77O06',
   },
 ];
 
