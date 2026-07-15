@@ -53,13 +53,26 @@ function extractSentences(file) {
   return { sentences, tokens };
 }
 const phrases = extractSentences('data/phrases.ts');
-// reading.ts sentences are built from a shared word dict (read word-by-word,
-// never as a whole) — its `th:` values are the tokens the read-along speaks.
+// reading.ts sentences reference a shared word dict (tokens: [W.chan, ...]),
+// so full sentences need the refs resolved; the dict's `th:` values are also
+// the words the tap-a-word gloss speaks.
+function extractReadingSentences() {
+  const src = readFileSync(join(root, 'data/reading.ts'), 'utf8');
+  const dict = {};
+  for (const m of src.matchAll(/(\w+):\s*\{ th: '([^']+)'/g)) dict[m[1]] = m[2];
+  const sentences = [];
+  for (const m of src.matchAll(/tokens:\s*\[([^\]]+)\]/g)) {
+    const toks = [...m[1].matchAll(/W\.(\w+)/g)].map(x => dict[x[1]]).filter(Boolean);
+    if (toks.length) sentences.push(toks.join(''));
+  }
+  return sentences;
+}
+const readingSentences = extractReadingSentences();
 const readingTokens = extract('data/reading.ts', /th:\s*'([^']+)'/g);
 
 const texts = [...new Set([
   ...alphaNames, ...lessonWords,
-  ...phrases.sentences,
+  ...phrases.sentences, ...readingSentences,
   ...phrases.tokens, ...readingTokens,
   ...otherWords,
 ])];

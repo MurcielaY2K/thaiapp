@@ -31,8 +31,10 @@ export default function ReadScreen() {
   const [showTranslate, setShowTranslate] = useState(false);
   const [selected, setSelected] = useState<Selected>(null);
   const [speedIdx, setSpeedIdx] = useState(1); // default 0.75×
-  const [playing, setPlaying] = useState(false);
-  const playRef = useRef(false);
+  // Index of the sentence currently playing (null = nothing). Playback is
+  // strictly per-sentence and user-initiated — no auto-advance.
+  const [playingS, setPlayingS] = useState<number | null>(null);
+  const playRef = useRef<number | null>(null);
   const rate = SPEEDS[speedIdx].rate;
 
   const lesson = READING_LESSONS[lessonIdx];
@@ -58,33 +60,33 @@ export default function ReadScreen() {
     setSelected(null);
   };
 
+  const stopReading = () => {
+    playRef.current = null;
+    stopSpeaking();
+    setPlayingS(null);
+  };
+
   const tapWord = (s: number, t: number, token: Token) => {
-    if (playing) stopReading();
+    if (playRef.current !== null) stopReading();
     setSelected({ s, t });
     speak(token.th, rate);
   };
 
-  const stopReading = () => {
-    playRef.current = false;
+  // Play ONE sentence as a single natural utterance (not word-by-word — that
+  // sounded chopped). Tapping the same sentence while it plays stops it;
+  // tapping another sentence switches to it. Never auto-advances.
+  const playSentence = async (s: number) => {
+    if (playRef.current === s) { stopReading(); return; }
     stopSpeaking();
-    setPlaying(false);
-  };
-
-  // Read every sentence word-by-word, highlighting each token as it's spoken.
-  const readAll = async () => {
-    if (playing) { stopReading(); return; }
-    setPlaying(true);
-    playRef.current = true;
-    for (let s = 0; s < sentences.length; s++) {
-      const toks = sentences[s].tokens;
-      for (let t = 0; t < toks.length; t++) {
-        if (!playRef.current) return;
-        setSelected({ s, t });
-        await speakThaiAsync(toks[t].th, rate);
-      }
+    playRef.current = s;
+    setPlayingS(s);
+    const text = sentences[s].tokens.map(tk => tk.th).join('');
+    await speakThaiAsync(text, rate);
+    // Only clear if another sentence hasn't taken over meanwhile.
+    if (playRef.current === s) {
+      playRef.current = null;
+      setPlayingS(null);
     }
-    playRef.current = false;
-    setPlaying(false);
   };
 
   // Stop any playback when switching tab / lesson / leaving the screen.
@@ -184,15 +186,6 @@ export default function ReadScreen() {
           >
             <Text style={styles.speedBtnText}>🐢 {SPEEDS[speedIdx].label}</Text>
           </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.readAll, playing && styles.readAllStop]}
-            onPress={readAll}
-            activeOpacity={0.8}
-          >
-            <Text style={[styles.readAllText, playing && styles.readAllStopText]}>
-              {playing ? '■  Stop' : '▶  Read all'}
-            </Text>
-          </TouchableOpacity>
         </View>
 
         {/* Selected word bar */}
@@ -218,8 +211,9 @@ export default function ReadScreen() {
               showPhonemic={showPhonemic}
               showTranslate={showTranslate}
               selected={selected}
+              isPlaying={playingS === s}
               onTapWord={tapWord}
-              onSpeak={() => { if (playing) stopReading(); speak(sentence.tokens.map(tk => tk.th).join(''), rate); }}
+              onSpeak={() => playSentence(s)}
             />
           ))}
         </View>
@@ -229,18 +223,19 @@ export default function ReadScreen() {
 }
 
 function SentenceRow({
-  sentence, sIndex, showPhonemic, showTranslate, selected, onTapWord, onSpeak,
+  sentence, sIndex, showPhonemic, showTranslate, selected, isPlaying, onTapWord, onSpeak,
 }: {
   sentence: Sentence;
   sIndex: number;
   showPhonemic: boolean;
   showTranslate: boolean;
   selected: Selected;
+  isPlaying: boolean;
   onTapWord: (s: number, t: number, token: Token) => void;
   onSpeak: () => void;
 }) {
   return (
-    <View style={styles.sentenceCard}>
+    <View style={[styles.sentenceCard, isPlaying && styles.sentenceCardPlaying]}>
       <View style={styles.sentenceMain}>
         <View style={styles.wordWrap}>
           {sentence.tokens.map((token, t) => {
@@ -260,8 +255,12 @@ function SentenceRow({
             );
           })}
         </View>
-        <TouchableOpacity style={styles.speakBtn} onPress={onSpeak} activeOpacity={0.7}>
-          <Text style={styles.speakIcon}>🔊</Text>
+        <TouchableOpacity
+          style={[styles.speakBtn, isPlaying && styles.speakBtnPlaying]}
+          onPress={onSpeak}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.speakIcon}>{isPlaying ? '■' : '▶'}</Text>
         </TouchableOpacity>
       </View>
       {showTranslate && <Text style={styles.translation}>{sentence.en}</Text>}
@@ -369,8 +368,6 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.card, borderWidth: 1, borderColor: Colors.border,
   },
   speedBtnText: { color: Colors.textDim, fontSize: 13, fontWeight: '700' },
-  readAllStop: { backgroundColor: Colors.wrong },
-  readAllStopText: { color: '#fff' },
   toggle: {
     flexDirection: 'row', alignItems: 'center', gap: 8,
     paddingVertical: 9, paddingHorizontal: 14, borderRadius: 12,
@@ -381,11 +378,6 @@ const styles = StyleSheet.create({
   toggleDotOn: { backgroundColor: Colors.accent },
   toggleLabel: { color: Colors.textDim, fontSize: 13, fontWeight: '600' },
   toggleLabelOn: { color: Colors.accent },
-  readAll: {
-    paddingVertical: 9, paddingHorizontal: 14, borderRadius: 12,
-    backgroundColor: Colors.accent,
-  },
-  readAllText: { color: Colors.bg, fontSize: 13, fontWeight: '700' },
 
   wordBar: {
     flexDirection: 'row',
@@ -407,6 +399,7 @@ const styles = StyleSheet.create({
   wordBarHint: { color: Colors.textDim, fontSize: 13, fontStyle: 'italic' },
 
   sentences: { marginTop: 16, gap: 12 },
+  sentenceCardPlaying: { borderColor: Colors.accent, borderWidth: 2 },
   sentenceCard: {
     backgroundColor: Colors.card,
     borderRadius: 16,
@@ -434,6 +427,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.bg, borderWidth: 1, borderColor: Colors.border,
     marginLeft: 8,
   },
+  speakBtnPlaying: { backgroundColor: Colors.accent, borderColor: Colors.accent },
   speakIcon: { fontSize: 16 },
   translation: {
     color: Colors.textDim,

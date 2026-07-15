@@ -132,6 +132,5 @@ Site URL = `https://murcielay2k.github.io/sanuk-thai`, and add
 
 - Push-notification streak reminders (web push works on iOS home-screen apps
   now; needs a small Supabase edge function + VAPID keys — ask Claude).
-- Word-by-word read-along using recorded audio (currently Web Speech only).
 - Leaderboard cold-start: seed with your own few profiles; add a friendly
   "be the first from your country" empty state.

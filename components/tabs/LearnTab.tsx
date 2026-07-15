@@ -11,6 +11,7 @@ import { Fonts } from '../../constants/typography';
 import HeartsBar from '../HeartsBar';
 import XPBar from '../XPBar';
 import PremiumModal from '../PremiumModal';
+import PixelEmoji from '../PixelEmoji';
 import PixelSprite from '../PixelSprite';
 import SpiritHero from '../SpiritHero';
 import { SPRITES, type SpriteName } from '../../data/sprites';
@@ -133,9 +134,9 @@ function LessonNode({
             {isComplete ? (
               <Text style={styles.nodeCheckMark}>✓</Text>
             ) : isPremLocked ? (
-              <Text style={styles.nodeIcon}>👑</Text>
+              <PixelEmoji emoji="👑" size={30} />
             ) : (
-              <Text style={styles.nodeIcon}>{lesson.icon}</Text>
+              <PixelEmoji emoji={lesson.icon} size={30} />
             )}
           </View>
           <Text style={[
