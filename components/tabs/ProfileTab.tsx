@@ -456,12 +456,10 @@ export default function ProfileTab() {
               <Text style={styles.legalLink}>Privacy</Text>
             </TouchableOpacity>
             <Text style={styles.legalDot}>·</Text>
+            {/* Refund policy stays live at /refunds (linked from Terms and
+                referenced at checkout) — it just isn't advertised here. */}
             <TouchableOpacity onPress={() => router.push('/terms')}>
               <Text style={styles.legalLink}>Terms</Text>
-            </TouchableOpacity>
-            <Text style={styles.legalDot}>·</Text>
-            <TouchableOpacity onPress={() => router.push('/refunds')}>
-              <Text style={styles.legalLink}>Refunds</Text>
             </TouchableOpacity>
             <Text style={styles.legalDot}>·</Text>
             <TouchableOpacity onPress={() => router.push('/delete-account')}>

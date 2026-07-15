@@ -132,11 +132,15 @@ export default function PremiumModal({ visible, onClose }: Props) {
                 🔒 Secure payment · Powered by Stripe
               </Text>
 
+              {/* The immediate-access sentence is load-bearing: it is the
+                  express consent + acknowledgment that waives the EU/UK
+                  14-day withdrawal right for digital content (Art. 16(m),
+                  Directive 2011/83/EU). Don't remove it. */}
               <Text style={styles.legalNote}>
-                By subscribing you agree to our{' '}
+                By purchasing you agree to our{' '}
                 <Text style={styles.legalLink} onPress={() => { onClose(); router.push('/terms'); }}>Terms</Text>
-                {' '}and{' '}
-                <Text style={styles.legalLink} onPress={() => { onClose(); router.push('/refunds'); }}>Refund Policy</Text>.
+                , request immediate access, and acknowledge that this waives
+                the 14-day withdrawal right where applicable.
               </Text>
             </>
           ) : (

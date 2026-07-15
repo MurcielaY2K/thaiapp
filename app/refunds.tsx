@@ -5,43 +5,48 @@ export default function Refunds() {
   return (
     <LegalPage
       title="Refund Policy"
-      updated="10 July 2026"
+      updated="15 July 2026"
       sections={[
         {
           paragraphs: [
-            'Sanuk Thai Premium is a monthly subscription (฿199/month). How cancellation and refunds work depends on where you purchased: on the web (processed by Stripe), or through the Apple App Store or Google Play.',
+            'Sanuk Thai Premium is digital content delivered immediately on purchase. Because access begins the moment payment completes, all sales are final except as set out below or where a refund is required by law.',
           ],
         },
         {
-          heading: 'Cancelling',
+          heading: 'Cancelling a subscription',
           paragraphs: [
-            'You can cancel at any time. Cancellation stops future charges; you keep Premium until the end of the period you already paid for. No partial-month charges apply after cancellation.',
+            'You can cancel at any time and keep Premium until the end of the period you already paid for. Cancellation stops all future charges; no further action is needed. Partial periods are not refunded pro rata.',
             'Web (Stripe): use the manage-subscription link in your Stripe receipt email, or email us and we will cancel it for you. App Store: Settings → your name → Subscriptions. Google Play: Play Store → Payments & subscriptions.',
+          ],
+        },
+        {
+          heading: 'Billing errors',
+          paragraphs: [
+            'If you were charged after cancelling, charged twice for the same period, or paid and did not receive Premium, email us within 30 days of the charge and we will correct it and refund the erroneous amount.',
+          ],
+        },
+        {
+          heading: 'Immediate delivery and the right of withdrawal (EU/UK)',
+          paragraphs: [
+            'By completing a purchase you expressly request immediate access to Premium and acknowledge that, once delivery of the digital content has begun, you lose the statutory 14-day right of withdrawal (Art. 16(m), Directive 2011/83/EU and the equivalent UK provision). This does not affect your statutory rights in respect of content that is faulty or not as described.',
+          ],
+        },
+        {
+          heading: 'Lifetime purchases',
+          paragraphs: [
+            'Lifetime Premium is a one-time purchase of digital content delivered immediately, and is non-refundable except in the case of a billing error or where a refund is required by law.',
           ],
         },
         {
           heading: 'Purchases made through the App Store or Google Play',
           paragraphs: [
-            'Refunds for store purchases are handled by the store, under its own policy: for Apple, request at reportaproblem.apple.com; for Google Play, use your order history or the Play refund flow. We cannot issue refunds for charges we did not process, but email us and we will help you with the request.',
+            'Refunds for store purchases are handled exclusively by the store under its own policy: for Apple, request at reportaproblem.apple.com; for Google Play, use your order history. We cannot issue refunds for charges we did not process.',
           ],
         },
         {
-          heading: 'Refunds (web purchases)',
+          heading: 'Contact',
           paragraphs: [
-            'If something went wrong — you were charged after cancelling, charged twice, or Premium features did not work — email us within 30 days of the charge and we will refund it.',
-            'If you simply changed your mind, email us within 14 days of a charge and we will refund that charge, provided the request is made in good faith (not a pattern of subscribing, using heavily and refunding every month).',
-          ],
-        },
-        {
-          heading: 'EU / UK consumers',
-          paragraphs: [
-            'If you are a consumer in the EU or UK, you have a statutory 14-day right of withdrawal from the date of purchase. By starting your subscription immediately, you consent to the service beginning within the withdrawal period; if you withdraw within 14 days, we will refund the charge in full. Nothing in this policy limits your statutory rights.',
-          ],
-        },
-        {
-          heading: 'How to request a refund',
-          paragraphs: [
-            'Email coficollective@gmail.com from the address associated with your payment, including the approximate charge date. Refunds are issued to the original payment method via Stripe, normally within 5–10 business days.',
+            'Email coficollective@gmail.com from the address associated with your payment, including the approximate charge date. Approved refunds are issued to the original payment method via Stripe, normally within 5–10 business days.',
           ],
         },
       ]}

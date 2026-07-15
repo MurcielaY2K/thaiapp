@@ -2,5 +2,6 @@ User-agent: *
 Allow: /
 Disallow: /review.html
 Disallow: /audio/
+Disallow: /refunds
 
 Sitemap: https://murcielay2k.github.io/sanuk-thai/sitemap.xml

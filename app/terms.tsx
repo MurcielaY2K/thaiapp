@@ -25,11 +25,12 @@ export default function Terms() {
           ],
         },
         {
-          heading: '3. Premium subscription',
+          heading: '3. Premium purchases',
           paragraphs: [
-            'Premium costs ฿199 per month (or the equivalent local price shown at purchase). It is an auto-renewing subscription: it renews automatically each month, and payment is charged to your payment method at confirmation of purchase and at the start of each renewal period, unless you cancel at least 24 hours before the current period ends.',
-            'Where you are billed depends on where you bought it: on the web, billing is processed by Stripe; in the Apple App Store or Google Play, billing is processed by that store and managed in your store account\'s subscription settings. You can cancel at any time and keep Premium until the end of the paid period; there is no lock-in. Prices may change — existing subscribers will be notified before any change affects them. See our Refund Policy for refunds.',
+            'Premium is available as an auto-renewing subscription (monthly or annual, at the price shown at purchase) or as a one-time lifetime purchase. Subscriptions renew automatically and payment is charged at confirmation of purchase and at the start of each renewal period, unless you cancel at least 24 hours before the current period ends.',
+            'Premium is digital content delivered immediately: by purchasing you expressly request immediate access and acknowledge that this waives any statutory 14-day right of withdrawal once delivery has begun. Where you are billed depends on where you bought it: on the web, billing is processed by Stripe; in the Apple App Store or Google Play, billing is processed by that store. You can cancel at any time and keep Premium until the end of the paid period; there is no lock-in. Prices may change — existing subscribers will be notified before any change affects them.',
           ],
+          links: [{ label: 'Refund Policy', href: '/refunds' }],
         },
         {
           heading: '4. Store terms',

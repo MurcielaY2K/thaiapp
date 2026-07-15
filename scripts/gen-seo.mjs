@@ -16,6 +16,7 @@ writeFileSync(join(root, 'public/robots.txt'),
 Allow: /
 Disallow: /review.html
 Disallow: /audio/
+Disallow: /refunds
 
 Sitemap: ${SITE_URL}/sitemap.xml
 `);
@@ -25,7 +26,6 @@ const pages = [
   { path: '/', priority: '1.0', freq: 'weekly' },
   { path: '/privacy', priority: '0.3', freq: 'yearly' },
   { path: '/terms', priority: '0.3', freq: 'yearly' },
-  { path: '/refunds', priority: '0.3', freq: 'yearly' },
 ];
 const urlset = pages.map((p) =>
   `  <url>\n    <loc>${SITE_URL}${p.path}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>${p.freq}</changefreq>\n    <priority>${p.priority}</priority>\n  </url>`

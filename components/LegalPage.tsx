@@ -8,6 +8,7 @@ export type LegalSection = {
   heading?: string;
   paragraphs: string[];
   bullets?: string[];
+  links?: { label: string; href: string }[]; // in-app routes, rendered after paragraphs
 };
 
 type Props = {
@@ -42,6 +43,11 @@ export default function LegalPage({ title, updated, sections }: Props) {
                 <Text style={styles.bulletText}>{b}</Text>
               </View>
             ))}
+            {s.links?.map((l, j) => (
+              <Text key={`l${j}`} style={styles.inlineLink} onPress={() => router.push(l.href as never)}>
+                {l.label}
+              </Text>
+            ))}
           </View>
         ))}
         <Text style={styles.contact}>Questions? Contact us at coficollective@gmail.com</Text>
@@ -75,4 +81,8 @@ const styles = StyleSheet.create({
   bulletDot: { color: Colors.lavender, fontSize: 14, lineHeight: 22 },
   bulletText: { flex: 1, color: Colors.text, fontSize: 14, fontFamily: Fonts.body, lineHeight: 22 },
   contact: { color: Colors.textDim, fontSize: 13, fontFamily: Fonts.body, marginTop: 12 },
+  inlineLink: {
+    color: Colors.lavender, fontSize: 13, fontFamily: Fonts.body,
+    textDecorationLine: 'underline', marginTop: 2,
+  },
 });
