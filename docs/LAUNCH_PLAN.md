@@ -23,6 +23,16 @@ money is **content quality + distribution**, in this order.
   "How do you say this phrase?" questions built from the phrasebook
   (`data/phrases.ts`), matched to the world's topic. Beginners choose between
   romanizations; everyone else picks the Thai sentence.
+- **Dead-session self-heal** — a device that remembers a linked account but
+  whose browser session has died (expired token, storage purged after
+  inactivity) now silently re-authenticates instead of showing a Cloud Sync
+  UI that always fails. Local progress is never at risk either way.
+- **Refund policy tightened to the legal minimum** — no more voluntary
+  change-of-mind refunds; EU/UK 14-day withdrawal right waived via express
+  immediate-access consent (shown on the paywall and on all three Stripe
+  Payment Links). Billing-error refunds still honored. Policy de-listed from
+  the sitemap/robots and no longer linked from the paywall or profile footer
+  — still reachable via Terms → Refund Policy.
 
 ## 🔑 Step 1 — Native-quality audio (highest leverage, ~1 hour of your time)
 
@@ -51,6 +61,26 @@ Paste `supabase/analytics.sql` in the Supabase SQL editor (one Run). The app
 is already instrumented. Before making any pricing/paywall decision, look at:
 day-7 retention, lesson_complete per device, and where the funnel leaks.
 Queries are at the bottom of the SQL file.
+
+## 🔑 Step 3b — Real email delivery (blocks launch — Supabase's default
+sender is dev-only)
+
+Supabase's built-in email sender is throttled to a handful of emails per
+hour — fine for testing, but real users signing up will hit
+**"email rate limit exceeded"** the same way we just did. Fix:
+
+1. ✅ Resend account created, API key generated (account: coficollective).
+2. In Supabase Dashboard → Authentication → Emails → SMTP Settings → enable
+   **Custom SMTP**: host `smtp.resend.com`, port `465`, username `resend`,
+   password = the Resend API key, sender `onboarding@resend.dev`,
+   sender name `Sanuk Thai`.
+3. ⚠️ **Blocked on a domain**: until a domain is verified in Resend
+   (Resend → Domains → Add Domain → add the DNS records), mail can only be
+   sent to the Resend account's own address (coficollective@gmail.com) —
+   not to real users. Verify **sanukthai.com** in Resend as part of the
+   domain purchase in Step 6 (same domain, two jobs: Cloudflare Pages
+   hosting + Resend sending). Until then, magic links / signup confirmation
+   only work for testing, not for real signups.
 
 ## 💰 Step 4 — Pricing & paywall flip (only after 1–3)
 
@@ -95,7 +125,8 @@ Site URL = `https://murcielay2k.github.io/sanuk-thai`, and add
 - Post the web app to Product Hunt / Hacker News once audio (Step 1) ships.
 - Custom domain (`sanukthai.com` + Cloudflare Pages, playbook in
   docs/REBRAND.md) before any promotion push — links people share should be
-  the brand, not github.io.
+  the brand, not github.io. **Also verify this domain in Resend** (Step 3b)
+  once purchased — it unblocks real user emails, not just hosting.
 
 ## Later / nice-to-have
 
