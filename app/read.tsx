@@ -1,41 +1,17 @@
 import React, { useMemo, useState, useRef, useEffect } from 'react';
 import {
-  View, Text, StyleSheet, TouchableOpacity, SafeAreaView, ScrollView, Platform,
+  View, Text, StyleSheet, TouchableOpacity, SafeAreaView, ScrollView,
 } from 'react-native';
 import { router } from 'expo-router';
-import { speakThai } from '../lib/audio';
+import { speakThai, speakThaiAsync, stopSpeaking } from '../lib/audio';
 import { Colors } from '../constants/colors';
 import PixelSprite from '../components/PixelSprite';
 import { SPRITES } from '../data/sprites';
 import { READING_LESSONS, type Sentence, type Token } from '../data/reading';
 import { PHRASE_CATEGORIES } from '../data/phrases';
 
-function thaiVoice() {
-  const w = window as any;
-  return (w.speechSynthesis.getVoices?.() ?? [])
-    .find((v: any) => /th(-|_)?/i.test(v.lang));
-}
-
 function speak(text: string, rate = 0.75) {
   speakThai(text, rate);
-}
-
-// Speak a single token and resolve when it finishes — used to drive the
-// word-by-word highlight during "Read all".
-function speakAsync(text: string, rate: number): Promise<void> {
-  return new Promise(resolve => {
-    if (Platform.OS !== 'web') return resolve();
-    const w = window as any;
-    if (!w.speechSynthesis) return resolve();
-    const u = new w.SpeechSynthesisUtterance(text);
-    u.lang = 'th-TH';
-    u.rate = rate;
-    const thai = thaiVoice();
-    if (thai) u.voice = thai;
-    u.onend = () => resolve();
-    u.onerror = () => resolve();
-    w.speechSynthesis.speak(u);
-  });
 }
 
 const SPEEDS = [
@@ -90,7 +66,7 @@ export default function ReadScreen() {
 
   const stopReading = () => {
     playRef.current = false;
-    if (Platform.OS === 'web') (window as any).speechSynthesis?.cancel();
+    stopSpeaking();
     setPlaying(false);
   };
 
@@ -104,7 +80,7 @@ export default function ReadScreen() {
       for (let t = 0; t < toks.length; t++) {
         if (!playRef.current) return;
         setSelected({ s, t });
-        await speakAsync(toks[t].th, rate);
+        await speakThaiAsync(toks[t].th, rate);
       }
     }
     playRef.current = false;

@@ -32,7 +32,9 @@ money is **content quality + distribution**, in this order.
 2. Run: `GOOGLE_TTS_KEY=your-key node scripts/gen-audio.mjs`
 3. `npm run deploy:web`
 Every lesson word now sounds near-native on every device. Re-run any time —
-it's incremental.
+it's incremental. ✅ **Done for all 3,171 vocabulary words.** A re-run with a
+fresh key will also record the phrasebook sentences (checkpoint phrase
+questions + Read tab) that were added afterwards — ~160 new clips, still free.
 
 ## 🔑 Step 2 — Native speaker review (~$100–200, one week)
 

@@ -37,8 +37,33 @@ for (const m of vocabSrc.matchAll(wordRe)) {
 // alphabet character names (what the writing trainer speaks)
 const alphaNames = extract('data/alphabet.ts', /thName:\s*'([^']+)'/g);
 
-const texts = [...new Set([...alphaNames, ...lessonWords, ...otherWords])];
-const LIMIT = Number(process.env.AUDIO_LIMIT ?? 1500); // top-priority subset
+// Full sentences + their word tokens from the phrasebook and reading lessons.
+// Sentences are spoken in checkpoint phrase questions (keyed by the tokens
+// joined, exactly as lesson.tsx builds them); tokens drive the read-along.
+function extractSentences(file) {
+  const src = readFileSync(join(root, file), 'utf8');
+  const sentences = [];
+  const tokens = [];
+  for (const m of src.matchAll(/tokens:\s*\[([\s\S]*?)\]/g)) {
+    const toks = [...m[1].matchAll(/th:\s*'([^']+)'/g)].map(x => x[1]);
+    if (toks.length === 0) continue;
+    sentences.push(toks.join(''));
+    tokens.push(...toks);
+  }
+  return { sentences, tokens };
+}
+const phrases = extractSentences('data/phrases.ts');
+// reading.ts sentences are built from a shared word dict (read word-by-word,
+// never as a whole) — its `th:` values are the tokens the read-along speaks.
+const readingTokens = extract('data/reading.ts', /th:\s*'([^']+)'/g);
+
+const texts = [...new Set([
+  ...alphaNames, ...lessonWords,
+  ...phrases.sentences,
+  ...phrases.tokens, ...readingTokens,
+  ...otherWords,
+])];
+const LIMIT = Number(process.env.AUDIO_LIMIT ?? 5000); // top-priority subset
 const batch = texts.slice(0, LIMIT);
 console.log(`Total unique strings: ${texts.length}; generating first ${batch.length}`);
 

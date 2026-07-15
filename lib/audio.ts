@@ -52,6 +52,8 @@ export function speakThai(text: string, rate = 0.8): void {
       window.speechSynthesis?.cancel();
       if (!player) player = new Audio();
       player.pause();
+      player.playbackRate = 1;
+      player.onended = null;
       player.src = `${BASE_PATH}/audio/${file}`;
       player.play().catch(() => fallbackSpeak(text, rate));
       return;
@@ -60,6 +62,60 @@ export function speakThai(text: string, rate = 0.8): void {
     }
   }
   fallbackSpeak(text, rate);
+}
+
+// Speak and resolve when playback finishes — drives sequenced speech like the
+// read-along highlight. Uses the same recorded-first/Web-Speech-fallback
+// priority as speakThai. Never rejects, and a stuck backend can't hang the
+// caller: a duration-based timeout always resolves.
+export function speakThaiAsync(text: string, rate = 0.8): Promise<void> {
+  return new Promise(resolve => {
+    if (Platform.OS !== 'web' || typeof window === 'undefined') return resolve();
+    loadManifest();
+
+    let done = false;
+    const finish = () => { if (!done) { done = true; resolve(); } };
+    const guard = setTimeout(finish, 10000);
+    const settle = () => { clearTimeout(guard); finish(); };
+
+    const file = manifest?.[text];
+    if (file) {
+      try {
+        window.speechSynthesis?.cancel();
+        if (!player) player = new Audio();
+        player.pause();
+        // Recordings are already at learner speed (0.9×): the read-along's
+        // default 0.75 plays them natural, other speeds scale around that.
+        player.playbackRate = Math.max(0.5, Math.min(1.25, rate / 0.75));
+        player.onended = settle;
+        player.onerror = settle;
+        player.src = `${BASE_PATH}/audio/${file}`;
+        player.play().catch(settle);
+        return;
+      } catch {
+        // fall through to TTS
+      }
+    }
+
+    const synth = window.speechSynthesis;
+    if (!synth) return settle();
+    if (!cachedVoice) cachedVoice = pickThaiVoice();
+    synth.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'th-TH';
+    u.rate = rate;
+    if (cachedVoice) u.voice = cachedVoice;
+    u.onend = settle;
+    u.onerror = settle;
+    synth.speak(u);
+  });
+}
+
+// Stop whatever is speaking — recorded clip or Web Speech utterance.
+export function stopSpeaking(): void {
+  if (Platform.OS !== 'web' || typeof window === 'undefined') return;
+  try { player?.pause(); } catch { /* already stopped */ }
+  window.speechSynthesis?.cancel();
 }
 
 function fallbackSpeak(text: string, rate: number) {

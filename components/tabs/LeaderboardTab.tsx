@@ -128,8 +128,11 @@ export default function LeaderboardTab() {
       ) : leaderboard.length === 0 ? (
         <View style={styles.center}>
           <Text style={styles.offlineIcon}>👑</Text>
-          <Text style={styles.offlineTitle}>No players yet</Text>
-          <Text style={styles.offlineSub}>Be the first on the leaderboard!</Text>
+          <Text style={styles.offlineTitle}>The throne is empty</Text>
+          <Text style={styles.offlineSub}>
+            Be the first from your country on the global leaderboard —
+            complete a lesson to earn XP and claim the top spot.
+          </Text>
         </View>
       ) : (
         <FlatList
