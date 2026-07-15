@@ -111,6 +111,23 @@ export const useUserStore = create<UserStore>((set, get) => ({
         const { data: { session } } = await supabase.auth.getSession();
         if (session) {
           set({ authId: session.user.id, isOnline: true } as any);
+        } else if (profile.authId) {
+          // Local state remembers a linked account, but this browser's own
+          // session has died (expired/rotated refresh token, storage purged
+          // after inactivity, etc). Re-authenticate anonymously so Cloud
+          // Sync / Link Email work again — local progress is untouched
+          // either way, and pushProgress will re-upload it under the fresh
+          // session on the next sync.
+          try {
+            const { data, error } = await supabase.auth.signInAnonymously();
+            if (!error && data.user) {
+              const authId = data.user.id;
+              set({ authId, isOnline: true } as any);
+              await AsyncStorage.setItem(PROFILE_KEY, JSON.stringify({ ...get(), authId }));
+            }
+          } catch {
+            // Stay in local-only mode — nothing lost, just not synced.
+          }
         }
       }
     } catch {

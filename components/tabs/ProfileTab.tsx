@@ -488,7 +488,9 @@ function StatCard({ icon, value, label, color }: { icon: string; value: number |
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: Colors.bg },
-  content: { padding: 20, paddingTop: 16, gap: 0 },
+  // Extra bottom clearance so the last card's buttons (Cloud Sync's Link
+  // Email / Sync Now) never sit flush against the fixed bottom tab bar.
+  content: { padding: 20, paddingTop: 16, paddingBottom: 48, gap: 0 },
 
   profileCard: {
     backgroundColor: Colors.card, borderRadius: 14, padding: 20,
@@ -556,7 +558,7 @@ const styles = StyleSheet.create({
   lockText: { fontSize: 16, marginTop: 2 },
   dim: { color: Colors.textDim },
 
-  setupContent: { padding: 24, paddingTop: 32, gap: 0 },
+  setupContent: { padding: 24, paddingTop: 32, paddingBottom: 48, gap: 0 },
   setupTitle: {
     color: Colors.text, fontSize: 24,
     fontFamily: Fonts.display, fontWeight: '700',
