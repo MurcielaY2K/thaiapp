@@ -5,8 +5,9 @@ import { SPRITES } from '../data/sprites';
 import { Colors } from '../constants/colors';
 
 // Floating Naga guardian over a pixel mountain horizon — the signature
-// Spirit Realm banner shown atop the Learn screen.
-export default function SpiritHero({ width }: { width: number }) {
+// Spirit Realm banner shown atop the Learn screen. align="right" nudges the
+// guardian toward the right edge so stats can overlay the left side.
+export default function SpiritHero({ width, align = 'center' }: { width: number; align?: 'center' | 'right' }) {
   const float = useRef(new Animated.Value(0)).current;
   const glow = useRef(new Animated.Value(0.4)).current;
 
@@ -42,10 +43,10 @@ export default function SpiritHero({ width }: { width: number }) {
       </View>
 
       {/* Glow halo behind the guardian */}
-      <Animated.View style={[styles.halo, { opacity: glow }]} />
+      <Animated.View style={[styles.halo, align === 'right' && styles.haloRight, { opacity: glow }]} />
 
       {/* Floating Naga guardian */}
-      <Animated.View style={[styles.naga, { transform: [{ translateY }] }]}>
+      <Animated.View style={[styles.naga, align === 'right' && styles.nagaRight, { transform: [{ translateY }] }]}>
         <PixelSprite sprite={SPRITES.naga} size={88} />
       </Animated.View>
     </View>
@@ -77,6 +78,8 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 30,
   },
+  haloRight: { alignSelf: 'auto', right: 8 },
+  nagaRight: { alignSelf: 'auto', right: 28 },
   star: {
     position: 'absolute',
     width: 3, height: 3,

@@ -282,30 +282,38 @@ export default function LearnTab() {
         <HeartsBar />
       </View>
 
-      <View style={styles.heroBlock}>
-        <Text style={styles.heroLabel}>TOTAL XP</Text>
-        <Text style={styles.heroValue}>{xp.toLocaleString()}</Text>
-        <View style={styles.heroMeta}>
-          <View style={styles.heroChip}>
-            <Text style={styles.heroChipText}>LV {level}</Text>
-          </View>
-          <View style={[styles.heroChip, { backgroundColor: Colors.realmGrove }]}>
-            <Text style={styles.heroChipText}>⚡ {dailyXp.earned}/{dailyGoal} today</Text>
-          </View>
-        </View>
-      </View>
-
-      <View style={styles.xpWrap}>
-        <XPBar />
-      </View>
-
       <ScrollView
         ref={scrollRef}
         style={styles.scroll}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        <SpiritHero width={SCREEN_W} />
+        {/* One hero card: XP stats overlaid on the Spirit Realm scene with
+            the daily bar docked to its base — same card language as the
+            world headers below, so the top reads as part of the path. */}
+        <View style={[
+          styles.heroCard,
+          Platform.OS === 'web' ? { boxShadow: `0 4px 0 0 ${Colors.borderStrong}` } as any : {},
+        ]}>
+          <View style={styles.heroScene}>
+            <SpiritHero width={SCREEN_W - 36} align="right" />
+            <View style={styles.heroOverlay} pointerEvents="none">
+              <Text style={styles.heroLabel}>TOTAL XP</Text>
+              <Text style={styles.heroValue}>{xp.toLocaleString()}</Text>
+              <View style={styles.heroMeta}>
+                <View style={styles.heroChip}>
+                  <Text style={styles.heroChipText}>LV {level}</Text>
+                </View>
+                <View style={[styles.heroChip, { backgroundColor: Colors.realmGrove }]}>
+                  <Text style={styles.heroChipText}>⚡ {dailyXp.earned}/{dailyGoal} today</Text>
+                </View>
+              </View>
+            </View>
+          </View>
+          <View style={styles.heroXpRow}>
+            <XPBar />
+          </View>
+        </View>
         {LIST_ITEMS.map((item, idx) => {
           if (item.type === 'header') {
             const done = item.world.lessons.filter(l => lessonProgress[l.id] === 'complete').length;
@@ -360,15 +368,31 @@ const styles = StyleSheet.create({
     letterSpacing: 3,
   },
 
-  xpWrap: { paddingHorizontal: 20, paddingBottom: 12 },
-
-  heroBlock: { paddingHorizontal: 20, paddingTop: 6, paddingBottom: 10, gap: 2 },
+  heroCard: {
+    marginHorizontal: 16,
+    marginTop: 4,
+    marginBottom: 4,
+    borderRadius: 18,
+    borderWidth: 2,
+    borderColor: Colors.borderStrong,
+    overflow: 'hidden',
+    backgroundColor: Colors.card,
+  },
+  heroScene: { position: 'relative' },
+  heroOverlay: { position: 'absolute', top: 14, left: 16 },
+  heroXpRow: {
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    backgroundColor: Colors.card,
+    borderTopWidth: 2,
+    borderTopColor: Colors.borderStrong,
+  },
   heroLabel: {
     color: Colors.textDim, fontSize: 10,
     fontFamily: Fonts.hud, letterSpacing: 2,
   },
   heroValue: {
-    color: Colors.text, fontSize: 52, lineHeight: 56,
+    color: Colors.text, fontSize: 40, lineHeight: 44,
     fontFamily: Fonts.hud,
   },
   heroMeta: { flexDirection: 'row', gap: 8, marginTop: 6 },
